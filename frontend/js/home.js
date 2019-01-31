@@ -104,7 +104,7 @@ function draw(){
         image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
     }
     
-    if(w*2 > windows.innerWidth ){
+    if(w*2 > window.innerWidth ){
         image(img,0,closeImgs[closeImgs.length-1][2]+1,w,h);
     }else{
         image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
