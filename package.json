@@ -9,10 +9,10 @@
   "author": "Menekou B. Coulibaly",
   "license": "MIT",
   "dependencies": {
-    "rhino": "^5.0.1",
-    "p5": "*",
-    "express": "*",
     "bootstrap": "*",
-    "jquery": "*"
+    "express": "*",
+    "jquery": "*",
+    "p5": "*",
+    "useragent": "^2.3.0"
   }
 }
