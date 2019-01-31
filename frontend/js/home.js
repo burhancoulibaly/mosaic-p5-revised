@@ -6,6 +6,7 @@
 let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
 let octree = new Quad(boundary,9);
 let imgArray;
+let mainImage;
 let allImages = new Array();
 let points = new Array();
 let mainImgRGB = new Array();
@@ -22,10 +23,20 @@ window.onload = function(){
         // console.log('success',data);
         }
     });
+
+    $.ajax({
+        type: 'GET',
+        async:false,
+        url:"http://localhost:3000/getmainimages",
+        success:function(data){
+        mainImage = data;
+        // console.log('success',data);
+        }
+    });
 }
 
 function preload() {
-    img = loadImage("./images/stock_images/"+"DSCN1756 2.JPG");
+    img = loadImage("./images/main_image/"+mainImage);
     for (var i = 0; i < imgArray.length; i++) {
     allImages[i] = loadImage("./images/stock_images/"+imgArray[i]);
     }
