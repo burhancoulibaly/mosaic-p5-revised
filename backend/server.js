@@ -37,13 +37,3 @@ app.get('/getimages',function(req,res){
     res.send(images);
   })
 })
-
-app.get('/getmainimages',function(req,res){
-  fs.readdir(images+"/main_image", function(err, images){
-    if(err){
-      console.error("Could not list your directory.", err);
-      process.exit(1);
-    }
-    res.send(images);
-  })
-})

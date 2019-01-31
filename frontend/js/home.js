@@ -23,22 +23,13 @@ window.onload = function(){
         // console.log('success',data);
         }
     });
-
-    $.ajax({
-        type: 'GET',
-        async:false,
-        url:"http://localhost:3000/getmainimages",
-        success:function(data){
-        mainImage = data;
-        // console.log('success',data);
-        }
-    });
 }
 
 function preload() {
-    img = loadImage("./images/main_image/"+mainImage);
+    mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
+    img = loadImage("./images/stock_images/"+ mainImage);
     for (var i = 0; i < imgArray.length; i++) {
-    allImages[i] = loadImage("./images/stock_images/"+imgArray[i]);
+        allImages[i] = loadImage("./images/stock_images/"+imgArray[i]);
     }
 }
 
@@ -47,7 +38,7 @@ function setup(){
     h = img.height;
 
     pxSize = (Math.round(w/h))*5;
-    canvas = createCanvas(w,h);
+    canvas = createCanvas(w*2,h*2);
     canvas.position(0,0);
 
     for (var i = 0; i < allImages.length; i++) {
@@ -112,6 +103,9 @@ function draw(){
         hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
         image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
     }
+    
+    image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
+    
     noLoop();
 }
 
