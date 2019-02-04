@@ -14,13 +14,17 @@ let closeImgs = new Array();
 let imgsHash = new Object;
 
 window.onload = function(){
+    const Url = "https://mosiac-p5.herokuapp.com/getimages"
     $.ajax({
+        url: Url,
         type: 'GET',
-        async:false,
-        url:"http://mosiac-p5.herokuapp.com/getimages",
+        async:false, 
         success:function(data){
         imgArray = data;
         // console.log('success',data);
+        },
+        error:function(error){
+            console.log('Error %{error}')
         }
     });
 }
