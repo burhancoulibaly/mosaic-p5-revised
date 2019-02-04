@@ -24,7 +24,7 @@ window.onload = function(){
         // console.log('success',data);
         },
         error:function(error){
-            console.log('Error %{error}')
+            // console.log('Error %{error}')
         }
     });
 }
@@ -74,7 +74,7 @@ function setup(){
         octree.newPoint(points[i])
     }
     
-    console.log(octree.node.getTotalPoints(octree.node));
+    // console.log(octree.node.getTotalPoints(octree.node));
 
     img.loadPixels();
     for (var i = 0; i < w; i+=pxSize) {
@@ -93,7 +93,7 @@ function setup(){
 }
 
 function draw(){
-    console.log(mainImgRGB.length);
+    // console.log(mainImgRGB.length);
     for(var i = 0; i < mainImgRGB.length; i++){
         // console.log(mainImgRGB[i][0])
         let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
@@ -101,7 +101,7 @@ function draw(){
         closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
     }
     
-    console.log(closeImgs);
+    // console.log(closeImgs);
 
     for(var i = 0; i < closeImgs.length; i++){
         hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
