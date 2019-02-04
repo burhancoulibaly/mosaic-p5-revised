@@ -14,7 +14,7 @@ let imgsHash = new Object;
 let octree = null;
 
 window.onload = function(){
-    const Url = "http://localhost:3000/getimages";
+    const Url = "https://mosiac-p5.herokuapp.com/getimages";
     $.ajax({
         url: Url,
         type: 'GET',
