@@ -11,6 +11,7 @@ let points = new Array();
 let mainImgRGB = new Array();
 let closeImgs = new Array();
 let imgsHash = new Object;
+let octree = null;
 
 window.onload = function(){
     const Url = "https://mosiac-p5.herokuapp.com/getimages"
@@ -29,7 +30,7 @@ window.onload = function(){
 }
 
 function preload() {
-    let octree = new Quad(boundary,Math.ceil(imgArray.length/10));
+    octree = new Quad(boundary,Math.ceil(imgArray.length/10));
     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
     img = loadImage("./images/stock_images/"+ mainImage);
     for (var i = 0; i < imgArray.length; i++) {
