@@ -29,7 +29,7 @@ window.onload = function(){
 }
 
 function preload() {
-    let octree = new Quad(boundary,Math.ceil(imgArray.length()/10));
+    let octree = new Quad(boundary,Math.ceil(imgArray.length/10));
     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
     img = loadImage("./images/stock_images/"+ mainImage);
     for (var i = 0; i < imgArray.length; i++) {
