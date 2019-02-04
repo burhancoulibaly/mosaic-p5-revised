@@ -4,7 +4,6 @@
 // octree.newPoint(point);
 // console.log(octree.node.getTotalPoints(octree.node))
 let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-let octree = new Quad(boundary,9);
 let imgArray;
 let mainImage;
 let allImages = new Array();
@@ -30,6 +29,7 @@ window.onload = function(){
 }
 
 function preload() {
+    let octree = new Quad(boundary,Math.ceil(imgArray.length()/10));
     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
     img = loadImage("./images/stock_images/"+ mainImage);
     for (var i = 0; i < imgArray.length; i++) {
