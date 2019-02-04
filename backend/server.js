@@ -21,7 +21,7 @@ app.use("/p5js", express.static(p5js));
 app.use("/jquery", express.static(jquery));
 app.use("/images", express.static(images));
 
-server.listen(process.env.PORT);
+server.listen(process.env.PORT || 3000);
 console.log("Server running on port: 3000");
 
 app.get('/',function(req,res){
