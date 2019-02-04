@@ -12,5 +12,5 @@ Also going to find a way to optimize the program to run faster.
 Add a gui.
 bugs and vulnerabilities.
 
-
+App is hosted at:
 https://mosiac-p5.herokuapp.com/
