@@ -17,7 +17,7 @@ window.onload = function(){
     $.ajax({
         type: 'GET',
         async:false,
-        url:"http://localhost:3000/getimages",
+        url:"http://mosiac-p5.herokuapp.com/getimages",
         success:function(data){
         imgArray = data;
         // console.log('success',data);
