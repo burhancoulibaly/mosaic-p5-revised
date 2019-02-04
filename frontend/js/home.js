@@ -42,7 +42,7 @@ function setup(){
     w = img.width;
     h = img.height;
 
-    pxSize = (Math.round(w/h))*10;
+    pxSize = (Math.round(w/h))*5;
     canvas = createCanvas(w*2,h*2);
     canvas.position(0,0);
 
