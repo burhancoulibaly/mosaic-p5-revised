@@ -4,6 +4,7 @@
   "description": "This is the revised mosaic image creator, this one will be a lot faster then my previous attempt because im going to be implemeneting an octree for the color comparisons.",
   "main": "index.js",
   "scripts": {
+    "start":"./backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Menekou B. Coulibaly",
