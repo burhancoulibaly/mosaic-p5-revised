@@ -14,7 +14,7 @@ let imgsHash = new Object;
 let octree = null;
 
 window.onload = function(){
-    const Url = "https://mosiac-p5.herokuapp.com/getimages"
+    const Url = "http://localhost:3000/getimages";
     $.ajax({
         url: Url,
         type: 'GET',
@@ -30,11 +30,11 @@ window.onload = function(){
 }
 
 function preload() {
-    octree = new Quad(boundary,Math.ceil(imgArray.length/10));
+    octree = new Quad(boundary,Math.ceil(150/10));
     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
     img = loadImage("./images/stock_images/"+ mainImage);
-    for (var i = 0; i < imgArray.length; i++) {
-        allImages[i] = loadImage("./images/stock_images/"+imgArray[i]);
+    for (var i = 0; i < 150; i++) {
+        allImages[i] = loadImage("./images/stock_images/"+imgArray[Math.floor(Math.random()*imgArray.length)]);
     }
 }
 
