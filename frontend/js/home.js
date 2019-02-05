@@ -51,7 +51,7 @@ function setup(){
         var red = 0;
         var green = 0;
         var blue = 0;
-        allImages[i].resize(250,250);
+        allImages[i].resize(150,150);
         allImages[i].loadPixels();
     
         for (var j = 0; j < allImages[i].pixels.length; j+=4) {
