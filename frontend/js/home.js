@@ -32,8 +32,8 @@ window.onload = function(){
 function preload() {
     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
     img = loadImage("./images/stock_images/"+ mainImage);
-    for (var i = 0; i < 100; i++) {
-        allImages[i] = loadImage("./images/stock_images/"+imgArray[Math.floor(Math.random()*imgArray.length)]);
+    for (var i = 0; i < imgArray.length; i++) {
+        allImages[i] = loadImage("./images/stock_images/"+imgArray[i]);
     }
     octree = new Quad(boundary,Math.ceil(allImages.length/10));
 }
