@@ -94,6 +94,7 @@ function setup(){
 }
 
 function draw(){
+    noStroke();
     // console.log(mainImgRGB.length);
     for(var i = 0; i < mainImgRGB.length; i++){
         // console.log(mainImgRGB[i][0])
