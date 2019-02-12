@@ -13,6 +13,8 @@ let closeImgs = new Array();
 let imgsHash = new Object;
 let octree = null;
 
+console.log("get images");
+console.time();
 window.onload = function(){
     const Url = "https://mosiac-p5.herokuapp.com/getimages";
     $.ajax({
@@ -28,7 +30,10 @@ window.onload = function(){
         }
     });
 }
+console.timeEnd();
 
+console.log("preload");
+console.time();
 function preload() {
     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
     img = loadImage("./images/stock_images/"+ mainImage);
@@ -37,6 +42,7 @@ function preload() {
     }
     octree = new Quad(boundary,Math.ceil(allImages.length/10));
 }
+console.timeEnd();
 
 function setup(){
     w = img.width;
@@ -45,7 +51,9 @@ function setup(){
     pxSize = (Math.round(w/h)*5);
     canvas = createCanvas(w*2,h*2);
     canvas.position(0,0);
-
+    
+    console.log("Ave Img RGB")
+    console.time();
     for (var i = 0; i < allImages.length; i++) {
         colArray = null;
         var red = 0;
@@ -69,46 +77,60 @@ function setup(){
         // console.log(r,g,b);
         points.push(new Point(r,g,b))
     }
-
+    console.timeEnd();
     
+    console.log("add points to octree")
+    console.time();
     for(var i = 0; i < points.length; i++){
         octree.newPoint(points[i])
     }
+    console.timeEnd();
+    console.log("add points to octree end")
     
     // console.log(octree.node.getTotalPoints(octree.node));
 
     img.loadPixels();
+    console.log("push points 2")
+    console.time();
     for (var i = 0; i < w; i+=pxSize) {
         for (var j = 0; j < h; j+=pxSize) {
-          var index = 4 * (i + (j * w));
-          x = i;
-          y = j;
-          r = img.pixels[index];
-          g = img.pixels[index + 1];
-          b = img.pixels[index + 2];
-          
-    
-          mainImgRGB.push(new Array(new Point(r,g,b),i,j));
+            var index = 4 * (i + (j * w));
+            x = i;
+            y = j;
+            r = img.pixels[index];
+            g = img.pixels[index + 1];
+            b = img.pixels[index + 2];
+            
+            mainImgRGB.push(new Array(new Point(r,g,b),i,j));
         }
     }
+    console.timeEnd();
+    console.log("push points 2 end")
 }
 
 function draw(){
     noStroke();
     // console.log(mainImgRGB.length);
+    console.log("close points")
+    console.time();
     for(var i = 0; i < mainImgRGB.length; i++){
         // console.log(mainImgRGB[i][0])
         let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
         // console.log(closePoint);
         closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
     }
-    
+    console.timeEnd();
+    console.log("close points end")
     // console.log(closeImgs);
 
+    console.log("drawing image")
+    console.time();
     for(var i = 0; i < closeImgs.length; i++){
         hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
         image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
     }
+    console.timeEnd();
+    console.log("drawing image end")
     
     if(w*2 > window.innerWidth ){
         image(img,0,closeImgs[closeImgs.length-1][2]+1,w,h);
