@@ -56,7 +56,7 @@ app.get('/getimages',function(req,res){
 app.post('/resizeimages',function(req,res){
   let image = req.body;
   let inStream = fs.createReadStream(allImages+"/stock_images/"+image);
-  let outStream = fs.createWriteStream("https://mosiac-p5.herokuapp.com/images/resized_images/"+image, {flags: "w"});
+  let outStream = fs.createWriteStream(allImages+"/resized_images/"+image, {flags: "w"});
 
   // on error of output file being saved
   outStream.on('error', function() {
