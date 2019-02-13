@@ -16,33 +16,54 @@ let octree = null;
 console.log("get images");
 console.time();
 window.onload = function(){
-    const Url = "https://mosiac-p5.herokuapp.com/getimages";
+    const UrlGet = "http://localhost:3000/getimages";
     $.ajax({
-        url: Url,
+        url: UrlGet,
         type: 'GET',
         async:false, 
         success:function(data){
         imgArray = data;
-        // console.log('success',data);
+            // console.log('success',data);
         },
         error:function(error){
             // console.log('Error %{error}')
         }
     });
+    
+    const UrlPost = "http://localhost:3000/resizeimages";
+    for(i = 0; i < imgArray.length; i++){
+        $.ajax({
+            url: UrlPost,
+            type: 'POST',
+            async:false, 
+            data:JSON.stringify([imgArray[i]]),
+            contentType:"application/json; charset=utf-8",
+            dataType:"json",
+            success:function(data){
+                // console.log('success',data);
+            },
+            error:function(error){
+                // console.log('Error %{error}')
+            }
+        });
+    }
 }
-console.timeEnd();
 
-console.log("preload");
+console.timeEnd();
+console.log("get images end");
+
+console.log("loading images");
 console.time();
 function preload() {
     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
     img = loadImage("./images/stock_images/"+ mainImage);
     for (var i = 0; i < imgArray.length; i++) {
-        allImages[i] = loadImage("./images/stock_images/"+imgArray[i]);
+        allImages[i] = loadImage("./images/resized_images/"+imgArray[i]);
     }
     octree = new Quad(boundary,Math.ceil(allImages.length/10));
 }
 console.timeEnd();
+console.log("Loading images end")
 
 function setup(){
     w = img.width;
@@ -52,16 +73,23 @@ function setup(){
     canvas = createCanvas(w*2,h*2);
     canvas.position(0,0);
     
+    // console.log("resizing imgs")
+    // console.time();
+    // for(var i = 1; i < allImages.length; i++){
+    //     allImages[i].resize(100,100);
+    // }
+    // console.timeEnd();
+    // console.log("resizing imgs end")
+
     console.log("Ave Img RGB")
     console.time();
     for (var i = 0; i < allImages.length; i++) {
-        colArray = null;
         var red = 0;
         var green = 0;
         var blue = 0;
-        allImages[i].resize(100,100);
+        
         allImages[i].loadPixels();
-    
+        
         for (var j = 0; j < allImages[i].pixels.length; j+=4) {
             red += allImages[i].pixels[j];
             green += allImages[i].pixels[j+1];
@@ -78,6 +106,8 @@ function setup(){
         points.push(new Point(r,g,b))
     }
     console.timeEnd();
+    console.log("Ave Img RGB end")
+
     
     console.log("add points to octree")
     console.time();
