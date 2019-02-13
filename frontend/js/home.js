@@ -40,13 +40,14 @@ window.onload = function(){
             contentType:"application/json; charset=utf-8",
             dataType:"json",
             success:function(data){
-                // console.log('success',data);
+                console.log('success',data);
             },
             error:function(error){
                 // console.log('Error %{error}')
             }
         });
     }
+
 }
 console.timeEnd();
 console.log("get images end");

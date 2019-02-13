@@ -12,6 +12,7 @@
   "dependencies": {
     "bootstrap": "*",
     "express": "*",
+    "jimp": "^0.6.0",
     "jquery": "*",
     "p5": "*",
     "promisepipe": "^3.0.0",

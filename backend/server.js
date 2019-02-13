@@ -56,7 +56,7 @@ app.get('/getimages',function(req,res){
 app.post('/resizeimages',function(req,res){
   let image = req.body;
   let inStream = fs.createReadStream(allImages+"/stock_images/"+image);
-  let outStream = fs.createWriteStream(allImages+"/resized_images/"+image, {flags: "w"});
+  let outStream = fs.createWriteStream("https://mosiac-p5.herokuapp.com/images/resized_images/"+image, {flags: "w"});
 
   // on error of output file being saved
   outStream.on('error', function() {
@@ -66,7 +66,7 @@ app.post('/resizeimages',function(req,res){
   // on success of output file being saved
   outStream.on('close', function() {
     console.log("Successfully saved file");
-    res.send("Successfully saved file");
+    res.send("done");
   });
 
   let transform = sharp()
@@ -76,4 +76,37 @@ app.post('/resizeimages',function(req,res){
                   })
 
   inStream.pipe(transform).pipe(outStream);
+  // console.log(image);
+  // error = false
+  // async function resize(){
+  //   await http.get("http://localhost:3000/images/stock_images/"+image, function(downloadStream){
+  //     downloadStream.pipe(sharp().resize(100,100).toFile(,(err,info)=>{
+  //       if(err){
+  //         console.log(err);
+  //         error = true
+  //       }else{
+  //         console.log(info);
+  //       }
+  //     }));
+  //     downloadStream.on('end', () => {
+  //       console.log("downloadStream","end")
+  //     });
+  //     downloadStream.on('error', (err) => {
+  //       console.log('downloadStream', err);
+  //     });
+  //   });
+  //   if(error == false){
+  //     console.log("hello");
+  //    Promise.resolve("done");
+  //   }else{
+  //     Promise.reject("error")
+  //   }
+  // }
+  // resize()
+  // .then(function(response){
+  //   res.send(response)
+  // })
+  // .catch(function(err){
+  //   res.send(err)
+  // })
 })
