@@ -15,6 +15,8 @@ window.onload = function(){
     //     characterDataOldValue: true
     // });
 }
+console.timeEnd();
+console.log("get images end");
 
     
 
@@ -43,6 +45,8 @@ function submitImages(){
     }
 
 }
+console.timeEnd();
+console.log("Loading images end")
 
 // // boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
 // // octree = new Quad(boundary,9);
