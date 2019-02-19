@@ -23,18 +23,38 @@ $(document).on('click','.clear',function(){
 function submitImages(){
     mainImage = $("#main")[0].files[0];
     smallImages = $("#small")[0].files;
-    formData = new FormData();
+    formDataBig = new FormData();
+    formDataSmall = new FormData();
 
+    formDataBig.append("image",mainImage);
     for(var i = 0; i < smallImages.length; i++){
-        formData.append("images",smallImages[i]);
+        formDataSmall.append("images",smallImages[i]);
     }
+
+    const UrlPostBig = "http://localhost:3000/mainimage";
+    $.ajax({
+        url: UrlPostBig,
+        type: 'POST',
+        async:false, 
+        data: formDataBig,
+        processData: false,
+        contentType: false,
+        // contentType:'application/json',
+        // dataType:'json',
+        success:function(data){
+            console.log('success',data);
+        },
+        error:function(error){
+            console.log('Error %{error}')
+        }
+    });
     
     const UrlPost = "http://localhost:3000/resizeimages";
     $.ajax({
         url: UrlPost,
         type: 'POST',
         async:false, 
-        data: formData,
+        data: formDataSmall,
         processData: false,
         contentType: false,
         // contentType:'application/json',

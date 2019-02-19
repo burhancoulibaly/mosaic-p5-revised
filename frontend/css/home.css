@@ -136,7 +136,7 @@ h1{
     position: absolute;
     top: 0;
     left: 0;
-    /* visibility: hidden; */
+    visibility: hidden;
     /* border-style: solid;
     border-color: purple; */
-}
+} 

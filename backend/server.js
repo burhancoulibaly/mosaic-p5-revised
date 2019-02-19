@@ -14,12 +14,24 @@ const express = require("express"),
     promisePipe = require("promisepipe");
 
 const storage = multer.diskStorage({
-  destination: './frontend/images/resized_images/',
+  destination: './frontend/images/temp_images/',
   filename: function(req, file, callback){
     callback(null,file.fieldname + '-' + Date.now() + 
     path.extname(file.originalname));
   }
 })
+
+const storageBig = multer.diskStorage({
+  destination: './frontend/images/main_image/',
+  filename: function(req, file, callback){
+    callback(null,file.fieldname + '-' + Date.now() + 
+    path.extname(file.originalname));
+  }
+})
+
+const uploadBig = multer({
+  storage:storageBig
+}).single('image',new Object);
 
 // upload = multer({dest: './frontend/images/resized_images'});
 const upload = multer({
@@ -53,12 +65,9 @@ server.listen(process.env.PORT || 3000);
 console.log("Server running on port: 3000");
 
 app.get('/',function(req,res){
-  res.render(main);
+  res.sendFile(main);
 })
 app.use(bodyParser.json());
-
-app.engine('html', ejs.renderFile);
-app.set('view engine', 'html');
 
 app.get('/getimages',function(req,res){
   fs.readdir(allImages+"/stock_images", function(err, images){
@@ -70,6 +79,17 @@ app.get('/getimages',function(req,res){
   })
 })
 
+app.post('/mainimage',function(req,res){
+  uploadBig(req,res,(err)=>{
+    if(err){
+      console.log(err)
+      res.send(err);
+    }else{
+      res.send("image uploaded");
+    }
+  })
+})
+
 app.post('/resizeimages',function(req,res){
   upload(req,res,(err) =>{
     if(err){
@@ -77,22 +97,44 @@ app.post('/resizeimages',function(req,res){
       res.send(err);
     }else{
       // console.log(req.files);
-      fs.readdir(allImages+"/resized_images", function(err, images){
+      fs.readdir(allImages+"/temp_images", function(err, images){
         if(err){
           console.error("Could not list your directory.", err);
           process.exit(1);
         }
         imagesArr = images;
-        for(var i = 0; i < images; i++){
+        for(var i = 0; i < imagesArr.length; i++){
           resize(images[i]);
         }
+        res.send("files uploaded and resized");
       })
     }
   })
 })
 
 function resize(image){
-  console.log(image);
+  console.log(image)
+  let inStream = fs.createReadStream(allImages+"/temp_images/"+image);
+  let outStream = fs.createWriteStream(allImages+"/resized_images/"+image, {flags: "w"});
+
+  // on error of output file being saved
+  outStream.on('error', function() {
+    console.log("Error");
+  });
+
+  // on success of output file being saved
+  outStream.on('close', function() {
+    console.log("Successfully saved file");
+  });
+
+  let transform = sharp()
+                  .resize({width:100,height:100})
+                  .on('info', function(fileInfo){
+                    console.log("resizing complete")
+                  })
+
+  inStream.pipe(transform).pipe(outStream);
+
 }
 
  // let image = JSON.stringify(req.body);
