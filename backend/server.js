@@ -1,15 +1,30 @@
 const express = require("express"),
     app = express(),
     path = require("path"),
-    http = require("http"),
-    https = require("https"),
+    multer = require('multer'),
     server = require('http').createServer(app),
     fs = require('fs'),
+    bodyParser = require("body-parser"),
+    ejs = require('ejs'),
+    engine = require('consolidate'),
+    http = require("http"),
+    https = require("https"),
     sharp = require("sharp"),
     request = require("request"),
-    promisePipe = require("promisepipe"),
-    bodyParser = require("body-parser"),
-    getPixels = require("get-pixels");
+    promisePipe = require("promisepipe");
+
+const storage = multer.diskStorage({
+  destination: './frontend/images/resized_images/',
+  filename: function(req, file, callback){
+    callback(null,file.fieldname + '-' + Date.now() + 
+    path.extname(file.originalname));
+  }
+})
+
+// upload = multer({dest: './frontend/images/resized_images'});
+const upload = multer({
+  storage:storage
+}).array('images',new Object);
 
 var main = path.resolve("./frontend/html/home.html"),
     css = path.resolve("./frontend/css"),
@@ -38,10 +53,12 @@ server.listen(process.env.PORT || 3000);
 console.log("Server running on port: 3000");
 
 app.get('/',function(req,res){
-  res.sendFile(main);
+  res.render(main);
 })
 app.use(bodyParser.json());
 
+app.engine('html', ejs.renderFile);
+app.set('view engine', 'html');
 
 app.get('/getimages',function(req,res){
   fs.readdir(allImages+"/stock_images", function(err, images){
@@ -54,28 +71,44 @@ app.get('/getimages',function(req,res){
 })
 
 app.post('/resizeimages',function(req,res){
-  let image = req.body;
-  let inStream = fs.createReadStream(allImages+"/stock_images/"+image);
-  let outStream = fs.createWriteStream(allImages+"/resized_images/"+image, {flags: "w"});
+  upload(req,res,(err) =>{
+    if(err){
+      console.log(err)
+      res.send(err);
+    }else{
+      // console.log(req.files);
+      fs.readdir(allImages+"/resized_images", function(err, images){
+        if(err){
+          console.error("Could not list your directory.", err);
+          process.exit(1);
+        }
+        imagesArr = images;
+        for(var i = 0; i < images; i++){
+          resize(images[i]);
+        }
+      })
+    }
+  })
+})
 
-  // on error of output file being saved
-  outStream.on('error', function() {
-    console.log("Error");
-  });
+function resize(image){
+  console.log(image);
+}
 
+ // let image = JSON.stringify(req.body);
+  // console.log(image);
+  // let image = fs.createWriteStream(allImages+"/resized_images/image.jpg", {flags: "w"}).write(imageBuffer);
+  // // on error of output file being saved
+  // image.on('error', function() {
+  //   console.log("Error");
   // on success of output file being saved
-  outStream.on('close', function() {
-    console.log("Successfully saved file");
-    res.send("done");
-  });
+  // image.on('close', function() {
+  //   console.log("Successfully saved file");
+  //   res.send("done");
+  // });
 
-  let transform = sharp()
-                  .resize({width:100,height:100})
-                  .on('info', function(fileInfo){
-                    console.log("resizing complete")
-                  });
 
-  inStream.pipe(transform).pipe(outStream);
+  
   // console.log(image);
   // error = false
   // async function resize(){
@@ -109,4 +142,3 @@ app.post('/resizeimages',function(req,res){
   // .catch(function(err){
   //   res.send(err)
   // })
-})
