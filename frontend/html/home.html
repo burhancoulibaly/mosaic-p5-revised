@@ -8,7 +8,6 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
     <script type="text/javascript" src="/js/octree.js"></script>
-    <script type="text/javascript" src="/js/home.js"></script>
     <script type="text/javascript" src="/p5js/p5.js"></script>
     <script type="text/javascript" src="/p5js/addons/p5.dom.js"></script>
     <!-- <script type="text/javascript" src="/p5js/addons/p5.sound.js"></script> -->
@@ -46,11 +45,13 @@
       </div>
       <div class="small-image-insert">
         <div class="holder">
-          <form id="smallImg" name="smallImgs" class="upload" method="post" enctype="multipart/form-data" action="/upload">
+          <%= typeof msg != 'undefined' ? msg : ''%>
+          <form action="/resizeimagess" id="smallImg" name="smallImgs" class="upload" method="post" enctype="multipart/form-data">
             <label class="click">
               Click to Insert Images to Create Mosaic
               <input id="small" class="add-file" type="file" value=file name="imgSmall" multiple>
             </label>
+            <button type="submit" onclick="submitImages()" class="btn btn-primary -btn-lg create">Create Mosaic Image</button>
           </form>
         </div>
       </div>
@@ -60,7 +61,7 @@
     
     </div>
     
-    <button onclick="submitImages()" class="btn btn-primary -btn-lg create">Create Mosaic Image</button>
-
+    
+    <script type="text/javascript" src="/js/home.js"></script>
   </body>
 </html>

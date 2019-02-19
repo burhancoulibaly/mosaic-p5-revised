@@ -1,4 +1,5 @@
 window.onload = function(){
+    
     // input = document.body.childNodes[4].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[1]
     // let mutationObserver = new MutationObserver(function(mutations) {
     //     mutations.forEach(function(mutation) {
@@ -15,38 +16,32 @@ window.onload = function(){
     //     characterDataOldValue: true
     // });
 }
-console.timeEnd();
-console.log("get images end");
-
-    
+$(document).on('click','.clear',function(){
+    console.log("hello");
+})
 
 function submitImages(){
-    mainImage = document.getElementById("main").files;
-    smallImages = document.getElementById("small").files;
-    console.log(mainImage);
-    console.log(smallImages)
+    mainImage = document.getElementById("main").files[0];
+    smallImage = document.getElementById("small").files  
+    console.log(smallImage);
 
-    const UrlPost = "http:localhost:3000/resizeimages";
-    for(i = 0; i < smallImages.length; i++){
-        $.ajax({
-            url: UrlPost,
-            type: 'POST',
-            async:false, 
-            data:JSON.stringify([smallImages[i]]),
-            contentType:"application/json; charset=utf-8",
-            dataType:"json",
-            success:function(data){
-                console.log('success',data);
-            },
-            error:function(error){
-                // console.log('Error %{error}')
-            }
-        });
-    }
+    // const UrlPost = "http://localhost:3000/resizeimages";
+    // $.ajax({
+    //     url: UrlPost,
+    //     type: 'POST',
+    //     async:false, 
+    //     data: JSON.stringify(smallImage),
+    //     contentType:"application/json; charset=utf-8",
+    //     dataType:"json",
+    //     success:function(data){
+    //         console.log('success',data);
+    //     },
+    //     error:function(error){
+    //         // console.log('Error %{error}')
+    //     }
+    // });
 
 }
-console.timeEnd();
-console.log("Loading images end")
 
 // // boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
 // // octree = new Quad(boundary,9);
