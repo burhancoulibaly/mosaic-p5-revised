@@ -7,9 +7,9 @@ const express = require("express"),
     fs = require('fs'),
     sharp = require("sharp"),
     request = require("request"),
-    promisePipe = require("promisepipe");
-    bodyParser = require("body-parser");
-
+    promisePipe = require("promisepipe"),
+    bodyParser = require("body-parser"),
+    getPixels = require("get-pixels");
 
 var main = path.resolve("./frontend/html/home.html"),
     css = path.resolve("./frontend/css"),
@@ -73,7 +73,7 @@ app.post('/resizeimages',function(req,res){
                   .resize({width:100,height:100})
                   .on('info', function(fileInfo){
                     console.log("resizing complete")
-                  })
+                  });
 
   inStream.pipe(transform).pipe(outStream);
   // console.log(image);

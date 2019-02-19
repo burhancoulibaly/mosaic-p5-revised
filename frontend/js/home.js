@@ -13,10 +13,11 @@ let closeImgs = new Array();
 let imgsHash = new Object;
 let octree = null;
 
-console.log("get images");
-console.time();
+
 window.onload = function(){
-    const UrlGet = "https://mosiac-p5.herokuapp.com/getimages";
+    console.log("get images");
+    console.time();
+    const UrlGet = "http://localhost:3000/getimages";
     $.ajax({
         url: UrlGet,
         type: 'GET',
@@ -29,8 +30,12 @@ window.onload = function(){
             // console.log('Error %{error}')
         }
     });
-    
-    const UrlPost = "https://mosiac-p5.herokuapp.com/resizeimages";
+    console.timeEnd();
+    console.log("get images end");
+
+    console.log("resizing images");
+    console.time();
+    const UrlPost = "http://localhost:3000/resizeimages";
     for(i = 0; i < imgArray.length; i++){
         $.ajax({
             url: UrlPost,
@@ -47,10 +52,10 @@ window.onload = function(){
             }
         });
     }
-
+    console.timeEnd();
+    console.log("resizing images end");
 }
-console.timeEnd();
-console.log("get images end");
+
 
 console.log("loading images");
 console.time();
