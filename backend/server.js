@@ -5,13 +5,8 @@ const express = require("express"),
     server = require('http').createServer(app),
     fs = require('fs'),
     bodyParser = require("body-parser"),
-    ejs = require('ejs'),
-    engine = require('consolidate'),
-    http = require("http"),
-    https = require("https"),
     sharp = require("sharp"),
-    request = require("request"),
-    promisePipe = require("promisepipe");
+    mkdirp = require('mkdirp');
 
 const storage = multer.diskStorage({
   destination: './frontend/images/temp_images/',
@@ -70,12 +65,21 @@ app.get('/',function(req,res){
 app.use(bodyParser.json());
 
 app.get('/getimages',function(req,res){
-  fs.readdir(allImages+"/stock_images", function(err, images){
+  fs.readdir(allImages+"/resized_images", function(err, smallImages){
     if(err){
       console.error("Could not list your directory.", err);
       process.exit(1);
+    }else{
+      fs.readdir(allImages+"/main_image", function(err, mainImage){
+        if(err){
+          console.error("Could not list your directory.", err);
+          process.exit(1);
+        }else{
+          images = [mainImage,smallImages];
+          res.send(images);
+        }
+      })
     }
-    res.send(images);
   })
 })
 
@@ -96,18 +100,25 @@ app.post('/resizeimages',function(req,res){
       console.log(err)
       res.send(err);
     }else{
-      // console.log(req.files);
-      fs.readdir(allImages+"/temp_images", function(err, images){
+      mkdirp(allImages+"/resized_images",function(err){
         if(err){
-          console.error("Could not list your directory.", err);
-          process.exit(1);
+          console.log(err);
+          res.send(err);
+        }else{
+          // console.log(req.files);
+          fs.readdir(allImages+"/temp_images", function(err, images){
+            if(err){
+              console.error("Could not list your directory.", err);
+              process.exit(1);
+            }
+            imagesArr = images;
+            for(var i = 0; i < imagesArr.length; i++){
+              resize(images[i]);
+            }
+          })
         }
-        imagesArr = images;
-        for(var i = 0; i < imagesArr.length; i++){
-          resize(images[i]);
-        }
-        res.send("files uploaded and resized");
       })
+      res.send("files uploaded and resized");
     }
   })
 })

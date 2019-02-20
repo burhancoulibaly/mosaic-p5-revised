@@ -1,28 +1,23 @@
-window.onload = function(){
-    
-    // input = document.body.childNodes[4].childNodes[3].childNodes[1].childNodes[1].childNodes[1].childNodes[1]
-    // let mutationObserver = new MutationObserver(function(mutations) {
-    //     mutations.forEach(function(mutation) {
-    //       console.log(mutation);
-    //     });
-    // });
+let imgArray;
+let mainImage;
+let allImages = new Array();
+let points = new Array();
+let mainImgRGB = new Array();
+let closeImgs = new Array();
+let imgsHash = new Object;
+let setupStarted = false;
+let drawStarted = false;
+let preloadStarted = false;
+let octree = null;
+let count1 = 0;
 
-    // mutationObserver.observe(input, {
-    //     attributes: true,
-    //     characterData: true,
-    //     childList: true,
-    //     subtree: true,
-    //     attributeOldValue: true,
-    //     characterDataOldValue: true
-    // });
-}
-$(document).on('click','.clear',function(){
-    console.log("hello");
-})
+// $(document).on('click','.clear',function(){
+//     console.log("hello");
+// })
 
 function submitImages(){
-    mainImage = $("#main")[0].files[0];
-    smallImages = $("#small")[0].files;
+    mainImage = document.getElementById("main").files[0];
+    smallImages = document.getElementById("small").files;
     formDataBig = new FormData();
     formDataSmall = new FormData();
 
@@ -42,25 +37,41 @@ function submitImages(){
         // contentType:'application/json',
         // dataType:'json',
         success:function(data){
-            console.log('success',data);
+            const UrlPost = "http://localhost:3000/resizeimages";
+            $.ajax({
+                url: UrlPost,
+                type: 'POST',
+                async:false, 
+                data: formDataSmall,
+                processData: false,
+                contentType: false,
+                // contentType:'application/json',
+                // dataType:'json',
+                success:function(data){
+                    console.log('success',data);
+                },
+                error:function(error){
+                    console.log('Error %{error}')
+                }
+            });
         },
         error:function(error){
             console.log('Error %{error}')
         }
     });
-    
-    const UrlPost = "http://localhost:3000/resizeimages";
+
+    const UrlGet = "http://localhost:3000/getimages";
     $.ajax({
-        url: UrlPost,
-        type: 'POST',
-        async:false, 
-        data: formDataSmall,
-        processData: false,
-        contentType: false,
+        url: UrlGet,
+        type: 'GET',
+        async:false,
         // contentType:'application/json',
         // dataType:'json',
         success:function(data){
             console.log('success',data);
+            imgArray = data;
+            startPreload();
+            preload();
         },
         error:function(error){
             console.log('Error %{error}')
@@ -69,127 +80,125 @@ function submitImages(){
 
 }
 
-// // boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-// // octree = new Quad(boundary,9);
-// // point = new Point(155,126,143)
-// // octree.newPoint(point);
-// // console.log(octree.node.getTotalPoints(octree.node))
-// let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-// let octree = new Quad(boundary,9);
-// let imgArray;
-// let mainImage;
-// let allImages = new Array();
-// let points = new Array();
-// let mainImgRGB = new Array();
-// let closeImgs = new Array();
-// let imgsHash = new Object;
+function preload(){
+    if(preloadStarted == true){
+        mainImage = imgArray[0][0];
+        img = loadImage("./images/main_image/"+ mainImage);
+        for (var i = 0; i < imgArray[1].length; i++) {
+            console.log(imgArray[1][i]);
+            allImages[i] = loadImage("./images/resized_images/"+imgArray[1][i]);
+        }
+        let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
+        octree = new Quad(boundary,Math.ceil(allImages.length/100));
+        startSetup()
+    }
+}
 
-// window.onload = function(){
-//     $.ajax({
-//         type: 'GET',
-//         async:false,
-//         url:"http://localhost:3000/getimages",
-//         success:function(data){
-//         imgArray = data;
-//         // console.log('success',data);
-//         }
-//     });
-// }
+function setup(){
+    if(setupStarted == true){
+        console.log(allImages[2]);
+        w = img.width;
+        h = img.height;
 
-// function preload() {
-//     mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
-//     img = loadImage("./images/stock_images/"+ mainImage);
-//     for (var i = 0; i < imgArray.length; i++) {
-//         allImages[i] = loadImage("./images/stock_images/"+imgArray[i]);
-//     }
-// }
+        pxSize = (Math.round(w/h))*10;
+        canvas = createCanvas(w*2,h*2);
+        canvas.position(0,0);
 
-// function setup(){
-//     w = img.width;
-//     h = img.height;
+        for (var i = 0; i < allImages.length; i++) {
+            colArray = null;
+            var red = 0;
+            var green = 0;
+            var blue = 0;
+            console.log(allImages[i]);
+            allImages[i].loadPixels();
+        
+            for (var j = 0; j < allImages[i].pixels.length; j+=4) {
+                red += allImages[i].pixels[j];
+                green += allImages[i].pixels[j+1];
+                blue += allImages[i].pixels[j+2];
+                console.log(red,green,blue);
+            }
 
-//     pxSize = (Math.round(w/h))*10;
-//     canvas = createCanvas(w*2,h*2);
-//     canvas.position(0,0);
+            r = Math.round(red/(allImages[i].pixels.length/4));
+            g = Math.round(green/(allImages[i].pixels.length/4));
+            b = Math.round(blue/(allImages[i].pixels.length/4));
 
-//     for (var i = 0; i < allImages.length; i++) {
-//         colArray = null;
-//         var red = 0;
-//         var green = 0;
-//         var blue = 0;
-//         allImages[i].resize(250,250);
-//         allImages[i].loadPixels();
-    
-//         for (var j = 0; j < allImages[i].pixels.length; j+=4) {
-//             red += allImages[i].pixels[j];
-//             green += allImages[i].pixels[j+1];
-//             blue += allImages[i].pixels[j+2];
-//         }
+            imgsHash[rgbToHex(r,g,b)] = allImages[i];
 
-//         r = Math.round(red/(allImages[i].pixels.length/4));
-//         g = Math.round(green/(allImages[i].pixels.length/4));
-//         b = Math.round(blue/(allImages[i].pixels.length/4));
+            // console.log(r,g,b);
+            points.push(new Point(r,g,b))
+        }
 
-//         imgsHash[rgbToHex(r,g,b)] = allImages[i];
+        
+        for(var i = 0; i < points.length; i++){
+            console.log(points[i]);
+            octree.newPoint(points[i])
+        }
+        
+        // console.log(octree.node.getTotalPoints(octree.node));
 
-//         // console.log(r,g,b);
-//         points.push(new Point(r,g,b))
-//     }
+        // img.loadPixels();
+        // for (var i = 0; i < w; i+=pxSize) {
+        //     for (var j = 0; j < h; j+=pxSize) {
+        //         var index = 4 * (i + (j * w));
+        //         x = i;
+        //         y = j;
+        //         r = img.pixels[index];
+        //         g = img.pixels[index + 1];
+        //         b = img.pixels[index + 2];
+                
+            
+        //         mainImgRGB.push(new Array(new Point(r,g,b),i,j));
+        //     }
+        // }
+        // startDraw();
+    }
+}
 
-    
-//     for(var i = 0; i < points.length; i++){
-//         octree.newPoint(points[i])
-//     }
-    
-//     console.log(octree.node.getTotalPoints(octree.node));
+function draw(){
+    if(drawStarted == true){
+        console.log(mainImgRGB.length);
+        for(var i = 0; i < mainImgRGB.length; i++){
+            // console.log(mainImgRGB[i][0])
+            let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
+            // console.log(closePoint);
+            closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
+        }
+        
+        console.log(closeImgs);
 
-//     img.loadPixels();
-//     for (var i = 0; i < w; i+=pxSize) {
-//         for (var j = 0; j < h; j+=pxSize) {
-//           var index = 4 * (i + (j * w));
-//           x = i;
-//           y = j;
-//           r = img.pixels[index];
-//           g = img.pixels[index + 1];
-//           b = img.pixels[index + 2];
-          
-    
-//           mainImgRGB.push(new Array(new Point(r,g,b),i,j));
-//         }
-//     }
-// }
+        for(var i = 0; i < closeImgs.length; i++){
+            hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
+            image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
+        }
+        
+        if(w*2 > window.innerWidth ){
+            image(img,0,closeImgs[closeImgs.length-1][2]+1,w,h);
+        }else{
+            image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
+        }
+        noLoop();
+    }
+}
 
-// function draw(){
-//     console.log(mainImgRGB.length);
-//     for(var i = 0; i < mainImgRGB.length; i++){
-//         // console.log(mainImgRGB[i][0])
-//         let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
-//         // console.log(closePoint);
-//         closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
-//     }
-    
-//     console.log(closeImgs);
+function startPreload(){
+    preloadStarted = true;
+    console.log("preloadStarted",preloadStarted)
+}
+function startSetup(){
+    setupStarted = true;
+    console.log("setupStarted",setupStarted);
+}
+function startDraw(){
+    drawStarted = true;
+    console.log("drawStarted",drawStarted);
+}
 
-//     for(var i = 0; i < closeImgs.length; i++){
-//         hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
-//         image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
-//     }
-    
-//     if(w*2 > window.innerWidth ){
-//         image(img,0,closeImgs[closeImgs.length-1][2]+1,w,h);
-//     }else{
-//         image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
-//     }
-    
-    
-//     noLoop();
-// }
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
 
-// function componentToHex(c) {
-//     var hex = c.toString(16);
-//     return hex.length == 1 ? "0" + hex : hex;
-// }
-
-// function rgbToHex(r, g, b) {
-//     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-// }
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
