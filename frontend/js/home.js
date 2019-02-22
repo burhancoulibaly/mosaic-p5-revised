@@ -10,10 +10,6 @@ let drawStarted = false;
 let preloadStarted = false;
 let octree = null;
 
-// $(document).on('click','.clear',function(){
-//     console.log("hello");
-// })
-
 function submitImages(){
     mainImage = document.getElementById("main").files[0];
     smallImages = document.getElementById("small").files;
@@ -79,6 +75,8 @@ function submitImages(){
         });
     }
 
+    console.time();
+    console.log("Uploading and resizing images");
     postMainImage()
     .then((resolveData)=>{
         console.log(resolveData);
@@ -91,6 +89,8 @@ function submitImages(){
     .then((resolveData)=>{
         console.log(resolveData[0],resolveData[1]);
         imgArray = resolveData[1];
+        console.log("Uploading and resizing images");
+        console.timeEnd();
         startPreload();
         preload();
     })
@@ -104,19 +104,20 @@ function preload(){
         mainImage = imgArray[0][0];
         img = loadImage("./images/main_image/"+ mainImage);
         for (var i = 0; i < imgArray[1].length; i++) {
-            console.log(imgArray[1][i]);
             allImages[i] = loadImage("./images/resized_images/"+imgArray[1][i]);
         }
-        let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-        octree = new Quad(boundary,Math.ceil(allImages.length/100));
-        startSetup();
-        setup();
+        setTimeout(()=>{
+            startSetup();
+            setup();
+        },3000);
     }
 }
 
 function setup(){
     if(setupStarted == true){
-        console.log(allImages[2]);
+        let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
+        octree = new Quad(boundary,Math.ceil(allImages.length/100));
+
         w = img.width;
         h = img.height;
 
@@ -129,14 +130,13 @@ function setup(){
             var red = 0;
             var green = 0;
             var blue = 0;
-            console.log(allImages[i]);
+            // console.log(allImages[i]);
             allImages[i].loadPixels();
         
             for (var j = 0; j < allImages[i].pixels.length; j+=4) {
                 red += allImages[i].pixels[j];
                 green += allImages[i].pixels[j+1];
                 blue += allImages[i].pixels[j+2];
-                console.log(red,green,blue);
             }
 
             r = Math.round(red/(allImages[i].pixels.length/4));
@@ -151,7 +151,7 @@ function setup(){
 
         
         for(var i = 0; i < points.length; i++){
-            console.log(points[i]);
+            // console.log(points[i]);
             octree.newPoint(points[i])
         }
         
@@ -185,7 +185,7 @@ function draw(){
             closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
         }
         
-        console.log(closeImgs);
+        // console.log(closeImgs);
 
         for(var i = 0; i < closeImgs.length; i++){
             hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);

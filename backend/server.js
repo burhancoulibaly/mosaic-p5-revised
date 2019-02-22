@@ -112,8 +112,7 @@ app.post('/resizeimages',function(req,res){
       .then((images)=>{
         return resizeImages(images);
       })
-      .then((resolveData)=>{
-        console.log(resolveData);
+      .then(()=>{
         return fs.readdirAsync(allImages+"/temp_images")
       })
       .then((resizedImages)=>{
@@ -128,37 +127,34 @@ app.post('/resizeimages',function(req,res){
   });
 });
 
-function resizeImages(images){
-  let count = 0;
-  return new Promise((resolve,reject)=>{  
-    images.forEach((image)=>{
-      resize(image)
-      .then((resolveData)=>{
-        count++;
-        if(count == images.length){
-          resolve(resolveData);
-        }
-      })
-      .catch((err)=>{
-        reject(err);
-      });
+async function resizeImages(images){
+  let count = 0
+  await Promise.all(images.map(async(image)=>{
+    await resize(image)
+    .then((resolveData)=>{
+      count++
+      // console.log(resolveData);
+    })
+    .catch((err)=>{
+      console.log(err);
     });
-  });  
+  })); 
+  console.log(count);
 };
 
 function resize(image){
   return new Promise((resolve,reject)=>{
-    console.log(image)
+    // console.log(image)
     sharp(allImages+"/temp_images/"+image)
     .resize({width:100,height:100})
     .jpeg()
     .toBuffer()
     .then((data) =>{
-      console.log(data);
+      // console.log(data);
       return fs.writeFileAsync(allImages+"/resized_images/"+image, data, { flag: 'w' });
     })
-    .then((info)=>{
-      resolve("resize complete\n",info);
+    .then(()=>{
+      resolve("resize complete");
     })
     .catch((err) =>{
       reject(err);
