@@ -9,11 +9,6 @@ let setupStarted = false;
 let drawStarted = false;
 let preloadStarted = false;
 let octree = null;
-let count1 = 0;
-
-// $(document).on('click','.clear',function(){
-//     console.log("hello");
-// })
 
 function submitImages(){
     mainImage = document.getElementById("main").files[0];
@@ -26,58 +21,82 @@ function submitImages(){
         formDataSmall.append("images",smallImages[i]);
     }
 
-    const UrlPostBig = "http://localhost:3000/mainimage";
-    $.ajax({
-        url: UrlPostBig,
-        type: 'POST',
-        async:false, 
-        data: formDataBig,
-        processData: false,
-        contentType: false,
-        // contentType:'application/json',
-        // dataType:'json',
-        success:function(data){
+    let postMainImage =  function(){
+        return new Promise((resolve,reject)=>{
+        const UrlPostBig = "http://localhost:3000/mainimage";
+            $.ajax({
+                url: UrlPostBig,
+                type: 'POST',
+                data: formDataBig,
+                processData: false,
+                contentType: false,
+                success:function(data){
+                    resolve("Main image posted",data);
+                },
+                error:function(error){
+                    reject('Error',error);
+                }
+            });
+        });
+    }
+
+    let resizeSmallImages = function(){
+        return new Promise((resolve,reject)=>{
             const UrlPost = "http://localhost:3000/resizeimages";
             $.ajax({
                 url: UrlPost,
                 type: 'POST',
-                async:false, 
                 data: formDataSmall,
                 processData: false,
                 contentType: false,
-                // contentType:'application/json',
-                // dataType:'json',
                 success:function(data){
-                    console.log('success',data);
+                    resolve("Small images resized",data);
                 },
                 error:function(error){
-                    console.log('Error %{error}')
+                    reject('Error',error);
+                }
+            });       
+        });
+    }
+
+    let getAllImages = function(){
+        return new Promise((resolve,reject)=>{
+            const UrlGet = "http://localhost:3000/getimages";
+            $.ajax({
+                url: UrlGet,
+                type: 'GET',
+                success:function(data){
+                    resolve(["All images recieved",data]);
+                },
+                error:function(error){
+                    reject('Error',error);
                 }
             });
-        },
-        error:function(error){
-            console.log('Error %{error}')
-        }
-    });
+        });
+    }
 
-    const UrlGet = "http://localhost:3000/getimages";
-    $.ajax({
-        url: UrlGet,
-        type: 'GET',
-        async:false,
-        // contentType:'application/json',
-        // dataType:'json',
-        success:function(data){
-            console.log('success',data);
-            imgArray = data;
-            startPreload();
-            preload();
-        },
-        error:function(error){
-            console.log('Error %{error}')
-        }
+    console.time();
+    console.log("Uploading and resizing images");
+    postMainImage()
+    .then((resolveData)=>{
+        console.log(resolveData);
+        return resizeSmallImages();
+    })
+    .then((resolveData)=>{
+        console.log(resolveData);
+        return getAllImages();
+    })
+    .then((resolveData)=>{
+        console.log(resolveData[0],resolveData[1]);
+        imgArray = resolveData[1];
+        console.log("Uploading and resizing images");
+        console.timeEnd();
+        startPreload();
+        preload();
+    })
+    .catch((rejectData)=>{
+        console.log(rejectData);
     });
-
 }
 
 function preload(){
@@ -85,18 +104,20 @@ function preload(){
         mainImage = imgArray[0][0];
         img = loadImage("./images/main_image/"+ mainImage);
         for (var i = 0; i < imgArray[1].length; i++) {
-            console.log(imgArray[1][i]);
             allImages[i] = loadImage("./images/resized_images/"+imgArray[1][i]);
         }
-        let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-        octree = new Quad(boundary,Math.ceil(allImages.length/100));
-        startSetup()
+        setTimeout(()=>{
+            startSetup();
+            setup();
+        },3000);
     }
 }
 
 function setup(){
     if(setupStarted == true){
-        console.log(allImages[2]);
+        let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
+        octree = new Quad(boundary,Math.ceil(allImages.length/100));
+
         w = img.width;
         h = img.height;
 
@@ -109,14 +130,13 @@ function setup(){
             var red = 0;
             var green = 0;
             var blue = 0;
-            console.log(allImages[i]);
+            // console.log(allImages[i]);
             allImages[i].loadPixels();
         
             for (var j = 0; j < allImages[i].pixels.length; j+=4) {
                 red += allImages[i].pixels[j];
                 green += allImages[i].pixels[j+1];
                 blue += allImages[i].pixels[j+2];
-                console.log(red,green,blue);
             }
 
             r = Math.round(red/(allImages[i].pixels.length/4));
@@ -131,27 +151,27 @@ function setup(){
 
         
         for(var i = 0; i < points.length; i++){
-            console.log(points[i]);
+            // console.log(points[i]);
             octree.newPoint(points[i])
         }
         
-        // console.log(octree.node.getTotalPoints(octree.node));
+        console.log(octree.node.getTotalPoints(octree.node));
 
-        // img.loadPixels();
-        // for (var i = 0; i < w; i+=pxSize) {
-        //     for (var j = 0; j < h; j+=pxSize) {
-        //         var index = 4 * (i + (j * w));
-        //         x = i;
-        //         y = j;
-        //         r = img.pixels[index];
-        //         g = img.pixels[index + 1];
-        //         b = img.pixels[index + 2];
+        img.loadPixels();
+        for (var i = 0; i < w; i+=pxSize) {
+            for (var j = 0; j < h; j+=pxSize) {
+                var index = 4 * (i + (j * w));
+                x = i;
+                y = j;
+                r = img.pixels[index];
+                g = img.pixels[index + 1];
+                b = img.pixels[index + 2];
                 
             
-        //         mainImgRGB.push(new Array(new Point(r,g,b),i,j));
-        //     }
-        // }
-        // startDraw();
+                mainImgRGB.push(new Array(new Point(r,g,b),i,j));
+            }
+        }
+        startDraw();
     }
 }
 
@@ -165,7 +185,7 @@ function draw(){
             closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
         }
         
-        console.log(closeImgs);
+        // console.log(closeImgs);
 
         for(var i = 0; i < closeImgs.length; i++){
             hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
