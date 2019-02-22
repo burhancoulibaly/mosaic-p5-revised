@@ -124,7 +124,7 @@ app.post('/resizeimages',function(req,res){
 })
 
 function resize(image){
-  console.log(image)
+  // console.log(image)
   let inStream = fs.createReadStream(allImages+"/temp_images/"+image);
   let outStream = fs.createWriteStream(allImages+"/resized_images/"+image, {flags: "w"});
 
@@ -140,12 +140,13 @@ function resize(image){
 
   let transform = sharp()
                   .resize({width:100,height:100})
+                  .toColourspace('rgba')
+                  .toFormat('jpeg')
                   .on('info', function(fileInfo){
                     console.log("resizing complete")
                   })
 
   inStream.pipe(transform).pipe(outStream);
-
 }
 
  // let image = JSON.stringify(req.body);
