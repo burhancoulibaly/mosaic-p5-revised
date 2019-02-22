@@ -9,7 +9,6 @@ let setupStarted = false;
 let drawStarted = false;
 let preloadStarted = false;
 let octree = null;
-let count1 = 0;
 
 // $(document).on('click','.clear',function(){
 //     console.log("hello");
@@ -26,58 +25,78 @@ function submitImages(){
         formDataSmall.append("images",smallImages[i]);
     }
 
-    const UrlPostBig = "http://localhost:3000/mainimage";
-    $.ajax({
-        url: UrlPostBig,
-        type: 'POST',
-        async:false, 
-        data: formDataBig,
-        processData: false,
-        contentType: false,
-        // contentType:'application/json',
-        // dataType:'json',
-        success:function(data){
+    let postMainImage =  function(){
+        return new Promise((resolve,reject)=>{
+        const UrlPostBig = "http://localhost:3000/mainimage";
+            $.ajax({
+                url: UrlPostBig,
+                type: 'POST',
+                data: formDataBig,
+                processData: false,
+                contentType: false,
+                success:function(data){
+                    resolve("Main image posted",data);
+                },
+                error:function(error){
+                    reject('Error',error);
+                }
+            });
+        });
+    }
+
+    let resizeSmallImages = function(){
+        return new Promise((resolve,reject)=>{
             const UrlPost = "http://localhost:3000/resizeimages";
             $.ajax({
                 url: UrlPost,
                 type: 'POST',
-                async:false, 
                 data: formDataSmall,
                 processData: false,
                 contentType: false,
-                // contentType:'application/json',
-                // dataType:'json',
                 success:function(data){
-                    console.log('success',data);
+                    resolve("Small images resized",data);
                 },
                 error:function(error){
-                    console.log('Error %{error}')
+                    reject('Error',error);
+                }
+            });       
+        });
+    }
+
+    let getAllImages = function(){
+        return new Promise((resolve,reject)=>{
+            const UrlGet = "http://localhost:3000/getimages";
+            $.ajax({
+                url: UrlGet,
+                type: 'GET',
+                success:function(data){
+                    resolve(["All images recieved",data]);
+                },
+                error:function(error){
+                    reject('Error',error);
                 }
             });
-        },
-        error:function(error){
-            console.log('Error %{error}')
-        }
-    });
+        });
+    }
 
-    const UrlGet = "http://localhost:3000/getimages";
-    $.ajax({
-        url: UrlGet,
-        type: 'GET',
-        async:false,
-        // contentType:'application/json',
-        // dataType:'json',
-        success:function(data){
-            console.log('success',data);
-            imgArray = data;
-            startPreload();
-            preload();
-        },
-        error:function(error){
-            console.log('Error %{error}')
-        }
+    postMainImage()
+    .then((resolveData)=>{
+        console.log(resolveData);
+        return resizeSmallImages();
+    })
+    .then((resolveData)=>{
+        console.log(resolveData);
+        return getAllImages();
+    })
+    .then((resolveData)=>{
+        console.log(resolveData[0],resolveData[1]);
+        imgArray = resolveData[1];
+        startPreload();
+        preload();
+    })
+    .catch((rejectData)=>{
+        console.log(rejectData);
     });
-
 }
 
 function preload(){
@@ -90,7 +109,8 @@ function preload(){
         }
         let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
         octree = new Quad(boundary,Math.ceil(allImages.length/100));
-        startSetup()
+        startSetup();
+        setup();
     }
 }
 
@@ -135,23 +155,23 @@ function setup(){
             octree.newPoint(points[i])
         }
         
-        // console.log(octree.node.getTotalPoints(octree.node));
+        console.log(octree.node.getTotalPoints(octree.node));
 
-        // img.loadPixels();
-        // for (var i = 0; i < w; i+=pxSize) {
-        //     for (var j = 0; j < h; j+=pxSize) {
-        //         var index = 4 * (i + (j * w));
-        //         x = i;
-        //         y = j;
-        //         r = img.pixels[index];
-        //         g = img.pixels[index + 1];
-        //         b = img.pixels[index + 2];
+        img.loadPixels();
+        for (var i = 0; i < w; i+=pxSize) {
+            for (var j = 0; j < h; j+=pxSize) {
+                var index = 4 * (i + (j * w));
+                x = i;
+                y = j;
+                r = img.pixels[index];
+                g = img.pixels[index + 1];
+                b = img.pixels[index + 2];
                 
             
-        //         mainImgRGB.push(new Array(new Point(r,g,b),i,j));
-        //     }
-        // }
-        // startDraw();
+                mainImgRGB.push(new Array(new Point(r,g,b),i,j));
+            }
+        }
+        startDraw();
     }
 }
 
