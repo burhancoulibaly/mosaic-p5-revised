@@ -2,11 +2,12 @@ const express = require("express"),
     app = express(),
     path = require("path"),
     multer = require('multer'),
+    sharp = require("sharp"),
+    {Storage} = require('@google-cloud/storage'),
     server = require('http').createServer(app),
     Promise = require('bluebird');
     fs = Promise.promisifyAll(require('fs')),
     bodyParser = require("body-parser"),
-    sharp = require("sharp"),
     mkdirp = require('mkdirp');
 
 var main = path.resolve("./frontend/html/home.html"),
@@ -29,6 +30,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
+const projectId = 'Mosaic-P5';
+const keyFilename = '../mosaic-p5-database-firebase-adminsdk-0558w-790f08f15d.json';
+
+const storage = new Storage({
+  projectId:projectId,
+  keyFilename:keyFilename
+})
+
+const bucketName = 'gs://mosaic-p5-database.appspot.com';
 
 const storage = multer.diskStorage({
   destination: './frontend/images/temp_images/',
@@ -146,6 +157,7 @@ function resize(image){
   return new Promise((resolve,reject)=>{
     // console.log(image)
     sharp(allImages+"/temp_images/"+image)
+    .flatten()
     .resize({width:100,height:100})
     .jpeg()
     .toBuffer()

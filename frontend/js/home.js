@@ -109,7 +109,7 @@ function preload(){
         setTimeout(()=>{
             startSetup();
             setup();
-        },3000);
+        },6000);
     }
 }
 
