@@ -109,7 +109,11 @@ function preload(){
         setTimeout(()=>{
             startSetup();
             setup();
+<<<<<<< HEAD
         },10000);
+=======
+        },6000);
+>>>>>>> 1627d563757045abb4d76f896d01e25de74b001b
     }
 }
 
