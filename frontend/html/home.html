@@ -15,50 +15,50 @@
     <link rel="stylesheet" href="/css/home.css">
   </head>
   <body>
-    <div class="header">
-      <h1>Mosaic Image Creator</h1>
-    </div>
-
-    <div class="insert">
-
-      <div class="ins-head-text-div">
-        <div class="insert-head-text">
-          <h1>Main Image</h1>
+    <div class="upload-page">
+      <div class="header">
+        <h1>Mosaic Image Creator</h1>
+      </div>
+  
+      <div class="insert">
+        <div class="ins-head-text-div">
+          <div class="insert-head-text">
+            <h1>Main Image</h1>
+          </div>
+          
+          <div class="insert-head-text">
+            <h1>Small Images</h1>
+          </div>
+          <hr style="clear:both;">
         </div>
         
-        <div class="insert-head-text">
-          <h1>Small Images</h1>
+        <div class="big-image-insert">
+          <div class="holder">
+            <form id="mainImg" name="mainImg" class="upload" method="post" enctype="multipart/form-data" action="/upload">
+              <label class="click">
+                Click To Insert Main Image
+                <input id="main" class="add-file" type="file" name="imgMain">
+              </label>
+            </form>
+          </div>
         </div>
-        <hr style="clear:both;">
-      </div>
+        <div class="small-image-insert">
+          <div class="holder">
+            <form id="smallImg" name="smallImgs" class="upload" method="post" enctype="multipart/form-data">
+              <label class="click">
+                Click to Insert Images to Create Mosaic
+                <input id="small" class="add-file" type="file" value=file name="imgSmall" multiple>
+              </label>
+            </form>
+          </div>
+        </div>
+  
+        <button id="but" class="btn btn-primary btn-lg clear">Clear</button>
+        <button class="btn btn-primary btn-lg clear">Clear</button>
       
-
-      <div class="big-image-insert">
-        <div class="holder">
-          <form id="mainImg" name="mainImg" class="upload" method="post" enctype="multipart/form-data" action="/upload">
-            <label class="click">
-              Click To Insert Main Image
-              <input id="main" class="add-file" type="file" name="imgMain">
-            </label>
-          </form>
-        </div>
       </div>
-      <div class="small-image-insert">
-        <div class="holder">
-          <form id="smallImg" name="smallImgs" class="upload" method="post" enctype="multipart/form-data">
-            <label class="click">
-              Click to Insert Images to Create Mosaic
-              <input id="small" class="add-file" type="file" value=file name="imgSmall" multiple>
-            </label>
-          </form>
-        </div>
-      </div>
-
-      <button id="but" class="btn btn-primary btn-lg clear">Clear</button>
-      <button class="btn btn-primary btn-lg clear">Clear</button>
-    
+      <button onClick="submitImages()" type="submit" class="btn btn-primary -btn-lg create">Create Mosaic Image</button>
     </div>
-    <button onClick="submitImages()" type="submit" class="btn btn-primary -btn-lg create">Create Mosaic Image</button>
     
     <script type="text/javascript" src="/js/home.js"></script>
   </body>

@@ -10,15 +10,15 @@ let drawStarted = false;
 let preloadStarted = false;
 let octree = null;
 
- window.onload = function(){
+window.onload = function(){
     deleteUploads()
     .then((resolveData)=>{
         console.log(resolveData[0]+resolveData[1]);
     })
     .catch((rejectData)=>{
         console.log(rejectData);
-    })
-}
+    });
+};
 
 $(window).on("unload", function(e) {
     deleteUploads()
@@ -27,10 +27,30 @@ $(window).on("unload", function(e) {
     })
     .catch((rejectData)=>{
         console.log(rejectData);
-    })
+    });
 });
 
+$('#main').change(function() { 
+    console.log("changed");
+    mainImage = URL.createObjectURL(document.getElementById("main").files[0]);
+    console.log(mainImage); 
+}); 
+
+$('#small').change(function() { 
+    console.log("changed");
+    blobImages = new Array();
+    smallImages = document.getElementById("small").files;
+
+    for(var i = 0; i < smallImages.length; i++){
+        blobImages.push(URL.createObjectURL(smallImages[i]));
+    }
+    
+    console.log(blobImages); 
+}); 
+
 function submitImages(){
+    $(".upload-page").hide();
+
     mainImage = document.getElementById("main").files[0];
     smallImages = document.getElementById("small").files;
     formDataBig = new FormData();
