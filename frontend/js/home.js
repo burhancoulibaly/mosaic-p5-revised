@@ -31,7 +31,7 @@ function submitImages(){
                 processData: false,
                 contentType: false,
                 success:function(data){
-                    resolve("Main image posted",data);
+                    resolve(["Main image posted",data]);
                 },
                 error:function(error){
                     reject('Error',error);
@@ -50,7 +50,7 @@ function submitImages(){
                 processData: false,
                 contentType: false,
                 success:function(data){
-                    resolve("Small images resized",data);
+                    resolve(["Small images resized",data]);
                 },
                 error:function(error){
                     reject('Error',error);
@@ -79,20 +79,24 @@ function submitImages(){
     console.log("Uploading and resizing images");
     postMainImage()
     .then((resolveData)=>{
-        console.log(resolveData);
+        console.log(resolveData[0]);
+        console.log(resolveData[1]);
         return resizeSmallImages();
     })
     .then((resolveData)=>{
-        console.log(resolveData);
+        console.log(resolveData[0]);
+
+        for(var i = 0;i < resolveData[1].length;i++){
+            console.log(resolveData[1][i]);
+        }
         return getAllImages();
     })
     .then((resolveData)=>{
         console.log(resolveData[0],resolveData[1]);
         imgArray = resolveData[1];
-        console.log("Uploading and resizing images");
         console.timeEnd();
-        startPreload();
-        preload();
+        // startPreload();
+        // preload();
     })
     .catch((rejectData)=>{
         console.log(rejectData);
@@ -109,11 +113,7 @@ function preload(){
         setTimeout(()=>{
             startSetup();
             setup();
-<<<<<<< HEAD
-        },10000);
-=======
         },6000);
->>>>>>> 1627d563757045abb4d76f896d01e25de74b001b
     }
 }
 

@@ -2,7 +2,7 @@ const express = require("express"),
     app = express(),
     path = require("path"),
     multer = require('multer'),
-    sharp = require("sharp"),
+    gcsSharp = require('multer-sharp'),
     server = require('http').createServer(app),
     Promise = require('bluebird');
     fs = Promise.promisifyAll(require('fs')),
@@ -18,8 +18,6 @@ var main = path.resolve("./frontend/html/home.html"),
     p5js = path.resolve("./node_modules/p5/lib"),
     allImages = path.resolve("./frontend/images");
 
-let resizeBuff = new Array();
-
 app.use("/main", express.static(main));
 app.use("/css", express.static(css));
 app.use("/js", express.static(js));
@@ -33,10 +31,20 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-const storageSmall = multer.memoryStorage({
-  limits:{
-    fileSize: 16 * 1024 * 1024
-  }
+const storageSmall = gcsSharp({
+  filename: (req, file, cb) => {
+    cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
+    path.extname(file.originalname));
+  },
+  bucket:"gs://mosaic-p5-database.appspot.com",
+  projectId:'Mosaic-P5',
+  keyFilename:'./mosaic-p5-database-firebase-adminsdk-0558w-e260b73db6.json',
+  acl: 'publicRead',
+  size:{
+    width:100,
+    height:100
+  },
+  max:true
 });
 
 const storageBig = multer.memoryStorage({
@@ -61,22 +69,7 @@ app.get('/',function(req,res){
 });
 
 app.get('/getimages',function(req,res){
-  // fs.readdir(allImages+"/resized_images", function(err, smallImages){
-  //   if(err){
-  //     console.error("Could not list your directory.", err);
-  //     process.exit(1);
-  //   }else{
-  //     fs.readdir(allImages+"/main_image", function(err, mainImage){
-  //       if(err){
-  //         console.error("Could not list your directory.", err);
-  //         process.exit(1);
-  //       }else{
-  //         images = [mainImage,smallImages];
-  //         res.send(images);
-  //       };
-  //     });
-  //   };
-  // });
+  res.send("shits on gcs")
 });
 
 app.post('/mainimage',uploadBig.single('image',new Object),gcsUpload.uploadToGCS,function(req,res,next){
@@ -84,86 +77,15 @@ app.post('/mainimage',uploadBig.single('image',new Object),gcsUpload.uploadToGCS
   if (req.file && req.file.cloudStoragePublicUrl) {
     data.imageUrl = req.file.cloudStoragePublicUrl;
   }
-  res.send("image uploaded");
+  console.log("\n",data.imageUrl);
+  res.send(data.imageUrl);
 });
 
-app.post('/resizeimages',upload.array('images',new Object),function(req,res,err){
-  if(err){
-    res.send(err);
-  }else{
-    resizeImages(req.files)
-    .then((resolveData)=>{
-      console.log(resolveData);
-      res.send(resolveData);
-    })
-    .catch((err)=>{
-      console.log(err,"ypp1")
-      res.send(err,"ypp");
-    });
-  };
+app.post('/resizeimages',upload.array('images',new Object),function(req,res,next){
+  imgUrls = new Array();
+  for(var i = 0;i < req.files.length;i++){
+    imgUrls[i] = "https://storage.googleapis.com/mosaic-p5-database.appspot.com/"+req.files[i].filename;
+  }
+  console.log("\n",imgUrls);
+  res.send(imgUrls);
 });
-
-function getPublicUrl (filename) {
-  return 'https://storage.googleapis.com/'+bucketName+'/'+filename;
-}
-
-async function resizeImages(images){
-  let count = 0
-  await Promise.all(images.map(async(image)=>{
-    await resize(image)
-    .then((resolveData)=>{
-      count++
-      resizeBuff.push(resolveData);
-    })
-    .catch((err)=>{
-      console.log(err,"ypp5");
-    });
-  })); 
-  console.log(count);
-  console.log(resizeBuff);
-};
-
-function resize(image){
-  return new Promise((resolve,reject)=>{
-    // console.log(image)
-    
-    sharp(image)
-    .flatten()
-    .resize({width:100,height:100})
-    .jpeg()
-    .toBuffer()
-    .then((data) =>{
-      const gcsname = "resized_images/"+Date.now() + image.file.originalname;
-      const file = bucketName.file(gcsname);
-
-      const stream = file.createWriteStream({
-        metadata: {
-          contentType: data.mimetype
-        },
-        resumable: false
-      });
-
-      stream.on('error', (err) => {
-        data.cloudStorageError = err;
-        console.log(err);
-      });
-
-      stream.on('finish', () => {
-        data.cloudStorageObject = gcsname;
-        file.makePublic().then(() => {
-          data.cloudStoragePublicUrl = getPublicUrl(gcsname);
-        });
-      });
-      stream.end(req.file.buffer); 
-    })
-    .then(()=>{
-      return file.makePublic()
-    })
-    .then(() => {
-      resolve(image.file.cloudStoragePublicUrl = getPublicUrl(gcsname));
-    })
-    .catch((err) =>{
-      reject(err);
-    });
-  });
-};
