@@ -1,13 +1,13 @@
-const path = require('path');
-
 const {Storage} = require('@google-cloud/storage'),
+      path = require('path');
+
       projectId = 'Mosaic-P5';
-      keyFilename = './mosaic-p5-database-firebase-adminsdk-0558w-e260b73db6.json';
+      keyFilename = './config.json';
 
 const storage = new Storage({
   projectId:projectId,
   keyFilename:keyFilename
-})
+});
 
 const bucket = storage.bucket('gs://mosaic-p5-database.appspot.com');
 
@@ -20,7 +20,7 @@ function uploadToGCS(req,res,next){
       return next();
     }
   
-    const gcsname = "main_images/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
+    const gcsname = "main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
     const file = bucket.file(gcsname);
   
     const stream = file.createWriteStream({

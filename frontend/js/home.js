@@ -10,6 +10,26 @@ let drawStarted = false;
 let preloadStarted = false;
 let octree = null;
 
+ window.onload = function(){
+    deleteUploads()
+    .then((resolveData)=>{
+        console.log(resolveData[0]+resolveData[1]);
+    })
+    .catch((rejectData)=>{
+        console.log(rejectData);
+    })
+}
+
+$(window).on("unload", function(e) {
+    deleteUploads()
+    .then((resolveData)=>{
+        console.log(resolveData[0]+resolveData[1]);
+    })
+    .catch((rejectData)=>{
+        console.log(rejectData);
+    })
+});
+
 function submitImages(){
     mainImage = document.getElementById("main").files[0];
     smallImages = document.getElementById("small").files;
@@ -76,27 +96,33 @@ function submitImages(){
     }
 
     console.time();
+
     console.log("Uploading and resizing images");
+
     postMainImage()
     .then((resolveData)=>{
         console.log(resolveData[0]);
-        console.log(resolveData[1]);
+        // console.log(resolveData[1]);
+
         return resizeSmallImages();
     })
     .then((resolveData)=>{
         console.log(resolveData[0]);
 
-        for(var i = 0;i < resolveData[1].length;i++){
-            console.log(resolveData[1][i]);
-        }
+        // for(var i = 0;i < resolveData[1].length;i++){
+        //     console.log(resolveData[1][i]);
+        // }
+
         return getAllImages();
     })
     .then((resolveData)=>{
         console.log(resolveData[0],resolveData[1]);
         imgArray = resolveData[1];
+
         console.timeEnd();
-        // startPreload();
-        // preload();
+
+        startPreload();
+        preload();
     })
     .catch((rejectData)=>{
         console.log(rejectData);
@@ -105,10 +131,11 @@ function submitImages(){
 
 function preload(){
     if(preloadStarted == true){
-        mainImage = imgArray[0][0];
-        img = loadImage("./images/main_image/"+ mainImage);
+        mainImage = imgArray[0][0].metadata.mediaLink;
+        img = loadImage(mainImage);
         for (var i = 0; i < imgArray[1].length; i++) {
-            allImages[i] = loadImage("./images/resized_images/"+imgArray[1][i]);
+            resizedImage = imgArray[1][i].metadata.mediaLink
+            allImages[i] = loadImage(resizedImage);
         }
         setTimeout(()=>{
             startSetup();
@@ -201,18 +228,45 @@ function draw(){
         }else{
             image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
         }
+
         noLoop();
+
+        deleteUploads()
+        .then((resolveData)=>{
+            console.log(resolveData[0]+resolveData[1]);
+        })
+        .catch((rejectData)=>{
+            console.log(rejectData);
+        })
     }
+}
+
+function deleteUploads(){
+    return new Promise((resolve,reject)=>{
+        const UrlGet = "http://localhost:3000/deleteimages";
+        $.ajax({
+            url: UrlGet,
+            type: 'GET',
+            success:function(data){
+                resolve(["Image upload deletion ",data]);
+            },
+            error:function(error){
+                reject('Error',error);
+            }
+        });      
+    });
 }
 
 function startPreload(){
     preloadStarted = true;
     console.log("preloadStarted",preloadStarted)
 }
+
 function startSetup(){
     setupStarted = true;
     console.log("setupStarted",setupStarted);
 }
+
 function startDraw(){
     drawStarted = true;
     console.log("drawStarted",drawStarted);

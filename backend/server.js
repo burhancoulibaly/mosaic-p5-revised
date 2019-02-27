@@ -2,6 +2,7 @@ const express = require("express"),
     app = express(),
     path = require("path"),
     multer = require('multer'),
+    {Storage} = require('@google-cloud/storage'),
     gcsSharp = require('multer-sharp'),
     server = require('http').createServer(app),
     Promise = require('bluebird');
@@ -31,6 +32,13 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
+const storage = new Storage({
+  projectId:projectId,
+  keyFilename:keyFilename
+})
+
+const bucket = storage.bucket('gs://mosaic-p5-database.appspot.com');
+
 const storageSmall = gcsSharp({
   filename: (req, file, cb) => {
     cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
@@ -38,7 +46,7 @@ const storageSmall = gcsSharp({
   },
   bucket:"gs://mosaic-p5-database.appspot.com",
   projectId:'Mosaic-P5',
-  keyFilename:'./mosaic-p5-database-firebase-adminsdk-0558w-e260b73db6.json',
+  keyFilename:'./config.json',
   acl: 'publicRead',
   size:{
     width:100,
@@ -68,16 +76,12 @@ app.get('/',function(req,res){
   res.sendFile(main);
 });
 
-app.get('/getimages',function(req,res){
-  res.send("shits on gcs")
-});
-
 app.post('/mainimage',uploadBig.single('image',new Object),gcsUpload.uploadToGCS,function(req,res,next){
   let data = req.body;
   if (req.file && req.file.cloudStoragePublicUrl) {
     data.imageUrl = req.file.cloudStoragePublicUrl;
   }
-  console.log("\n",data.imageUrl);
+  // console.log("\n",data.imageUrl);
   res.send(data.imageUrl);
 });
 
@@ -86,6 +90,72 @@ app.post('/resizeimages',upload.array('images',new Object),function(req,res,next
   for(var i = 0;i < req.files.length;i++){
     imgUrls[i] = "https://storage.googleapis.com/mosaic-p5-database.appspot.com/"+req.files[i].filename;
   }
-  console.log("\n",imgUrls);
+  // console.log("\n",imgUrls);
   res.send(imgUrls);
 });
+
+app.get('/getimages',function(req,res,err){
+  getImages()
+  .then((resolveData)=>{
+    // console.log(resolveData);
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    res.send(rejectData);
+  })
+});
+
+app.get('/deleteimages',function(req,res,err){
+  deleteImages()
+  .then((resolveData)=>{
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    res.send(rejectData);
+  })
+});
+
+async function deleteImages(){
+  return new Promise(async(resolve,reject)=>{
+    const [imgsToDelete] = await bucket.getFiles();
+
+    if(imgsToDelete.length == 0){
+      resolve("Empty Bucket");
+    }
+
+    await Promise.all(imgsToDelete.map(async(img)=>{
+      await bucket.file(img.metadata.name).delete()
+            .then(()=>{
+              resolve("complete");
+            })
+            .catch((err)=>{
+              reject(err);
+            })
+    }));
+
+  });
+};
+
+async function getImages(){
+  return new Promise(async(resolve,reject)=>{
+    const mainFolder = "main_image";
+    const resizeFolder = "resized_images";
+
+    const delimeter = "/";
+
+    const optionsMain = {
+      prefix:mainFolder,
+      delimeter:delimeter
+    }
+
+    const optionsResize = {
+      prefix:resizeFolder,
+      delimeter:delimeter
+    }
+
+    const [imageMain] = await bucket.getFiles(optionsMain);
+    const [imagesResized] = await bucket.getFiles(optionsResize);
+    
+    resolve([imageMain,imagesResized]);
+  })
+}
