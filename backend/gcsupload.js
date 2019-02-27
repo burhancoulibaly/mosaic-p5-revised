@@ -2,7 +2,7 @@ const {Storage} = require('@google-cloud/storage'),
       path = require('path');
 
       projectId = 'Mosaic-P5';
-      keyFilename = './config.json';
+      keyFilename = './keyfile.json';
 
 const storage = new Storage({
   projectId:projectId,

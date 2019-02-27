@@ -33,8 +33,8 @@ app.use(bodyParser.urlencoded({
 }));
 
 const storage = new Storage({
-  projectId:projectId,
-  keyFilename:keyFilename
+  projectId:'Mosaic-P5',
+  keyFilename:'./keyfile.json'
 })
 
 const bucket = storage.bucket('gs://mosaic-p5-database.appspot.com');
@@ -46,7 +46,7 @@ const storageSmall = gcsSharp({
   },
   bucket:"gs://mosaic-p5-database.appspot.com",
   projectId:'Mosaic-P5',
-  keyFilename:'./config.json',
+  keyFilename:'./keyfile.json',
   acl: 'publicRead',
   size:{
     width:100,
