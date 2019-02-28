@@ -9,6 +9,8 @@ let setupStarted = false;
 let drawStarted = false;
 let preloadStarted = false;
 let octree = null;
+let mainHas = false;
+let smallHas = false;
 
 window.onload = function(){
     deleteUploads()
@@ -31,22 +33,95 @@ $(window).on("unload", function(e) {
 });
 
 $('#main').change(function() { 
-    console.log("changed");
-    mainImage = URL.createObjectURL(document.getElementById("main").files[0]);
-    console.log(mainImage); 
+    // console.log("changed");
+    if((document.getElementById("main").files).length == 0){
+        mainHas = false;
+        
+        $("#mainImgLabel img").remove();
+        $("#mainImgLabel").append('<div id="mainImgText">Click To Insert Main Image</div>');
+        
+        $("#sendImgs").removeClass("create");
+        $("#sendImgs").addClass("create-hidden");
+
+    }else{
+        mainImage = URL.createObjectURL(document.getElementById("main").files[0]);
+        // console.log(mainImage);
+
+        $("#mainImgText").remove()
+
+        $("#mainImgLabel").prepend('<img class="prevMain" src="" />');
+        $("#mainImgLabel img").attr("src",mainImage);
+    
+        mainHas = true;
+
+        if(mainHas == true && smallHas == true){
+            $("#sendImgs").removeClass("create-hidden");
+            $("#sendImgs").addClass("create");
+        }       
+    }
 }); 
 
 $('#small').change(function() { 
-    console.log("changed");
+    // console.log("changed");
     blobImages = new Array();
     smallImages = document.getElementById("small").files;
-
-    for(var i = 0; i < smallImages.length; i++){
-        blobImages.push(URL.createObjectURL(smallImages[i]));
-    }
     
-    console.log(blobImages); 
+    if((document.getElementById("small").files).length < 4){
+        smallHas = false;
+
+        $("#smallImgsLabel img").remove();
+        $("#smallImgsText").remove();
+        $("#smallImgsLabel").append('<div id="smallImgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>');
+        
+        $("#sendImgs").removeClass("create");
+        $("#sendImgs").addClass("create-hidden");
+
+    }else{
+        for(var i = 0; i < smallImages.length; i++){
+            smallImage = URL.createObjectURL(smallImages[i]);
+            blobImages.push(smallImage);
+        }
+        // console.log(blobImages); 
+    
+        $("#smallImgsText").remove();
+    
+        for(var i = 0; i < blobImages.length; i++){
+            $("#smallImgsLabel").append('<img class="prevSmall" src='+blobImages[i]+' />');
+        }
+
+        smallHas = true;
+
+        if(mainHas == true && smallHas == true){
+            $("#sendImgs").removeClass("create-hidden");
+            $("#sendImgs").addClass("create");
+        }
+    }
 }); 
+
+function mainClr(){
+    mainHas = false;
+
+    $("#sendImgs").removeClass("create");
+    $("#sendImgs").addClass("create-hidden");
+    
+    $("#mainImg").get(0).reset();
+    $("#mainImgLabel img").remove();
+    $("#mainImgLabel").append('<div id="mainImgText">Click To Insert Main Image</div>');
+
+}
+
+function smallClr(){
+    smallHas = false;
+
+    $("#sendImgs").removeClass("create");
+    $("#sendImgs").addClass("create-hidden");
+
+    $("#smallImg").get(0).reset();
+    $("#smallImgsLabel img").remove();
+    $("#smallImgsText").remove();
+    $("#smallImgsLabel").append('<div id="smallImgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>');
+
+}
 
 function submitImages(){
     $(".upload-page").hide();
@@ -160,7 +235,7 @@ function preload(){
         setTimeout(()=>{
             startSetup();
             setup();
-        },6000);
+        },2000);
     }
 }
 
