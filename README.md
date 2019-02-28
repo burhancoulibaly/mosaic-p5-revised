@@ -6,11 +6,11 @@ Program now runs and operates alot faster, and is more accurate than the origina
 
 This program uses an octree filled with average rgb values from a list of images, and each pixel in the main image is queried in the octree and the image with the closest average rgb vaue is the image thats used in place of the pixel from the main image at point x,y. If theres a situation where the quadrant that a pixel falls into is empty the program finds the next quandrant thats not empty be it left or right and finds the image closest rgb value amoung that quandrant.
 
-Things to fix:
-Theres a limit to the amount of images that can be loaded in p5 before the program crashes, going to see if this can be fixed.
-Also going to find a way to optimize the program to run faster.
-Add a gui.
-bugs and vulnerabilities.
+program is currently being restructered to upload images only to gcs, and accept user input images.
 
-App is hosted at:
-https://mosiac-p5.herokuapp.com/
+Things to fix:
+Havent yet run into a crashing issue when uploading images most that have been uploaded and processed in p5 right now is 292, image limit is currently unknown.
+Program runs faster than before, I still haven't measured that difference however.
+Webpage added for users to input their images, using js, html, and css.
+bugs(program doesnt always upload all the images in a selected folder an example being upon uploading 306 images only 292 have been uploaded this number also varies occasionally will look into this further) and vulnerabilities.
+
