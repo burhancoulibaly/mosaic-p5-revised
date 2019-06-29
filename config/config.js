@@ -1,9 +1,10 @@
 const _ = require('lodash');
 
 //module variables
-const defaultConfig = process.env.development;
+// const config = require("./config.json");
+const defaultConfig = config.development;
       environment = process.env.NODE_ENV|| 'development';
-      environmentConfig = process.env.environment;
+      environmentConfig = config[environment];
       finalConfig = _.merge(defaultConfig, environmentConfig);
 
 // as a best practice
@@ -11,4 +12,4 @@ const defaultConfig = process.env.development;
 // and their names should always begin with g
 global.gConfig = finalConfig;
 
-console.log(`global.gConfig: ${JSON.stringify(global.gConfig, undefined, global.gConfig.json_indentation)}`);
+// console.log(`global.gConfig: ${JSON.stringify(global.gConfig, undefined, global.gConfig.json_indentation)}`);
