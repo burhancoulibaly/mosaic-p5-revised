@@ -1,15 +1,20 @@
 const _ = require('lodash');
 
+config = JSON.parse(process.env.config);
+console.log(config);
+
 //module variables
-// const config = require("./config.json");
 const defaultConfig = config.development;
-      environment = process.env.NODE_ENV|| 'development';
-      environmentConfig = config[environment];
-      finalConfig = _.merge(defaultConfig, environmentConfig);
+environment = process.env.NODE_ENV|| 'development';
+environmentConfig = config[environment];
+finalConfig = _.merge(defaultConfig, environmentConfig);
 
 // as a best practice
 // all global variables should be referenced via global. syntax
-// and their names should always begin with g
-global.gConfig = finalConfig;
+// and their names should always begin with 
 
-// console.log(`global.gConfig: ${JSON.stringify(global.gConfig, undefined, global.gConfig.json_indentation)}`);
+if(finalConfig != null){
+    global.gConfig = finalConfig;
+}else{
+    console.log("Unable to create config");
+}

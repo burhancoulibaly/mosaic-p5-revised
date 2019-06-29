@@ -1,18 +1,10 @@
 const {Storage} = require('@google-cloud/storage'),
       path = require('path'),
       gcsSharp = require('multer-sharp'),
-      // gConfig = require("../config/config"),
-      // firebaseConf = global.gConfig.firebaseConfig,
-      // CLOUD_BUCKET = firebaseConf.storageBucket,
-      aws = require('aws-sdk');
+      gConfig = require("../config/config"),
+      firebaseConf = global.gConfig.firebaseConfig,
+      CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
-
-let cube = new aws.S3({
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey:process.env.SECRET_ACCESS_KEY
-})
-
-console.log(cube);
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
