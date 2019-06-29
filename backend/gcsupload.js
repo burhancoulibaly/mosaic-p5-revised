@@ -8,7 +8,7 @@ const {Storage} = require('@google-cloud/storage'),
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
-  keyFilename:process.env
+  keyFilename:process.env.config
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -51,7 +51,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:"./config/config.json",
+    keyFilename:process.env.config,
     acl: 'publicRead',
     size:{
       width:100,
@@ -67,7 +67,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:"./config/config.json",
+    keyFilename:process.env.config,
     acl: 'publicRead',
     max:true
   });
