@@ -143,7 +143,7 @@ function submitImages(){
 
     let postMainImage =  function(){
         return new Promise((resolve,reject)=>{
-        const UrlPostBig = "https://mosiac-p5.herokuapp.com/mainimage";
+        const UrlPostBig = "http://localhost:300/mainimage";
             $.ajax({
                 url: UrlPostBig,
                 type: 'POST',
@@ -162,7 +162,7 @@ function submitImages(){
 
     let resizeSmallImages = function(){
         return new Promise((resolve,reject)=>{
-            const UrlPost = "https://mosiac-p5.herokuapp.com/resizeimages";
+            const UrlPost = "http://localhost:300/resizeimages";
             $.ajax({
                 url: UrlPost,
                 type: 'POST',
@@ -181,7 +181,7 @@ function submitImages(){
 
     let getAllImages = function(){
         return new Promise((resolve,reject)=>{
-            const UrlGet = "https://mosiac-p5.herokuapp.com/getimages";
+            const UrlGet = "http://localhost:300/getimages";
             $.ajax({
                 url: UrlGet,
                 type: 'GET',
@@ -343,7 +343,7 @@ function draw(){
 
 function deleteUploads(){
     return new Promise((resolve,reject)=>{
-        const UrlGet = "https://mosiac-p5.herokuapp.com/deleteimages";
+        const UrlGet = "http://localhost:300/deleteimages";
         $.ajax({
             url: UrlGet,
             type: 'GET',
