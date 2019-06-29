@@ -2,9 +2,9 @@ const _ = require('lodash');
 
 //module variables
 const config = require("./config.json");
-      defaultConfig = config.development;
+      defaultConfig = process.env.development;
       environment = process.env.NODE_ENV|| 'development';
-      environmentConfig = config[environment];
+      environmentConfig = process.env.environment;
       finalConfig = _.merge(defaultConfig, environmentConfig);
 
 // as a best practice
