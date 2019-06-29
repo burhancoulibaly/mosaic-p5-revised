@@ -12,4 +12,4 @@ const config = require("./config.json");
 // and their names should always begin with g
 global.gConfig = finalConfig;
 
-// console.log(`global.gConfig: ${JSON.stringify(global.gConfig, undefined, global.gConfig.json_indentation)}`);
+console.log(`global.gConfig: ${JSON.stringify(global.gConfig, undefined, global.gConfig.json_indentation)}`);
