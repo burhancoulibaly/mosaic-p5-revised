@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@google-cloud/storage": "*",
+    "aws-sdk": "^2.485.0",
     "bluebird": "*",
     "bootstrap": "*",
     "consolidate": "*",
