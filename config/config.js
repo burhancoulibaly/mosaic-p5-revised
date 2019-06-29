@@ -1,7 +1,6 @@
 const _ = require('lodash');
 
 config = JSON.parse(process.env.config);
-console.log(config);
 
 //module variables
 const defaultConfig = config.development;
@@ -15,6 +14,7 @@ finalConfig = _.merge(defaultConfig, environmentConfig);
 
 if(finalConfig != null){
     global.gConfig = finalConfig;
+    console.log(global.gConfig);
 }else{
     console.log("Unable to create config");
 }
