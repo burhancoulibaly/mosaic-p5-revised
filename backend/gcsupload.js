@@ -1,4 +1,5 @@
 const {Storage} = require('@google-cloud/storage'),
+<<<<<<< HEAD
       path = require('path'),
       gcsSharp = require('multer-sharp'),
       gConfig = require("../config/config"),
@@ -12,16 +13,34 @@ const storage = new Storage({
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
+=======
+      path = require('path');
+
+      projectId = 'Mosaic-P5';
+      keyFilename = './keyfile.json';
+
+const storage = new Storage({
+  projectId:projectId,
+  keyFilename:keyFilename
+});
+
+const bucket = storage.bucket('gs://mosaic-p5-database.appspot.com');
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
 
 function getPublicUrl (filename) {
   return 'https://storage.googleapis.com/'+bucket.name+'/'+filename;
 }
 
+<<<<<<< HEAD
 function uploadToGCSMain(req,res,next){
+=======
+function uploadToGCS(req,res,next){
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
     if (!req.file) {
       return next();
     }
   
+<<<<<<< HEAD
     const gcsName = "main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
 
     req.file.cloudStoragePublicUrl = getPublicUrl(gcsName);
@@ -151,4 +170,34 @@ function uploadToGCSMain(req,res,next){
     uploadSmall,
     getImages,
     deleteImages
+=======
+    const gcsname = "main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
+    const file = bucket.file(gcsname);
+  
+    const stream = file.createWriteStream({
+      metadata: {
+        contentType: req.file.mimetype
+      },
+      resumable: false
+    });
+  
+    stream.on('error', (err) => {
+      req.file.cloudStorageError = err;
+      next(err);
+    });
+  
+    stream.on('finish', () => {
+      req.file.cloudStorageObject = gcsname;
+      file.makePublic().then(() => {
+        req.file.cloudStoragePublicUrl = getPublicUrl(gcsname);
+        next();
+      });
+    });
+  
+    stream.end(req.file.buffer);  
+  }
+
+  module.exports = {
+    uploadToGCS
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
   };

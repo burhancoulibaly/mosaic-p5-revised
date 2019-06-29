@@ -13,12 +13,16 @@ let mainHas = false;
 let smallHas = false;
 
 window.onload = function(){
+<<<<<<< HEAD
     createSession()
     .then((resolveData) =>{
         console.log(resolveData);
 
         return deleteUploads();
     })
+=======
+    deleteUploads()
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
     .then((resolveData)=>{
         console.log(resolveData[0]+resolveData[1]);
     })
@@ -143,7 +147,11 @@ function submitImages(){
 
     let postMainImage =  function(){
         return new Promise((resolve,reject)=>{
+<<<<<<< HEAD
         const UrlPostBig = "https://mosiac-p5.herokuapp.com/mainimage";
+=======
+        const UrlPostBig = "http://localhost:3000/mainimage";
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
             $.ajax({
                 url: UrlPostBig,
                 type: 'POST',
@@ -162,7 +170,11 @@ function submitImages(){
 
     let resizeSmallImages = function(){
         return new Promise((resolve,reject)=>{
+<<<<<<< HEAD
             const UrlPost = "https://mosiac-p5.herokuapp.com/resizeimages";
+=======
+            const UrlPost = "http://localhost:3000/resizeimages";
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
             $.ajax({
                 url: UrlPost,
                 type: 'POST',
@@ -181,7 +193,11 @@ function submitImages(){
 
     let getAllImages = function(){
         return new Promise((resolve,reject)=>{
+<<<<<<< HEAD
             const UrlGet = "https://mosiac-p5.herokuapp.com/getimages";
+=======
+            const UrlGet = "http://localhost:3000/getimages";
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
             $.ajax({
                 url: UrlGet,
                 type: 'GET',
@@ -216,7 +232,11 @@ function submitImages(){
         return getAllImages();
     })
     .then((resolveData)=>{
+<<<<<<< HEAD
         console.log(resolveData);
+=======
+        console.log(resolveData[0],resolveData[1]);
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
         imgArray = resolveData[1];
 
         console.timeEnd();
@@ -343,7 +363,11 @@ function draw(){
 
 function deleteUploads(){
     return new Promise((resolve,reject)=>{
+<<<<<<< HEAD
         const UrlGet = "https://mosiac-p5.herokuapp.com/deleteimages";
+=======
+        const UrlGet = "http://localhost:3000/deleteimages";
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
         $.ajax({
             url: UrlGet,
             type: 'GET',
@@ -379,6 +403,7 @@ function componentToHex(c) {
 
 function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+<<<<<<< HEAD
 }
 
 function createSession(){
@@ -395,4 +420,6 @@ function createSession(){
             }
         });
     });
+=======
+>>>>>>> 87c15838d9781e3c3cf955ee16972abd8f05cb72
 }
