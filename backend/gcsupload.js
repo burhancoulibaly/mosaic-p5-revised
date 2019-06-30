@@ -8,8 +8,8 @@ const {Storage} = require('@google-cloud/storage'),
       aws = require('aws-sdk');
 
 let s3 = new aws.S3({
-  accessKeyId: "AKIA37SVVXBHRZDUIP4K",
-  secretAccessKey: "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"
+  accessKeyId: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY
 })
 
 var params = {
@@ -21,7 +21,7 @@ console.log(global.gConfig);
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
-  jsonContent:global.gConfig
+  keyFile:global.gConfig
   // keyFilename:cubeConfig()
 });
 
@@ -65,7 +65,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    jsonContent:global.gConfig,
+    keyFile:global.gConfig,
     // keyFilename:cubeConfig(),
     acl: 'publicRead',
     size:{
@@ -82,7 +82,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    jsonContent:global.gConfig,
+    keyFile:global.gConfig,
     // keyFilename:cubeConfig(),
     acl: 'publicRead',
     max:true
