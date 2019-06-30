@@ -5,10 +5,21 @@ const {Storage} = require('@google-cloud/storage'),
       firebaseConf = global.gConfig.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
+      aws = require('aws-sdk');
+
+let s3 = new aws.S3({
+  accessKeyId: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY
+})
+
+var params = {
+  Bucket: "cloud-cube", 
+  Key: "wbpzpinnncli/config.json"
+};
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
-  keyFilename:process.env.config
+  keyFilename:cubeConfig()
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -51,7 +62,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:process.env.config,
+    keyFilename:cubeConfig(),
     acl: 'publicRead',
     size:{
       width:100,
@@ -67,7 +78,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:process.env.config,
+    keyFilename:cubeConfig(),
     acl: 'publicRead',
     max:true
   });
@@ -143,6 +154,13 @@ function uploadToGCSMain(req,res,next){
       })
     });
   };
+
+  async function cubeConfig(){
+    await s3.getObject(params, function(err, data) {
+      if (err) return(err, err.stack);
+      else     return(data); 
+    });
+  }
 
   module.exports = {
     uploadToGCSMain,
