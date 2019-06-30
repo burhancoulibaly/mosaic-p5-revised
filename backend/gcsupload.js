@@ -2,7 +2,7 @@ const {Storage} = require('@google-cloud/storage'),
       path = require('path'),
       gcsSharp = require('multer-sharp'),
       gConfig = require("../config/config"),
-      firebaseConf = global.gConfig.firebaseConfig,
+      firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
 
