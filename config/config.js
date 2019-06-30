@@ -1,44 +1,20 @@
-const _ = require('lodash')
+const _ = require('lodash');
 
+config = JSON.parse(process.env.config);
 
+//module variables
+const defaultConfig = config.development;
+environment = process.env.NODE_ENV|| 'development';
+environmentConfig = config[environment];
+finalConfig = _.merge(defaultConfig, environmentConfig);
 
-if(process.env.config != null){
-    config = JSON.parse(process.env.config);
+// as a best practice
+// all global variables should be referenced via global. syntax
+// and their names should always begin with 
 
-    const defaultConfig = config;
-          environment = process.env.NODE_ENV|| 'development';
-          environmentConfig = config[environment];
-          finalConfig = _.merge(defaultConfig, environmentConfig);
-
-    // as a best practice
-    // all global variables should be referenced via global. syntax
-    // and their names should always begin with 
-
-    if(finalConfig != null){
-        global.gConfig = finalConfig;
-        // console.log(global.gConfig);
-    }else{
-        console.log("Unable to create config");
-    }
+if(finalConfig != null){
+    global.gConfig = finalConfig;
+    console.log(global.gConfig);
 }else{
-    const config = require("./config.json");
-    
-    const defaultConfig = config;
-          environment = process.env.NODE_ENV|| 'development';
-          environmentConfig = config[environment];
-          finalConfig = _.merge(defaultConfig, environmentConfig);
-    
-    //module variables
-
-
-    // as a best practice
-    // all global variables should be referenced via global. syntax
-    // and their names should always begin with 
-
-    if(finalConfig != null){
-        global.gConfig = finalConfig;
-        // console.log(global.gConfig);
-    }else{
-        console.log("Unable to create config");
-    }
+    console.log("Unable to create config");
 }
