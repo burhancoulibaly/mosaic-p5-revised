@@ -8,7 +8,10 @@ const {Storage} = require('@google-cloud/storage'),
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
-  keyFilename:process.env.GOOGLE_APPLICATION_CREDENTIALS
+  credentials:{
+    private_key:process.env.private_key,
+    client_email:process.env.client_email
+  }
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -51,7 +54,10 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    credentials:{
+      private_key:process.env.private_key,
+      client_email:process.env.client_email
+    },
     acl: 'publicRead',
     size:{
       width:100,
@@ -67,7 +73,10 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    credentials:{
+      private_key:process.env.private_key,
+      client_email:process.env.client_email
+    },
     acl: 'publicRead',
     max:true
   });
