@@ -1,5 +1,4 @@
 const _ = require('lodash')
-const config = require("./config.json");
 
 
 
@@ -22,6 +21,8 @@ if(process.env.config != null){
         console.log("Unable to create config");
     }
 }else{
+    const config = require("./config.json");
+    
     const defaultConfig = config;
           environment = process.env.NODE_ENV|| 'development';
           environmentConfig = config[environment];
