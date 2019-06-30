@@ -7,7 +7,8 @@ const {Storage} = require('@google-cloud/storage'),
       multer = require('multer');
 
 const storage = new Storage({
-  projectId:firebaseConf.projectId
+  projectId:firebaseConf.projectId,
+  keyFilename:process.env.GOOGLE_APPLICATION_CREDENTIALS
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -50,6 +51,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
+    keyFilename:process.env.GOOGLE_APPLICATION_CREDENTIALS,
     acl: 'publicRead',
     size:{
       width:100,
@@ -65,6 +67,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
+    keyFilename:process.env.GOOGLE_APPLICATION_CREDENTIALS,
     acl: 'publicRead',
     max:true
   });
