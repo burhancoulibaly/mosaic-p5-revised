@@ -14,7 +14,7 @@ finalConfig = _.merge(defaultConfig, environmentConfig);
 
 if(finalConfig != null){
     global.gConfig = finalConfig;
-    console.log(global.gConfig);
+    // console.log(global.gConfig);
 }else{
     console.log("Unable to create config");
 }
