@@ -8,8 +8,8 @@ const {Storage} = require('@google-cloud/storage'),
       aws = require('aws-sdk');
 
 let s3 = new aws.S3({
-  accessKeyId: process.env.ACCESS_KEY_ID,
-  secretAccessKey: process.env.SECRET_ACCESS_KEY
+  accessKeyId: "AKIA37SVVXBHRZDUIP4K",
+  secretAccessKey: "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"
 })
 
 var params = {
@@ -17,9 +17,11 @@ var params = {
   Key: "wbpzpinnncli/config.json"
 };
 
+console.log(global.gConfig);
+
 const storage = new Storage({
   projectId:firebaseConf.projectId,
-  keyFilename:cubeConfig()
+  // keyFilename:cubeConfig()
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -62,7 +64,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:cubeConfig(),
+    // keyFilename:cubeConfig(),
     acl: 'publicRead',
     size:{
       width:100,
@@ -78,7 +80,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    keyFilename:cubeConfig(),
+    // keyFilename:cubeConfig(),
     acl: 'publicRead',
     max:true
   });
@@ -129,6 +131,7 @@ function uploadToGCSMain(req,res,next){
   }
 
   async function deleteImages(){
+    
     return new Promise(async(resolve,reject)=>{
       bucket.getFiles()
       .then(async(results)=>{
@@ -146,10 +149,12 @@ function uploadToGCSMain(req,res,next){
             resolve(resolveData);
           })
           .catch((err)=>{
+            console.log(err);
             reject(err);
           })      
       })
       .catch((err)=>{
+        console.log(err);
         reject(err);
       })
     });
@@ -157,8 +162,12 @@ function uploadToGCSMain(req,res,next){
 
   async function cubeConfig(){
     await s3.getObject(params, function(err, data) {
-      if (err) return(err, err.stack);
-      else     return(data); 
+      if (err){
+        return(err, err.stack);
+      }else{
+        // console.log(JSON.parse(data.Body.toString()))
+        return(JSON.parse(data.Body.toString()));
+      }      
     });
   }
 
