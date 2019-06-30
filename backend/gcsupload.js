@@ -21,6 +21,7 @@ console.log(global.gConfig);
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
+  jsonContent:global.gConfig
   // keyFilename:cubeConfig()
 });
 
@@ -64,6 +65,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
+    jsonContent:global.gConfig,
     // keyFilename:cubeConfig(),
     acl: 'publicRead',
     size:{
@@ -80,6 +82,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
+    jsonContent:global.gConfig,
     // keyFilename:cubeConfig(),
     acl: 'publicRead',
     max:true
