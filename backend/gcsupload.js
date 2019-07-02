@@ -74,7 +74,7 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
     credentials:{
-      private_key:process.env.private_key,
+      private_key:process.env.private_key.replace(/\\n/g, '\n'),
       client_email:process.env.client_email
     },
     acl: 'publicRead',
