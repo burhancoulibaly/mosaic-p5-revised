@@ -16,7 +16,7 @@ const storage = new Storage({
 });
 
 let  multerCreds = storage.getCredentials()
-console.log(multerCreds);
+console.log(multerCreds.private_key);
 
 
 const bucket = storage.bucket(CLOUD_BUCKET);
