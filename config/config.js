@@ -16,5 +16,5 @@ if(finalConfig != null){
     global.gConfig = finalConfig;
     // console.log(global.gConfig);
 }else{
-    console.log("Unable to create config");
+    // console.log("Unable to create config");
 }
