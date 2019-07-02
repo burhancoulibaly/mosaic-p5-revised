@@ -5,8 +5,6 @@ const {Storage} = require('@google-cloud/storage'),
       firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
-
-let  multerCreds;
       
 
 const storage = new Storage({
@@ -17,11 +15,9 @@ const storage = new Storage({
   },
 });
 
-storage.getCredentials()
-.then((credentials)=>{
-  multerCreds = credentials;
-  console.log(multerCreds);
-})
+let  multerCreds = storage.getCredentials()
+console.log(multerCreds);
+
 
 const bucket = storage.bucket(CLOUD_BUCKET);
 
