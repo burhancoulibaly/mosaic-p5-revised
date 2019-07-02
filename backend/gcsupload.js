@@ -19,8 +19,8 @@ const storage = new Storage({
 
 storage.getCredentials()
 .then((credentials)=>{
-  console.log(multerCreds)
   multerCreds = credentials;
+  console.log(multerCreds);
 })
 
 const bucket = storage.bucket(CLOUD_BUCKET);
