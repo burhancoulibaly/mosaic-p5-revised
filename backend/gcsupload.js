@@ -10,20 +10,16 @@ const {Storage} = require('@google-cloud/storage'),
 const storage = new Storage({
   projectId:firebaseConf.projectId,
   credentials:{
-    private_key_id: global.gConfig.private_key_id,
     private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
     client_email: global.gConfig.client_email,
-    client_id: global.gConfig.client_id,
-    auth_uri: global.gConfig.auth_uri,
-    token_uri: global.gConfig.token_uri,
-    auth_provider_x509_cert_url: global.gConfig.auth_provider_x509_cert_url,
-    client_x509_cert_url: global.gConfig.client_x509_cert_url
   },
 });
 
 console.log(storage.getCredentials());
 
-console.log(storage.getCredentials("private_key_id"));
+console.log(storage.getCredentials().private_key);
+
+console.log(JSON.stringify(storage.getCredentials()).private_key);
 
 const bucket = storage.bucket(CLOUD_BUCKET);
 
@@ -66,14 +62,8 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
     credentials:{
-      private_key_id: storage.getCredentials("private_key_id"),
-      private_key: storage.getCredentials("private_key"),
-      client_email: storage.getCredentials("client_email"),
-      client_id: storage.getCredentials("client_id"),
-      auth_uri: storage.getCredentials("auth_uri"),
-      token_uri: storage.getCredentials("token_uri"),
-      auth_provider_x509_cert_url: storage.getCredentials("auth_provider_x509_cert_url"),
-      client_x509_cert_url: storage.getCredentials("client_x509_cert_url")
+      private_key: storage.getCredentials().private_key,
+      client_email: storage.getCredentials().client_email
     },
     acl: 'publicRead',
     size:{
@@ -91,14 +81,8 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
     credentials:{
-      private_key_id: storage.getCredentials("private_key_id"),
-      private_key: storage.getCredentials("private_key"),
-      client_email: storage.getCredentials("client_email"),
-      client_id: storage.getCredentials("client_id"),
-      auth_uri: storage.getCredentials("auth_uri"),
-      token_uri: storage.getCredentials("token_uri"),
-      auth_provider_x509_cert_url: storage.getCredentials("auth_provider_x509_cert_url"),
-      client_x509_cert_url: storage.getCredentials("client_x509_cert_url")
+      private_key: storage.getCredentials().private_key,
+      client_email: storage.getCredentials().client_email
     },
     acl: 'publicRead',
     max:true
