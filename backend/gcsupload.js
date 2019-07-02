@@ -5,6 +5,8 @@ const {Storage} = require('@google-cloud/storage'),
       firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
+
+let  multerCreds;
       
 
 const storage = new Storage({
@@ -15,11 +17,11 @@ const storage = new Storage({
   },
 });
 
-console.log(storage.getCredentials());
-
-console.log(storage.getCredentials().private_key);
-
-console.log(JSON.stringify(storage.getCredentials()).private_key);
+storage.getCredentials()
+.then((credentials)=>{
+  console.log(multerCreds)
+  multerCreds = credentials;
+})
 
 const bucket = storage.bucket(CLOUD_BUCKET);
 
@@ -62,8 +64,8 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
     credentials:{
-      private_key: storage.getCredentials().private_key,
-      client_email: storage.getCredentials().client_email
+      private_key: multerCreds.private_key,
+      client_email: multerCreds.client_email
     },
     acl: 'publicRead',
     size:{
@@ -81,8 +83,8 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
     credentials:{
-      private_key: storage.getCredentials().private_key,
-      client_email: storage.getCredentials().client_email
+      private_key: multerCreds.private_key,
+      client_email: multerCreds.client_email
     },
     acl: 'publicRead',
     max:true
