@@ -5,14 +5,16 @@ const {Storage} = require('@google-cloud/storage'),
       firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
+      
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
   credentials:{
+    private_key_id: global.gConfig.private_key_id,
     private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
     client_email: global.gConfig.client_email,
-    private_key_id: global.gConfig.private_key_id
-  }
+    client_id: global.gConfig.client_id
+  },
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -55,11 +57,12 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    credentials:{
-      private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
-      client_email: global.gConfig.client_email,
-      private_key_id: global.gConfig.private_key_id
-    },
+    // credentials:{
+    //   private_key_id: global.gConfig.private_key_id,
+    //   private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
+    //   client_email: global.gConfig.client_email,
+    //   client_id: global.gConfig.client_id
+    // },
     acl: 'publicRead',
     size:{
       width:100,
@@ -75,11 +78,12 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    credentials:{
-      private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
-      client_email: global.gConfig.client_email,
-      private_key_id: global.gConfig.private_key_id
-    },
+    // credentials:{
+    //   private_key_id: global.gConfig.private_key_id,
+    //   private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
+    //   client_email: global.gConfig.client_email,
+    //   client_id: global.gConfig.client_id
+    // },
     acl: 'publicRead',
     max:true
   });
