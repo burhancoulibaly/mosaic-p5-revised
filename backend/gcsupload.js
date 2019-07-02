@@ -60,7 +60,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
+    projectId:firebaseConf.projectId,
     credentials:{
       private_key_id: global.gConfig.private_key_id,
       private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
@@ -85,7 +85,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
+    projectId:firebaseConf.projectId,
     credentials:{
       private_key_id: global.gConfig.private_key_id,
       private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
