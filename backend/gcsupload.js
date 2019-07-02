@@ -62,14 +62,14 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
     credentials:{
-      private_key_id: storage.private_key_id,
-      private_key: storage.private_key.replace(/\\n/g, '\n'),
-      client_email: storage.client_email,
-      client_id: storage.client_id,
-      auth_uri: storage.auth_uri,
-      token_uri: storage.token_uri,
-      auth_provider_x509_cert_url: storage.auth_provider_x509_cert_url,
-      client_x509_cert_url: storage.client_x509_cert_url
+      private_key_id: storage.credentials.private_key_id,
+      private_key: storage.credentials.private_key,
+      client_email: storage.credentials.client_email,
+      client_id: storage.credentials.client_id,
+      auth_uri: storage.credentials.auth_uri,
+      token_uri: storage.credentials.token_uri,
+      auth_provider_x509_cert_url: storage.credentials.auth_provider_x509_cert_url,
+      client_x509_cert_url: storage.credentials.client_x509_cert_url
     },
     acl: 'publicRead',
     size:{
@@ -87,14 +87,14 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
     credentials:{
-      private_key_id: storage.private_key_id,
-      private_key: storage.private_key.replace(/\\n/g, '\n'),
-      client_email: storage.client_email,
-      client_id: storage.client_id,
-      auth_uri: storage.auth_uri,
-      token_uri: storage.token_uri,
-      auth_provider_x509_cert_url: storage.auth_provider_x509_cert_url,
-      client_x509_cert_url: storage.client_x509_cert_url
+      private_key_id: storage.credentials.private_key_id,
+      private_key: storage.credentials.private_key,
+      client_email: storage.credentials.client_email,
+      client_id: storage.credentials.client_id,
+      auth_uri: storage.credentials.auth_uri,
+      token_uri: storage.credentials.token_uri,
+      auth_provider_x509_cert_url: storage.credentials.auth_provider_x509_cert_url,
+      client_x509_cert_url: storage.credentials.client_x509_cert_url
     },
     acl: 'publicRead',
     max:true
