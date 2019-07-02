@@ -60,16 +60,16 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:firebaseConf.projectId,
+    projectId:storage.projectId,
     credentials:{
-      private_key_id: global.gConfig.private_key_id,
-      private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
-      client_email: global.gConfig.client_email,
-      client_id: global.gConfig.client_id,
-      auth_uri: global.gConfig.auth_uri,
-      token_uri: global.gConfig.token_uri,
-      auth_provider_x509_cert_url: global.gConfig.auth_provider_x509_cert_url,
-      client_x509_cert_url: global.gConfig.client_x509_cert_url
+      private_key_id: storage.private_key_id,
+      private_key: storage.private_key.replace(/\\n/g, '\n'),
+      client_email: storage.client_email,
+      client_id: storage.client_id,
+      auth_uri: storage.auth_uri,
+      token_uri: storage.token_uri,
+      auth_provider_x509_cert_url: storage.auth_provider_x509_cert_url,
+      client_x509_cert_url: storage.client_x509_cert_url
     },
     acl: 'publicRead',
     size:{
@@ -85,16 +85,16 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:firebaseConf.projectId,
+    projectId:storage.projectId,
     credentials:{
-      private_key_id: global.gConfig.private_key_id,
-      private_key: global.gConfig.private_key.replace(/\\n/g, '\n'),
-      client_email: global.gConfig.client_email,
-      client_id: global.gConfig.client_id,
-      auth_uri: global.gConfig.auth_uri,
-      token_uri: global.gConfig.token_uri,
-      auth_provider_x509_cert_url: global.gConfig.auth_provider_x509_cert_url,
-      client_x509_cert_url: global.gConfig.client_x509_cert_url
+      private_key_id: storage.private_key_id,
+      private_key: storage.private_key.replace(/\\n/g, '\n'),
+      client_email: storage.client_email,
+      client_id: storage.client_id,
+      auth_uri: storage.auth_uri,
+      token_uri: storage.token_uri,
+      auth_provider_x509_cert_url: storage.auth_provider_x509_cert_url,
+      client_x509_cert_url: storage.client_x509_cert_url
     },
     acl: 'publicRead',
     max:true
