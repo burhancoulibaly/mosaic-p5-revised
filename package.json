@@ -25,9 +25,10 @@
     "multer-sharp": "*",
     "mustache": "*",
     "p5": "*",
+    "popper": "^1.0.1",
     "promisepipe": "*",
     "request": "*",
-    "sharp": "*",
+    "sharp": "^0.23.0",
     "useragent": "*"
   }
 }
