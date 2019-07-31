@@ -47,6 +47,23 @@ function uploadToGCSMain(req,res,next){
     next();
   }
 
+  const storageBig = gcsSharp({
+    filename: (req, file, cb) => {
+      cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
+      path.extname(file.originalname));
+    },
+    bucket:CLOUD_BUCKET,
+    projectId:storage.projectId,
+    credentials:{
+      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
+      client_email:process.env.client_email
+    },
+    acl: 'publicRead',
+    max:true
+  });
+
+  console.log(storageBig);
+
   const storageSmall = gcsSharp({
     filename: (req, file, cb) => {
       console.log(file.fieldname, file.originalname);
@@ -66,21 +83,7 @@ function uploadToGCSMain(req,res,next){
     },
     max:true
   });
-  
-  const storageBig = gcsSharp({
-    filename: (req, file, cb) => {
-      cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
-      path.extname(file.originalname));
-    },
-    bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
-    credentials:{
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
-      client_email:process.env.client_email
-    },
-    acl: 'publicRead',
-    max:true
-  });
+
   
   const uploadBig = multer({
     storage:storageBig
