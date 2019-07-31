@@ -53,7 +53,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:storage.projectId
+    projectId:storage.projectId,
     // credentials:{
     //   client_email:process.env.client_email,
     //   private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
@@ -71,7 +71,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:storage.projectId
+    projectId:storage.projectId,
     // credentials:{
     //   client_email:process.env.client_email,
     //   private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
