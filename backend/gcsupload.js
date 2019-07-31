@@ -1,7 +1,6 @@
 const {Storage} = require('@google-cloud/storage'),
       path = require('path'),
       gcsSharp = require('multer-sharp'),
-      gConfig = require("../config/config"),
       firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
@@ -54,7 +53,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:firebaseConf.projectId,
+    projectId:storage.projectId,
     credentials:{
       private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
       client_email:process.env.client_email
@@ -73,7 +72,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:firebaseConf.projectId,
+    projectId:storage.projectId,
     credentials:{
       private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
       client_email:process.env.client_email
