@@ -142,6 +142,8 @@ function submitImages(){
     }
 
     let postMainImage =  function(){
+        //uploading main image
+        console.log("uploading main image");
         return new Promise((resolve,reject)=>{
         const UrlPostBig = "https://mosiac-p5.herokuapp.com/mainimage";
             $.ajax({
@@ -161,6 +163,8 @@ function submitImages(){
     }
 
     let resizeSmallImages = function(){
+        //resizing and uploading small images
+        console.log("resizing and uploading small images");
         return new Promise((resolve,reject)=>{
             const UrlPost = "https://mosiac-p5.herokuapp.com/resizeimages";
             $.ajax({
@@ -180,6 +184,8 @@ function submitImages(){
     }
 
     let getAllImages = function(){
+        //getting all images
+        console.log("getting all images");
         return new Promise((resolve,reject)=>{
             const UrlGet = "https://mosiac-p5.herokuapp.com/getimages";
             $.ajax({
