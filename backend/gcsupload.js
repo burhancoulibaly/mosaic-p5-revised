@@ -53,11 +53,11 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
-    credentials:{
-      client_email:process.env.client_email,
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-    },
+    projectId:storage.projectId
+    // credentials:{
+    //   client_email:process.env.client_email,
+    //   private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+    // },
     acl: 'publicRead',
     max:true
   });
@@ -71,11 +71,11 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
-    credentials:{
-      client_email:process.env.client_email,
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-    },
+    projectId:storage.projectId
+    // credentials:{
+    //   client_email:process.env.client_email,
+    //   private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+    // },
     acl: 'publicRead',
     size:{
       width:100,
