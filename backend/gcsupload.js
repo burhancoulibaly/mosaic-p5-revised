@@ -9,7 +9,10 @@ const {Storage} = require('@google-cloud/storage'),
 console.log(new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'));
 const storage = new Storage({
   projectId:firebaseConf.projectId,
-
+  credentials:{
+    client_email:process.env.client_email,
+    private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+  },
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
