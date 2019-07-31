@@ -52,8 +52,8 @@ function uploadToGCSMain(req,res,next){
       cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
-    bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
+    bucket:"gs://mosaic-p5-database.appspot.com",
+    projectId:'Mosaic-P5',
     credentials:{
       private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
       client_email:process.env.client_email
@@ -70,8 +70,8 @@ function uploadToGCSMain(req,res,next){
       cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
-    bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
+    bucket:"gs://mosaic-p5-database.appspot.com",
+    projectId:'Mosaic-P5',
     credentials:{
       private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
       client_email:process.env.client_email
