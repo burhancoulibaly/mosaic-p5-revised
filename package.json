@@ -28,7 +28,7 @@
     "popper": "^1.0.1",
     "promisepipe": "*",
     "request": "*",
-    "sharp": "^0.23.0",
+    "sharp": "^0.22.0",
     "useragent": "*"
   }
 }
