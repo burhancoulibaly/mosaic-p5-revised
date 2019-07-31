@@ -52,11 +52,11 @@ function uploadToGCSMain(req,res,next){
       cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
-    bucket:"gs://mosaic-p5-database.appspot.com",
-    projectId:"mosaic-p5-database",
+    bucket:CLOUD_BUCKET,
+    projectId:storage.projectId,
     credentials:{
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
-      client_email:process.env.client_email
+      client_email:process.env.client_email,
+      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
     },
     acl: 'publicRead',
     max:true
@@ -70,11 +70,11 @@ function uploadToGCSMain(req,res,next){
       cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
-    bucket:"gs://mosaic-p5-database.appspot.com",
-    projectId:"mosaic-p5-database",
+    bucket:CLOUD_BUCKET,
+    projectId:storage.projectId,
     credentials:{
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'),
-      client_email:process.env.client_email
+      client_email:process.env.client_email,
+      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
     },
     acl: 'publicRead',
     size:{
