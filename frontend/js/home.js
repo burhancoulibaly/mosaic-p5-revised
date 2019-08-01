@@ -387,18 +387,18 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-// function createSession(){
-//     return new Promise((resolve,reject)=>{
-//     const newSession = "https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession";
-//         $.ajax({
-//             url: newSession,
-//             type: 'GET',
-//             success:function(data){
-//                 resolve(["Main image posted",data]);
-//             },
-//             error:function(error){
-//                 reject('Error',error);
-//             }
-//         });
-//     });
-// }
+function createSession(){
+    return new Promise((resolve,reject)=>{
+    const newSession = "https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession";
+        $.ajax({
+            url: newSession,
+            type: 'GET',
+            success:function(data){
+                resolve(["Main image posted",data]);
+            },
+            error:function(error){
+                reject('Error',error);
+            }
+        });
+    });
+}
