@@ -6,8 +6,6 @@ const {Storage} = require('@google-cloud/storage'),
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
 
-console.log(new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'));
-
 const storage = new Storage({
   projectId:firebaseConf.projectId,
   credentials:{
