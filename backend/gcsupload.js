@@ -50,18 +50,23 @@ function uploadToGCSMain(req,res,next){
     next();
   }
 
-  const storageBig = gcsSharp({
+
+  const storageBig = new gcsSharp({
     filename: (req, file, cb) => {
       cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
     projectId:firebaseConf.projectId,
+    credentials:{
+      client_email:process.env.client_email,
+      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+    },
     acl: 'publicRead',
     max:true
   });
 
-  const storageSmall = gcsSharp({
+  const storageSmall = new gcsSharp({
     filename: (req, file, cb) => {
       console.log(file.fieldname, file.originalname);
       cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
@@ -69,6 +74,10 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:firebaseConf.projectId,
+    credentials:{
+      client_email:process.env.client_email,
+      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+    },
     acl: 'publicRead',
     size:{
       width:100,
