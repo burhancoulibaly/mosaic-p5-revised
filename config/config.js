@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-config = require("./config.json");
+config = JSON.parse(process.env.config);
 
 //module variables
 const defaultConfig = config;
