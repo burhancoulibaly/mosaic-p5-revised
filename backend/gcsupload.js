@@ -54,9 +54,6 @@ function uploadToGCSMain(req,res,next){
       cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
-    bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
-    credentials:storage.getCredentials(),
     acl: 'publicRead',
     max:true
   });
@@ -67,9 +64,6 @@ function uploadToGCSMain(req,res,next){
       cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
-    bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
-    credentials:storage.getCredentials(),
     acl: 'publicRead',
     size:{
       width:100,
