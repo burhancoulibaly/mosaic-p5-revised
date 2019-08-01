@@ -14,8 +14,6 @@ const storage = new Storage({
   },
 });
 
-console.log(storage.getCredentials());
-
 const bucket = storage.bucket(CLOUD_BUCKET);
 
 function getPublicUrl (filename) {

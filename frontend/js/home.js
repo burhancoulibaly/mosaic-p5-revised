@@ -13,12 +13,12 @@ let mainHas = false;
 let smallHas = false;
 
 window.onload = function(){
-    deleteUploads()
-    // .then((resolveData) =>{
-    //     console.log(resolveData);
+    createSession()
+    .then((resolveData) =>{
+        console.log(resolveData);
 
-    //     return deleteUploads();
-    // })
+        return deleteUploads();
+    })
     .then((resolveData)=>{
         console.log(resolveData[0]+resolveData[1]);
     })
