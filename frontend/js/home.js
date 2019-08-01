@@ -389,7 +389,7 @@ function rgbToHex(r, g, b) {
 
 function createSession(){
     return new Promise((resolve,reject)=>{
-    const UrlGet = "https://mosiac-p5.herokuapp.com/newSession";
+    const UrlGet = "https://mosiac-p5.herokuapp.com/newsession";
         $.ajax({
             url: newSession,
             type: 'GET',
