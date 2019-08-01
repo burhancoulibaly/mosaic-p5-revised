@@ -15,6 +15,8 @@ const storage = new Storage({
   },
 });
 
+console.log(storage.getCredentials);
+
 const bucket = storage.bucket(CLOUD_BUCKET);
 
 function getPublicUrl (filename) {
@@ -54,15 +56,10 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    // credentials:{
-    //   client_email:process.env.client_email,
-    //   private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-    // },
+    credentials:storage.getCredentials,
     acl: 'publicRead',
     max:true
   });
-
-  console.log(storageBig);
 
   const storageSmall = gcsSharp({
     filename: (req, file, cb) => {
@@ -72,10 +69,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    // credentials:{
-    //   client_email:process.env.client_email,
-    //   private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-    // },
+    credentials:storage.getCredentials,
     acl: 'publicRead',
     size:{
       width:100,
