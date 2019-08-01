@@ -389,12 +389,12 @@ function rgbToHex(r, g, b) {
 
 function createSession(){
     return new Promise((resolve,reject)=>{
-    const newSession = "https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession";
+    const UrlGet = "https://mosiac-p5.herokuapp.com/newSession";
         $.ajax({
             url: newSession,
             type: 'GET',
             success:function(data){
-                resolve(["Main image posted",data]);
+                resolve([data]);
             },
             error:function(error){
                 reject('Error',error);
