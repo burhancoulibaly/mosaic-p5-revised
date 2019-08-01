@@ -56,6 +56,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
+    projectId:firebaseConf.projectId,
     acl: 'publicRead',
     max:true
   });
@@ -67,6 +68,7 @@ function uploadToGCSMain(req,res,next){
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
+    projectId:firebaseConf.projectId,
     acl: 'publicRead',
     size:{
       width:100,
