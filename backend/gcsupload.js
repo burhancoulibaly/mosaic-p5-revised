@@ -15,7 +15,7 @@ const storage = new Storage({
   },
 });
 
-console.log(storage.getCredentials);
+console.log(storage.getCredentials());
 
 const bucket = storage.bucket(CLOUD_BUCKET);
 
@@ -56,7 +56,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    credentials:storage.getCredentials,
+    credentials:storage.getCredentials(),
     acl: 'publicRead',
     max:true
   });
@@ -69,7 +69,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:storage.projectId,
-    credentials:storage.getCredentials,
+    credentials:storage.getCredentials(),
     acl: 'publicRead',
     size:{
       width:100,
