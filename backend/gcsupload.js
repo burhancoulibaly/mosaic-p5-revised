@@ -1,6 +1,6 @@
 const {Storage} = require('@google-cloud/storage'),
       path = require('path'),
-      gcsSharp = require('multer-sharp'),
+      gcsSharp = require('../custom_module/multer-sharp'),
       gConfig = require("../config/config"),
       firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
@@ -51,7 +51,7 @@ function uploadToGCSMain(req,res,next){
   }
 
 
-  const storageBig = new gcsSharp({
+  const storageBig = gcsSharp({
     filename: (req, file, cb) => {
       cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
@@ -66,7 +66,7 @@ function uploadToGCSMain(req,res,next){
     max:true
   });
 
-  const storageSmall = new gcsSharp({
+  const storageSmall = gcsSharp({
     filename: (req, file, cb) => {
       console.log(file.fieldname, file.originalname);
       cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
