@@ -7,6 +7,7 @@ const {Storage} = require('@google-cloud/storage'),
       multer = require('multer');
 
 console.log(new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n'));
+
 const storage = new Storage({
   projectId:firebaseConf.projectId,
   credentials:{
@@ -54,6 +55,7 @@ function uploadToGCSMain(req,res,next){
       cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
+    bucket:CLOUD_BUCKET,
     acl: 'publicRead',
     max:true
   });
@@ -64,6 +66,7 @@ function uploadToGCSMain(req,res,next){
       cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
+    bucket:CLOUD_BUCKET,
     acl: 'publicRead',
     size:{
       width:100,
