@@ -11,6 +11,7 @@ const storage = new Storage({
   credentials:{
     client_email:process.env.client_email,
     private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+    // private_key:global.gConfig.private_key
   },
 });
 
@@ -54,10 +55,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:firebaseConf.projectId,
-    credentials:{
-      client_email:process.env.client_email,
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-    },
+    credentials:storage.getCredentials(),
     acl: 'publicRead',
     max:true
   });
@@ -70,10 +68,7 @@ function uploadToGCSMain(req,res,next){
     },
     bucket:CLOUD_BUCKET,
     projectId:firebaseConf.projectId,
-    credentials:{
-      client_email:process.env.client_email,
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-    },
+    credentials:storage.getCredentials(),
     acl: 'publicRead',
     size:{
       width:100,

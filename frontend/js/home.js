@@ -11,12 +11,14 @@ let preloadStarted = false;
 let octree = null;
 let mainHas = false;
 let smallHas = false;
+let uri = "https://mosiac-p5.herokuapp.com/"
 
 window.onload = function(){
     createSession()
     .then((resolveData) =>{
         console.log(resolveData);
-
+        setCookie(resolveData[0][2]);
+        console.log(document.cookie);
         return deleteUploads();
     })
     .then((resolveData)=>{
@@ -31,6 +33,11 @@ $(window).on("unload", function(e) {
     deleteUploads()
     .then((resolveData)=>{
         console.log(resolveData[0]+resolveData[1]);
+
+        return deleteSessions();
+    })
+    .then((resolveData)=>{
+        console.log(resolveData);
     })
     .catch((rejectData)=>{
         console.log(rejectData);
@@ -145,9 +152,9 @@ function submitImages(){
         //uploading main image
         console.log("uploading main image");
         return new Promise((resolve,reject)=>{
-        const UrlPostBig = "https://mosiac-p5.herokuapp.com/mainimage";
+        const UrlPostBig = "mainimage";
             $.ajax({
-                url: UrlPostBig,
+                url: uri+UrlPostBig,
                 type: 'POST',
                 data: formDataBig,
                 processData: false,
@@ -166,9 +173,9 @@ function submitImages(){
         //resizing and uploading small images
         console.log("resizing and uploading small images");
         return new Promise((resolve,reject)=>{
-            const UrlPost = "https://mosiac-p5.herokuapp.com/resizeimages";
+            const UrlPost = "resizeimages";
             $.ajax({
-                url: UrlPost,
+                url: uri+UrlPost,
                 type: 'POST',
                 data: formDataSmall,
                 processData: false,
@@ -187,9 +194,9 @@ function submitImages(){
         //getting all images
         console.log("getting all images");
         return new Promise((resolve,reject)=>{
-            const UrlGet = "https://mosiac-p5.herokuapp.com/getimages";
+            const UrlGet = "getimages";
             $.ajax({
-                url: UrlGet,
+                url: uri+UrlGet,
                 type: 'GET',
                 success:function(data){
                     resolve(["All images recieved",data]);
@@ -349,9 +356,9 @@ function draw(){
 
 function deleteUploads(){
     return new Promise((resolve,reject)=>{
-        const UrlGet = "https://mosiac-p5.herokuapp.com/deleteimages";
+        const UrlGet = "deleteimages";
         $.ajax({
-            url: UrlGet,
+            url: uri+UrlGet,
             type: 'GET',
             success:function(data){
                 resolve(["Image upload deletion ",data]);
@@ -361,6 +368,33 @@ function deleteUploads(){
             }
         });      
     });
+}
+
+function deleteSessions(){
+    return new Promise((resolve,reject)=>{
+        const UrlGet = "delete-session";
+        $.ajax({
+            url: uri+UrlGet,
+            type: 'POST',
+            data: JSON.stringify({sessionId: getSessionId()}),
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            success:function(data){
+                resolve(["session deletion",data]);
+            },
+            error:function(error){
+                reject('Error',error);
+            }
+        });      
+    });
+}
+
+function getSessionId(){
+    cookie = document.cookie;
+    sessionId = cookie.split("=");
+    sessionId = sessionId[1];
+    return sessionId;
+
 }
 
 function startPreload(){
@@ -389,9 +423,9 @@ function rgbToHex(r, g, b) {
 
 function createSession(){
     return new Promise((resolve,reject)=>{
-    const UrlGet = "https://mosiac-p5.herokuapp.com/newsession";
+    const UrlGet = "newsession";
         $.ajax({
-            url: newSession,
+            url: uri+UrlGet,
             type: 'GET',
             success:function(data){
                 resolve([data]);
@@ -401,4 +435,10 @@ function createSession(){
             }
         });
     });
+}
+
+function setCookie(sessionId){
+    var d = new Date
+    d.setTime(d.getTime() + 3*60*60*1000);
+    document.cookie = "sessionId ="+sessionId+";expires="+d.toGMTString()+";";
 }
