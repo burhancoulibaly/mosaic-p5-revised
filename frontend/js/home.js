@@ -11,14 +11,14 @@ let preloadStarted = false;
 let octree = null;
 let mainHas = false;
 let smallHas = false;
-let uri = "https://mosiac-p5.herokuapp.com/"
+let uri = "https://mosiac-p5.herokuapp.com/";
 
 window.onload = function(){
     createSession()
     .then((resolveData) =>{
-        console.log(resolveData);
         setCookie(resolveData[0][2]);
         console.log(document.cookie);
+        
         return deleteUploads();
     })
     .then((resolveData)=>{
@@ -30,14 +30,11 @@ window.onload = function(){
 };
 
 $(window).on("unload", function(e) {
-    deleteUploads()
-    .then((resolveData)=>{
-        console.log(resolveData[0]+resolveData[1]);
-
-        return deleteSessions();
-    })
+    deleteSessions()
     .then((resolveData)=>{
         console.log(resolveData);
+
+        return null;
     })
     .catch((rejectData)=>{
         console.log(rejectData);
@@ -438,7 +435,5 @@ function createSession(){
 }
 
 function setCookie(sessionId){
-    var d = new Date
-    d.setTime(d.getTime() + 3*60*60*1000);
-    document.cookie = "sessionId ="+sessionId+";expires="+d.toGMTString()+";";
+    document.cookie = "sessionId ="+sessionId+";";
 }

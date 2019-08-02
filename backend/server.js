@@ -85,6 +85,7 @@ app.get('/newsession',function(req,res,err){
   createSession()
   .then((resolveData)=>{
     console.log(resolveData);
+    gcsUpload.setSessionId(resolveData[2]);
     res.send(resolveData);
   })
   .catch((rejectData)=>{
@@ -104,6 +105,10 @@ function createSession(){
 app.post('/delete-session',function(req,res,err){
   console.log(req.body.sessionId);
   deleteSession(req.body.sessionId)
+  .then((resolveData)=>{
+    console.log(resolveData);
+    return gcsUpload.deleteImages()
+  })
   .then((resolveData)=>{
     console.log(resolveData);
     res.send(resolveData);
