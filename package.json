@@ -30,5 +30,9 @@
     "request": "*",
     "sharp": "*",
     "useragent": "*"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-plugin-promise": "^4.2.1"
   }
 }

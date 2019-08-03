@@ -78,7 +78,3 @@ app.get('/deleteimages',function(req,res,err){
     res.send(rejectData);
   })
 });
-
-
-
-
