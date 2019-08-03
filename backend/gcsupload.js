@@ -1,17 +1,19 @@
 const {Storage} = require('@google-cloud/storage'),
       path = require('path'),
-      gcsSharp = require('multer-sharp'),
+      gcsSharp = require('../custom_module/multer-sharp'),
       gConfig = require("../config/config"),
       firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket,
       multer = require('multer');
+let sessionId;
 
 const storage = new Storage({
   projectId:firebaseConf.projectId,
   credentials:{
-    private_key:process.env.private_key.replace(/\\n/g, '\n'),
-    client_email:process.env.client_email
-  }
+    client_email:process.env.client_email,
+    private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+    // private_key:global.gConfig.private_key
+  },
 });
 
 const bucket = storage.bucket(CLOUD_BUCKET);
@@ -21,24 +23,26 @@ function getPublicUrl (filename) {
 }
 
 function uploadToGCSMain(req,res,next){
+    console.log(sessionId);
     if (!req.file) {
       return next();
     }
   
-    const gcsName = "main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
+    const gcsName = sessionId+"/main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
 
     req.file.cloudStoragePublicUrl = getPublicUrl(gcsName);
     next();
   }
 
   function uploadToGCSSmall(req,res,next){
+    console.log(sessionId);
     if (!req.files) {
       return next();
     }
 
     imgUrls = new Array();
     for(var i = 0;i < req.files.length;i++){
-      const gcsName = "resized_images/"+req.files[i].fieldname + '-' + Date.now() + path.extname(req.files[i].originalname);
+      const gcsName = sessionId+"/resized_images/"+req.files[i].fieldname + '-' + Date.now() + path.extname(req.files[i].originalname);
       imgUrls[i] = getPublicUrl(gcsName)
     }
 
@@ -46,17 +50,35 @@ function uploadToGCSMain(req,res,next){
     next();
   }
 
-  const storageSmall = gcsSharp({
+
+  const storageBig = gcsSharp({
     filename: (req, file, cb) => {
-      console.log(file.fieldname, file.originalname);
-      cb(null,"resized_images/"+file.fieldname + '-' + Date.now() + 
+      cb(null,sessionId+"/main_image/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
+    projectId:firebaseConf.projectId,
     credentials:{
-      private_key:process.env.private_key.replace(/\\n/g, '\n'),
-      client_email:process.env.client_email
+      client_email:process.env.client_email,
+      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+      // private_key:global.gConfig.private_key
+    },
+    acl: 'publicRead',
+    max:true
+  });
+
+  const storageSmall = gcsSharp({
+    filename: (req, file, cb) => {
+      console.log(file.fieldname, file.originalname);
+      cb(null,sessionId+"/resized_images/"+file.fieldname + '-' + Date.now() + 
+      path.extname(file.originalname));
+    },
+    bucket:CLOUD_BUCKET,
+    projectId:firebaseConf.projectId,
+    credentials:{
+      client_email:process.env.client_email,
+      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+      // private_key:global.gConfig.private_key
     },
     acl: 'publicRead',
     size:{
@@ -65,21 +87,7 @@ function uploadToGCSMain(req,res,next){
     },
     max:true
   });
-  
-  const storageBig = gcsSharp({
-    filename: (req, file, cb) => {
-      cb(null,"main_image/"+file.fieldname + '-' + Date.now() + 
-      path.extname(file.originalname));
-    },
-    bucket:CLOUD_BUCKET,
-    projectId:storage.projectId,
-    credentials:{
-      private_key:process.env.private_key.replace(/\\n/g, '\n'),
-      client_email:process.env.client_email
-    },
-    acl: 'publicRead',
-    max:true
-  });
+
   
   const uploadBig = multer({
     storage:storageBig
@@ -91,6 +99,7 @@ function uploadToGCSMain(req,res,next){
 
   async function getImages(){
     return new Promise(async(resolve,reject)=>{
+      const root = sessionId;
       const mainFolder = "main_image";
       const resizeFolder = "resized_images";
       let resolveArr = new Array();
@@ -98,12 +107,12 @@ function uploadToGCSMain(req,res,next){
       const delimeter = "/";
   
       const optionsMain = {
-        prefix:mainFolder,
+        prefix:root+"/"+mainFolder,
         delimeter:delimeter
       }
   
       const optionsResize = {
-        prefix:resizeFolder,
+        prefix:root+"/"+resizeFolder,
         delimeter:delimeter
       }
 
@@ -156,11 +165,17 @@ function uploadToGCSMain(req,res,next){
     });
   };
 
+  function setSessionId(id){
+    sessionId = id
+    console.log(sessionId);
+  }
+
   module.exports = {
     uploadToGCSMain,
     uploadToGCSSmall,
     uploadBig,
     uploadSmall,
     getImages,
-    deleteImages
+    deleteImages,
+    setSessionId
   };

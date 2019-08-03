@@ -5,8 +5,9 @@ const express = require("express"),
     Promise = require('bluebird');
     fs = Promise.promisifyAll(require('fs')),
     bodyParser = require("body-parser"),
-    mkdirp = require('mkdirp');
-    gcsUpload = require('./gcsupload');
+    mkdirp = require('mkdirp'),
+    gcsUpload = require('./gcsupload'),
+    request = require('request');
 
 var main = path.resolve("./frontend/html/home.html"),
     css = path.resolve("./frontend/css"),
@@ -78,3 +79,62 @@ app.get('/deleteimages',function(req,res,err){
     res.send(rejectData);
   })
 });
+<<<<<<< HEAD
+=======
+
+
+app.get('/newsession',function(req,res,err){
+  createSession()
+  .then((resolveData)=>{
+    console.log(resolveData);
+    gcsUpload.setSessionId(resolveData[2]);
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    res.send(rejectData);
+  })
+});
+
+function createSession(){
+  return new Promise((resolve,reject)=>{
+    request('https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', { json: true }, (err, res, body) => {
+      if (err) { return reject(err); }
+      resolve(res.body);
+    })
+  });
+}
+
+app.post('/delete-session',function(req,res,err){
+  console.log(req.body.sessionId);
+  deleteSession(req.body.sessionId)
+  .then((resolveData)=>{
+    console.log(resolveData);
+    return gcsUpload.deleteImages()
+  })
+  .then((resolveData)=>{
+    console.log(resolveData);
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    res.send(rejectData);
+  })
+});
+
+function deleteSession(id){
+  console.log(id);
+  return new Promise((resolve,reject)=>{
+    request.post({
+      headers: {'content-type' : 'application/x-www-form-urlencoded'},
+      url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
+      form:{sessionId:id},
+      json: true,
+    }, (err, res, body) => {
+      if (err) { return reject(err); }
+      resolve(res.body);
+    })
+  });
+}
+
+
+
+>>>>>>> 637c59901a0ce0f3866b583fbc85ef4607aa39f2
