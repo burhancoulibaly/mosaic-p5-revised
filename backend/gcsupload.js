@@ -169,6 +169,22 @@ function uploadToGCSMain(req,res,next){
     });
   };
 
+function deleteSession(){
+  console.log();
+  return new Promise((resolve,reject)=>{
+    request.post({
+      headers: {'content-type' : 'application/x-www-form-urlencoded'},
+      url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
+      form:{sessionId:sessionId},
+      json: true,
+    }, (err, res, body) => {
+      if (err) { return reject(err); }
+      resolve(res.body);
+    })
+  });
+}
+  
+
   function setSessionId(id){
     sessionId = id
     console.log(sessionId);

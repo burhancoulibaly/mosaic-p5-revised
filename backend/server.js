@@ -102,9 +102,8 @@ function createSession(){
   });
 }
 
-app.post('/delete-session',function(req,res,err){
-  console.log(req.body.sessionId);
-  deleteSession(req.body.sessionId)
+app.get('/delete-session',function(req,res,err){
+  gcsUpload.deleteSession()
   .then((resolveData)=>{
     console.log(resolveData);
     return gcsUpload.deleteImages()
@@ -118,20 +117,6 @@ app.post('/delete-session',function(req,res,err){
   })
 });
 
-function deleteSession(id){
-  console.log(id);
-  return new Promise((resolve,reject)=>{
-    request.post({
-      headers: {'content-type' : 'application/x-www-form-urlencoded'},
-      url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
-      form:{sessionId:id},
-      json: true,
-    }, (err, res, body) => {
-      if (err) { return reject(err); }
-      resolve(res.body);
-    })
-  });
-}
 
 
 

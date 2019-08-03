@@ -374,9 +374,9 @@ function deleteSessions(){
         $.ajax({
             async: false,
             url: uri+UrlGet,
-            type: 'POST',
-            data: JSON.stringify({sessionId: getSessionId()}),
-            contentType: "application/json; charset=utf-8",
+            type: 'GET',
+            // data: JSON.stringify({sessionId: getSessionId()}),
+            // contentType: "application/json; charset=utf-8",
             processData: false,
             success:function(data){
                 resolve(["session deletion",data]);
