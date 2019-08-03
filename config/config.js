@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
-config = JSON.parse(process.env.config);
-// config = require("./config.json");
+// config = JSON.parse(process.env.config);
+config = require("./config.json");
 
 //module variables
 const defaultConfig = config;
@@ -17,5 +17,5 @@ if(finalConfig != null){
     global.gConfig = finalConfig;
     // console.log(global.gConfig);
 }else{
-    // console.log("Unable to create config");
+    console.log("Unable to create config");
 }

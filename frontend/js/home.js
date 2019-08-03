@@ -11,11 +11,12 @@ let preloadStarted = false;
 let octree = null;
 let mainHas = false;
 let smallHas = false;
-let uri = "https://mosiac-p5.herokuapp.com/";
+let uri = "http://localhost:3000/";
 
 window.onload = function(){
     createSession()
     .then((resolveData) =>{
+        console.log(resolveData);
         setCookie(resolveData[0][2]);
         console.log(document.cookie);
         
@@ -371,6 +372,7 @@ function deleteSessions(){
     return new Promise((resolve,reject)=>{
         const UrlGet = "delete-session";
         $.ajax({
+            async: false,
             url: uri+UrlGet,
             type: 'POST',
             data: JSON.stringify({sessionId: getSessionId()}),
@@ -387,9 +389,10 @@ function deleteSessions(){
 }
 
 function getSessionId(){
-    cookie = document.cookie;
+    let cookie = document.cookie;
     sessionId = cookie.split("=");
-    sessionId = sessionId[1];
+    sessionId = sessionId[2];
+    console.log(sessionId);
     return sessionId;
 
 }

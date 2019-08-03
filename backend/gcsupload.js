@@ -10,9 +10,10 @@ let sessionId;
 const storage = new Storage({
   projectId:firebaseConf.projectId,
   credentials:{
-    client_email:process.env.client_email,
-    private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-    // private_key:global.gConfig.private_key
+    client_email:global.gConfig.client_email,
+    private_key:global.gConfig.private_key
+    // client_email:process.env.client_email,
+    // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
   },
 });
 
@@ -59,9 +60,10 @@ function uploadToGCSMain(req,res,next){
     bucket:CLOUD_BUCKET,
     projectId:firebaseConf.projectId,
     credentials:{
-      client_email:process.env.client_email,
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-      // private_key:global.gConfig.private_key
+      client_email:global.gConfig.client_email,
+      private_key:global.gConfig.private_key
+      // client_email:process.env.client_email,
+      // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
     },
     acl: 'publicRead',
     max:true
@@ -69,16 +71,17 @@ function uploadToGCSMain(req,res,next){
 
   const storageSmall = gcsSharp({
     filename: (req, file, cb) => {
-      console.log(file.fieldname, file.originalname);
+      // console.log(file.fieldname, file.originalname);
       cb(null,sessionId+"/resized_images/"+file.fieldname + '-' + Date.now() + 
       path.extname(file.originalname));
     },
     bucket:CLOUD_BUCKET,
     projectId:firebaseConf.projectId,
     credentials:{
-      client_email:process.env.client_email,
-      private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-      // private_key:global.gConfig.private_key
+      client_email:global.gConfig.client_email,
+      private_key:global.gConfig.private_key
+      // client_email:process.env.client_email,
+      // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
     },
     acl: 'publicRead',
     size:{
@@ -107,12 +110,12 @@ function uploadToGCSMain(req,res,next){
       const delimeter = "/";
   
       const optionsMain = {
-        prefix:root+"/"+mainFolder,
+        prefix: root+"/"+mainFolder,
         delimeter:delimeter
       }
   
       const optionsResize = {
-        prefix:root+"/"+resizeFolder,
+        prefix: root+"/"+resizeFolder,
         delimeter:delimeter
       }
 
@@ -140,8 +143,9 @@ function uploadToGCSMain(req,res,next){
     return new Promise(async(resolve,reject)=>{
       bucket.getFiles()
       .then(async(results)=>{
-        console.log(results);
+        // console.log(results);
         const [imgsToDelete] = results;
+        console.log([imgsToDelete]);
 
         if(imgsToDelete.length == 0){
           resolve("Empty Bucket");

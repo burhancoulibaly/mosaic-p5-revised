@@ -79,8 +79,6 @@ app.get('/deleteimages',function(req,res,err){
     res.send(rejectData);
   })
 });
-<<<<<<< HEAD
-=======
 
 
 app.get('/newsession',function(req,res,err){
@@ -137,4 +135,3 @@ function deleteSession(id){
 
 
 
->>>>>>> 637c59901a0ce0f3866b583fbc85ef4607aa39f2
