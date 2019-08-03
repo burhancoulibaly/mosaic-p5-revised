@@ -197,5 +197,6 @@ function deleteSession(){
     uploadSmall,
     getImages,
     deleteImages,
-    setSessionId
+    setSessionId,
+    deleteSession
   };
