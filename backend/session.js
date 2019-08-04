@@ -70,7 +70,7 @@ class Session{
 
     this.getStorageBig
     this.sessionId = this.createSession();
-    this.bucket = this.storage.bucket(CLOUD_BUCKET);
+    this.bucket = this.storage;
 
     return {
       getUploadBig(){
@@ -86,6 +86,7 @@ class Session{
       },
 
       getBucket(){
+        console.log(this.sessionId);
         return this.bucket
       },
 
