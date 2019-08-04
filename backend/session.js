@@ -18,16 +18,6 @@ class Session{
       })
     };
 
-    this.storage = new Storage({
-      projectId:firebaseConf.projectId,
-      credentials:{
-        client_email:global.gConfig.client_email,
-        private_key:global.gConfig.private_key
-        // client_email:process.env.client_email,
-        // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-      },
-    });
-
     this.storageBig = gcsSharp({
       filename: (req, file, cb) => {
         cb(null,this.sessionId+"/main_image/"+file.fieldname + '-' + Date.now() + 
@@ -68,9 +58,7 @@ class Session{
       max:true
     });
 
-    this.getStorageBig
     this.sessionId = this.createSession();
-    this.bucket = this.storage;
 
     return {
       getUploadBig(){
@@ -82,12 +70,24 @@ class Session{
       },
 
       getSessionId(){
-        return this.sessionId
+        console.log(this.sessionId);
+        return this.sessionId;
       },
 
       getBucket(){
-        console.log(this.sessionId);
-        return this.bucket
+        return this.getStorage().bucket(CLOUD_BUCKET);
+      },
+
+      getStorage(){
+        return this.storage = new Storage({
+          projectId:firebaseConf.projectId,
+          credentials:{
+            client_email:global.gConfig.client_email,
+            private_key:global.gConfig.private_key
+            // client_email:process.env.client_email,
+            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+          },
+        });
       },
 
       uploadToGCSMain(req,res,next){
