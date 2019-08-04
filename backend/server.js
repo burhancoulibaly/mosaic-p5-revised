@@ -6,10 +6,11 @@ const express = require("express"),
     fs = Promise.promisifyAll(require('fs')),
     bodyParser = require("body-parser"),
     mkdirp = require('mkdirp'),
-    gcsUpload = require('./gcsupload'),
+    Session = require('./session'),
     request = require('request');
 
-var main = path.resolve("./frontend/html/home.html"),
+var session = new Session();
+    main = path.resolve("./frontend/html/home.html"),
     css = path.resolve("./frontend/css"),
     js = path.resolve("./frontend/js"),
     bootstrap = path.resolve("./node_modules/bootstrap/dist"),
@@ -37,7 +38,24 @@ app.get('/',function(req,res){
   res.sendFile(main);
 });
 
-app.post('/mainimage',gcsUpload.uploadBig.single('image',new Object),gcsUpload.uploadToGCSMain,function(req,res,next){
+app.get('/newsession',function(req,res,err){
+  res.send(session.getSessionId());
+});
+
+app.get('/deleteimages',function(req,res,err){
+  session.deleteImages()
+  .then((resolveData)=>{
+    console.log(resolveData);
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    console.log(rejectData);
+    res.send(rejectData);
+  })
+});
+
+app.post('/mainimage',session.getUploadBig().single('image',new Object),session.uploadToGCSMain,function(req,res,next){
+  console.log("hello");
   let data = req.body;
   if (req.file && req.file.cloudStoragePublicUrl) {
     data.imageUrl = req.file.cloudStoragePublicUrl;
@@ -46,7 +64,7 @@ app.post('/mainimage',gcsUpload.uploadBig.single('image',new Object),gcsUpload.u
   res.send(data.imageUrl);
 });
 
-app.post('/resizeimages',gcsUpload.uploadSmall.array('images',new Object),gcsUpload.uploadToGCSSmall,function(req,res,next){
+app.post('/resizeimages',session.getUploadSmall().array('images',new Object),session.uploadToGCSSmall,function(req,res,next){
   let data = req.body;
 
   if (req.files && req.files.imgUrls) {
@@ -58,7 +76,7 @@ app.post('/resizeimages',gcsUpload.uploadSmall.array('images',new Object),gcsUpl
 });
 
 app.get('/getimages',function(req,res,err){
-  gcsUpload.getImages()
+  session.getImages()
   .then((resolveData)=>{
     // console.log("images",resolveData);
     res.send(resolveData);
@@ -68,45 +86,11 @@ app.get('/getimages',function(req,res,err){
   })
 });
 
-app.get('/deleteimages',function(req,res,err){
-  gcsUpload.deleteImages()
-  .then((resolveData)=>{
-    console.log(resolveData);
-    res.send(resolveData);
-  })
-  .catch((rejectData)=>{
-    console.log(rejectData);
-    res.send(rejectData);
-  })
-});
-
-
-app.get('/newsession',function(req,res,err){
-  createSession()
-  .then((resolveData)=>{
-    console.log(resolveData);
-    gcsUpload.setSessionId(resolveData[2]);
-    res.send(resolveData);
-  })
-  .catch((rejectData)=>{
-    res.send(rejectData);
-  })
-});
-
-function createSession(){
-  return new Promise((resolve,reject)=>{
-    request('https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', { json: true }, (err, res, body) => {
-      if (err) { return reject(err); }
-      resolve(res.body);
-    })
-  });
-}
-
 app.get('/delete-session',function(req,res,err){
-  gcsUpload.deleteSession()
+  session.deleteSession()
   .then((resolveData)=>{
     console.log(resolveData);
-    return gcsUpload.deleteImages()
+    return session.deleteImages();
   })
   .then((resolveData)=>{
     console.log(resolveData);
@@ -116,6 +100,19 @@ app.get('/delete-session',function(req,res,err){
     res.send(rejectData);
   })
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
