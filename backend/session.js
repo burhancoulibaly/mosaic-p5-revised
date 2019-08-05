@@ -8,7 +8,8 @@ const {Storage} = require('@google-cloud/storage'),
 
 class Session{
   constructor(){
-    this.createSession = () => {
+    var that = this;
+    let _createSession = function(){
       return new Promise((resolve,reject)=>{
         request('https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', { json: true }, (err, res, body) => {
           if (err) { return reject(err); }
@@ -18,68 +19,7 @@ class Session{
       })
     };
 
-    this.storageBig = gcsSharp({
-      filename: (req, file, cb) => {
-        cb(null,this.sessionId+"/main_image/"+file.fieldname + '-' + Date.now() + 
-        path.extname(file.originalname));
-      },
-      bucket:CLOUD_BUCKET,
-      projectId:firebaseConf.projectId,
-      credentials:{
-        client_email:global.gConfig.client_email,
-        private_key:global.gConfig.private_key
-        // client_email:process.env.client_email,
-        // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-      },
-      acl: 'publicRead',
-      max:true
-    });
-
-
-    this.storageSmall = gcsSharp({
-      filename: (req, file, cb) => {
-        // console.log(file.fieldname, file.originalname);
-        cb(null,this.sessionId+"/resized_images/"+file.fieldname + '-' + Date.now() + 
-        path.extname(file.originalname));
-      },
-      bucket:CLOUD_BUCKET,
-      projectId:firebaseConf.projectId,
-      credentials:{
-        client_email:global.gConfig.client_email,
-        private_key:global.gConfig.private_key
-        // client_email:process.env.client_email,
-        // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-      },
-      acl: 'publicRead',
-      size:{
-        width:100,
-        height:100
-      },
-      max:true
-    });
-
-    this.sessionId = this.createSession();
-
-    return {
-      getUploadBig(){
-        return multer({ storage: this.storageBig });
-      },
-
-      getUploadSmall(){
-        return multer({ storage: this.storageSmall });
-      },
-
-      getSessionId(){
-        console.log(this.sessionId);
-        return this.sessionId;
-      },
-
-      getBucket(){
-        return this.getStorage().bucket(CLOUD_BUCKET);
-      },
-
-      getStorage(){
-        return this.storage = new Storage({
+    let _storage = new Storage({
           projectId:firebaseConf.projectId,
           credentials:{
             client_email:global.gConfig.client_email,
@@ -88,39 +28,124 @@ class Session{
             // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
           },
         });
+
+    let _storageBig = gcsSharp({
+          filename: (req, file, cb) => {
+            cb(null,_sessionId+"/main_image/"+file.fieldname + '-' + Date.now() + 
+            path.extname(file.originalname));
+          },
+          bucket:CLOUD_BUCKET,
+          projectId:firebaseConf.projectId,
+          credentials:{
+            client_email:global.gConfig.client_email,
+            private_key:global.gConfig.private_key
+            // client_email:process.env.client_email,
+            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+          },
+          acl: 'publicRead',
+          max:true
+        });
+
+    let _storageSmall = gcsSharp({
+          filename: (req, file, cb) => {
+            // console.log(file.fieldname, file.originalname);
+            cb(null,_sessionId+"/resized_images/"+file.fieldname + '-' + Date.now() + 
+            path.extname(file.originalname));
+          },
+          bucket:CLOUD_BUCKET,
+          projectId:firebaseConf.projectId,
+          credentials:{
+            client_email:global.gConfig.client_email,
+            private_key:global.gConfig.private_key
+            // client_email:process.env.client_email,
+            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+          },
+          acl: 'publicRead',
+          size:{
+            width:100,
+            height:100
+          },
+          max:true
+        });
+    
+    let _sessionId = _createSession();
+    let _bucket = _storage.bucket(CLOUD_BUCKET);
+    let _uploadBig = multer({ storage: _storageBig });
+    let _uploadSmall = multer({ storage: _storageSmall });
+
+    return {
+      getUploadBig(){
+        console.log(this)
+        return _uploadBig;
       },
 
+      getUploadSmall(){
+        return _uploadSmall;
+      },
+
+      getSessionId(){
+        return _sessionId;
+      },
+
+      getBucket(){
+        return _bucket;
+      },
+
+      
+      getPublicUrl(filename){
+        return 'https://storage.googleapis.com/'+this.getBucket().name+'/'+filename;
+      },
+      
       uploadToGCSMain(req,res,next){
-        console.log(this.getSessionId());
         if (!req.file) {
           return next();
         }
-      
-        const gcsName = this.getSessionId()+"/main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
-    
-        req.file.cloudStoragePublicUrl = getPublicUrl(gcsName);
+
+        let id = () => {
+          this.getSessionId();
+        }
+
+        const gcsName = id+"/main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
+        
+        function getpublicUrl(){
+          return this.getPublicUrl(gcsName)
+        }
+
+        let publicUrl = getpublicUrl.bind(Session);
+  
+        req.file.cloudStoragePublicUrl = publicUrl;
         next();
       },
-
+      
       uploadToGCSSmall(req,res,next){
         if (!req.files) {
           return next();
         }
     
-        imgUrls = new Array();
+        let imgUrls = new Array();
+
+        function getSessionId(){
+          return this.getSessionId();
+        }
+
+        let id = getSessionId.bind(Session);
+
         for(var i = 0;i < req.files.length;i++){
-          const gcsName = this.getSessionId()+"/resized_images/"+req.files[i].fieldname + '-' + Date.now() + path.extname(req.files[i].originalname);
-          imgUrls[i] = getPublicUrl(gcsName)
+          const gcsName = id+"/resized_images/"+req.files[i].fieldname + '-' + Date.now() + path.extname(req.files[i].originalname);
+          
+          function getpublicUrl(){
+            return this.getPublicUrl(gcsName)
+          }
+  
+          let publicUrl = getpublicUrl.bind(Session);
+
+          imgUrls[i] = publicUrl;
         }
     
         req.files.cloudStoragePublicUrl = imgUrls;
         next();
       },
-
-      getPublicUrl (filename) {
-        return 'https://storage.googleapis.com/'+getBucket().name+'/'+filename;
-      },
-      
+    
       async getImages(){
         return new Promise(async(resolve,reject)=>{
           const root = this.getSessionId();
@@ -195,7 +220,7 @@ class Session{
           request.post({
             headers: {'content-type' : 'application/x-www-form-urlencoded'},
             url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
-            form:{sessionId:this.getSessionId()},
+            form:{sessionId: this.getSessionId()},
             json: true,
           }, (err, res, body) => {
             if (err) { return reject(err); }
@@ -206,10 +231,8 @@ class Session{
     }
   }
 }
-
 module.exports = Session;
 
 
 
 
-  
