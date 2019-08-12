@@ -17,7 +17,7 @@ window.onload = function(){
     createSession()
     .then((resolveData) =>{
         console.log(resolveData);
-        setCookie(resolveData[0][2]);
+        setCookie(resolveData);
         console.log(document.cookie);
         
         return deleteUploads();
@@ -197,6 +197,7 @@ function submitImages(){
                 url: uri+UrlGet,
                 type: 'GET',
                 success:function(data){
+                    console.log(data)
                     resolve(["All images recieved",data]);
                 },
                 error:function(error){
@@ -428,7 +429,7 @@ function createSession(){
             url: uri+UrlGet,
             type: 'GET',
             success:function(data){
-                resolve([data]);
+                resolve(data);
             },
             error:function(error){
                 reject('Error',error);

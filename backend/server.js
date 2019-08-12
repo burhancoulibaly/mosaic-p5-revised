@@ -6,10 +6,10 @@ const express = require("express"),
     fs = Promise.promisifyAll(require('fs')),
     bodyParser = require("body-parser"),
     mkdirp = require('mkdirp'),
-    Session = require('./session'),
+    SessionManager = require("./session_manager");
     request = require('request');
 
-var session = new Session();
+    sessionManager = new SessionManager();
     main = path.resolve("./frontend/html/home.html"),
     css = path.resolve("./frontend/css"),
     js = path.resolve("./frontend/js"),
@@ -39,23 +39,16 @@ app.get('/',function(req,res){
 });
 
 app.get('/newsession',function(req,res,err){
-  res.send(session.getSessionId());
+  sessionId = sessionManager.getSessionId;
+  res.send(sessionId);
 });
 
 app.get('/deleteimages',function(req,res,err){
-  session.deleteImages()
-  .then((resolveData)=>{
-    console.log(resolveData);
-    res.send(resolveData);
-  })
-  .catch((rejectData)=>{
-    console.log(rejectData);
-    res.send(rejectData);
-  })
+  imageDeleteData = sessionManager.deleteImages;
+  res.send(imageDeleteData);
 });
 
-app.post('/mainimage',session.getUploadBig().single('image',new Object),session.uploadToGCSMain,function(req,res,next){
-  console.log("hello");
+app.post('/mainimage',sessionManager.getUploadBig.single('image',new Object),uploadToGCSMain,function(req,res,next){
   let data = req.body;
   if (req.file && req.file.cloudStoragePublicUrl) {
     data.imageUrl = req.file.cloudStoragePublicUrl;
@@ -64,7 +57,7 @@ app.post('/mainimage',session.getUploadBig().single('image',new Object),session.
   res.send(data.imageUrl);
 });
 
-app.post('/resizeimages',session.getUploadSmall().array('images',new Object),session.uploadToGCSSmall,function(req,res,next){
+app.post('/resizeimages',sessionManager.getUploadSmall.array('images',new Object),uploadToGCSSmall,function(req,res,next){
   let data = req.body;
 
   if (req.files && req.files.imgUrls) {
@@ -76,9 +69,8 @@ app.post('/resizeimages',session.getUploadSmall().array('images',new Object),ses
 });
 
 app.get('/getimages',function(req,res,err){
-  session.getImages()
+  sessionManager.getImages()
   .then((resolveData)=>{
-    // console.log("images",resolveData);
     res.send(resolveData);
   })
   .catch((rejectData)=>{
@@ -87,21 +79,37 @@ app.get('/getimages',function(req,res,err){
 });
 
 app.get('/delete-session',function(req,res,err){
-  session.deleteSession()
-  .then((resolveData)=>{
-    console.log(resolveData);
-    return session.deleteImages();
-  })
-  .then((resolveData)=>{
-    console.log(resolveData);
-    res.send(resolveData);
-  })
-  .catch((rejectData)=>{
-    res.send(rejectData);
-  })
+  deleteData = sessionManager.deleteSessionData;
+  res.send(deleteData);
 });
 
+function uploadToGCSMain(req,res,next){
+  if (!req.file) {
+    return next();
+  }
+  
+  const gcsName = sessionManager.getSessionId+"/main_image/"+req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
 
+  req.file.cloudStoragePublicUrl = sessionManager.getPublicUrl(gcsName);
+  next();
+}
+
+function uploadToGCSSmall(req,res,next){
+  if (!req.files) {
+      return next();
+  }
+  
+  let imgUrls = new Array();
+  
+  for(var i = 0;i < req.files.length;i++){
+      const gcsName = sessionManager.getSessionId+"/resized_images/"+req.files[i].fieldname + '-' + Date.now() + path.extname(req.files[i].originalname);
+
+      imgUrls[i] = sessionManager.getPublicUrl(gcsName);
+  }
+  
+  req.files.cloudStoragePublicUrl = imgUrls;
+  next();
+}
 
 
 
