@@ -39,13 +39,25 @@ app.get('/',function(req,res){
 });
 
 app.get('/newsession',function(req,res,err){
-  sessionId = sessionManager.getSessionId;
-  res.send(sessionId);
+  sessionManager.createSession()
+  .then(async(sessionId)=>{
+    res.send(sessionManager.getSessionId);
+  })
+  .catch(async(error)=>{
+    _sessionId = error
+  });
 });
 
 app.get('/deleteimages',function(req,res,err){
-  imageDeleteData = sessionManager.deleteImages;
-  res.send(imageDeleteData);
+  sessionManager.deleteImages()
+  .then((resolveData)=>{
+    console.log(resolveData);
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    console.log(rejectData);
+    res.send(rejectData);
+  })
 });
 
 app.post('/mainimage',sessionManager.getUploadBig.single('image',new Object),uploadToGCSMain,function(req,res,next){
@@ -79,8 +91,16 @@ app.get('/getimages',function(req,res,err){
 });
 
 app.get('/delete-session',function(req,res,err){
-  deleteData = sessionManager.deleteSessionData;
-  res.send(deleteData);
+  sessionManager.deleteSession()
+  .then((resolveData)=>{
+    return sessionManager.deleteImages();
+  })
+  .then((resolveData)=>{
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    res.send(rejectData);
+  })
 });
 
 function uploadToGCSMain(req,res,next){
