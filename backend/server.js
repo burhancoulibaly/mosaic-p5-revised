@@ -39,9 +39,11 @@ app.get('/',function(req,res){
 });
 
 app.get('/newsession',function(req,res,err){
+  console.log("yeoo")
   sessionManager.createSession()
   .then(async(sessionId)=>{
-    res.send(sessionManager.getSessionId);
+    console.log(sessionId);
+    res.send(sessionId);
   })
   .catch(async(error)=>{
     _sessionId = error

@@ -11,8 +11,8 @@ let preloadStarted = false;
 let octree = null;
 let mainHas = false;
 let smallHas = false;
-// let uri = "http://localhost:3000/";
-let uri = "https://mosiac-p5.herokuapp.com/";
+let uri = "http://localhost:3000/";
+// let uri = "https://mosiac-p5.herokuapp.com/";
 
 window.onload = function(){
     createSession()
@@ -366,7 +366,7 @@ function deleteSessions(){
     return new Promise((resolve,reject)=>{
         const UrlGet = "delete-session";
         $.ajax({
-            async: false,
+            // async: false,
             url: uri+UrlGet,
             type: 'GET',
             // data: JSON.stringify({sessionId: getSessionId()}),
