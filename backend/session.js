@@ -8,19 +8,6 @@ const {Storage} = require('@google-cloud/storage'),
 
 class Session{
   constructor(){
-    let _createSession = () => {
-      return new Promise((resolve,reject)=>{
-        request('https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', { json: true }, (err, res, body) => {
-          if (err) { reject(err); }
-          resolve(res.body[2]);
-        })
-      })
-    };
-
-    let _setSessionId = () => {
-      _createSession().then(async(sessionId)=>{_sessionId = sessionId;}).catch(async(error)=>{_sessionId = error});
-    }
-
     let _storage = new Storage({
           projectId:firebaseConf.projectId,
           credentials:{
@@ -71,7 +58,7 @@ class Session{
         });
 
     
-    let _sessionId = _setSessionId();
+    let _sessionId = null;
     let _bucket = _storage.bucket(CLOUD_BUCKET);
     let _uploadBig = multer({ storage: _storageBig });
     let _uploadSmall = multer({ storage: _storageSmall });
@@ -93,6 +80,22 @@ class Session{
       getPublicUrl(filename){
         _publicUrl = 'https://storage.googleapis.com/'+this.getBucket.name+'/'+filename;
         return _publicUrl;
+      },
+      createSession(){
+        // if(_sessionId != null){
+        //   return new Promise((resolve,reject)=>{
+        //     resolve(this.getSessionId);
+        //   })
+        // }else{
+          return new Promise((resolve,reject)=>{
+            request('https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', { json: true }, (err, res, body) => {
+              if (err) {
+                 reject(err); 
+              }
+              _sessionId = res.body[2];
+            })
+          })
+        // }
       },
       getImages(){
         return new Promise(async(resolve,reject)=>{
