@@ -24,10 +24,10 @@ class Session{
     let _storage = new Storage({
           projectId:firebaseConf.projectId,
           credentials:{
-            client_email:global.gConfig.client_email,
-            private_key:global.gConfig.private_key
-            // client_email:process.env.client_email,
-            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+            // client_email:global.gConfig.client_email,
+            // private_key:global.gConfig.private_key
+            client_email:process.env.client_email,
+            private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
           },
         });
 
@@ -39,10 +39,10 @@ class Session{
           bucket:CLOUD_BUCKET,
           projectId:firebaseConf.projectId,
           credentials:{
-            client_email:global.gConfig.client_email,
-            private_key:global.gConfig.private_key
-            // client_email:process.env.client_email,
-            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+            // client_email:global.gConfig.client_email,
+            // private_key:global.gConfig.private_key
+            client_email:process.env.client_email,
+            private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
           },
           acl: 'publicRead',
           max:true
@@ -57,10 +57,10 @@ class Session{
           bucket:CLOUD_BUCKET,
           projectId:firebaseConf.projectId,
           credentials:{
-            client_email:global.gConfig.client_email,
-            private_key:global.gConfig.private_key
-            // client_email:process.env.client_email,
-            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+            // client_email:global.gConfig.client_email,
+            // private_key:global.gConfig.private_key
+            client_email:process.env.client_email,
+            private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
           },
           acl: 'publicRead',
           size:{
@@ -131,6 +131,49 @@ class Session{
             reject(err);
           })
         })
+      },
+      deleteSession(){
+        console.log();
+        return new Promise((resolve,reject)=>{
+            request.post({
+            headers: {'content-type' : 'application/x-www-form-urlencoded'},
+            url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
+            form:{sessionId: super.getSessionId},
+            json: true,
+            }, (err, res, body) => {
+            if (err) { return reject(err); }
+            resolve(res.body);
+            })
+        });
+      },
+      imageDeletion(){
+        return new Promise(async(resolve,reject)=>{
+            this.getBucket.getFiles()
+            .then(async(results)=>{
+            // console.log(results);
+            const [imgsToDelete] = results;
+            console.log([imgsToDelete]);
+
+            if(imgsToDelete.length == 0){
+                resolve("Empty Bucket");
+            }
+        
+            Promise.all(imgsToDelete.map(async(img)=>{
+                return this.getBucket.file(img.metadata.name).delete();
+            }))
+            .then((resolveData)=>{
+                resolve(resolveData);
+            })
+            .catch((err)=>{
+                console.log(err);
+                reject(err);
+            })      
+            })
+            .catch((err)=>{
+            console.log(err);
+            reject(err);
+            })
+        });
       }
     }
   }

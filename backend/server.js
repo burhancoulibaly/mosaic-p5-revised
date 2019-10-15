@@ -40,12 +40,20 @@ app.get('/',function(req,res){
 
 app.get('/newsession',function(req,res,err){
   sessionId = sessionManager.getSessionId;
+  console.log(sessionId);
   res.send(sessionId);
 });
 
 app.get('/deleteimages',function(req,res,err){
-  imageDeleteData = sessionManager.deleteImages;
-  res.send(imageDeleteData);
+  sessionManager.imageDeletion()
+  .then((resolveData)=>{
+    console.log(resolveData);
+    return resolveData;
+  })
+  .catch((rejectData)=>{
+    console.log(rejectData);
+    return rejectData;
+  })
 });
 
 app.post('/mainimage',sessionManager.getUploadBig.single('image',new Object),uploadToGCSMain,function(req,res,next){
@@ -79,8 +87,17 @@ app.get('/getimages',function(req,res,err){
 });
 
 app.get('/delete-session',function(req,res,err){
-  deleteData = sessionManager.deleteSessionData;
-  res.send(deleteData);
+  console.log(sessionManager.getSessionId);
+  sessionManager.deleteSession()
+  .then(()=>{
+    return this.deleteImages();
+  })
+  .then((resolveData)=>{
+    return resolveData;
+  })
+  .catch((rejectData)=>{
+    return rejectData;
+  })
 });
 
 function uploadToGCSMain(req,res,next){
