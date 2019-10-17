@@ -29,6 +29,7 @@
     "promisepipe": "*",
     "request": "^2.88.0",
     "sharp": "^0.22.0",
+    "socket.io": "^2.3.0",
     "useragent": "*"
   },
   "devDependencies": {

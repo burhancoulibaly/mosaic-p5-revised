@@ -17,7 +17,7 @@ class Session{
             private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
           },
         });
-
+    
     let _storageBig = gcsSharp({
           filename: (req, file, cb) => {
             cb(null,_sessionId+"/main_image/"+file.fieldname + '-' + Date.now() + 
@@ -77,6 +77,12 @@ class Session{
       get getBucket(){
         return _bucket;
       },
+      resetUploads(){
+        _storageBig = null;
+        _storageSmall = null;
+        _uploadBig = null;
+        _uploadSmall = null;
+      },
       getPublicUrl(filename){
         _publicUrl = 'https://storage.googleapis.com/'+this.getBucket.name+'/'+filename;
         return _publicUrl;
@@ -93,6 +99,7 @@ class Session{
                  reject(err); 
               }
               _sessionId = res.body[2];
+              resolve(res.body[2]);
             })
           })
         // }
@@ -100,6 +107,7 @@ class Session{
       getImages(){
         return new Promise(async(resolve,reject)=>{
           const root = this.getSessionId;
+          console.log(this.getSessionId)
           const mainFolder =  root+"/main_image";
           const resizeFolder =  root+"/resized_images";
           let resolveArr = new Array();
@@ -136,12 +144,12 @@ class Session{
         })
       },
       deleteSession(){
-        console.log();
+        console.log("Deleting Session "+this.getSessionId);
         return new Promise((resolve,reject)=>{
             request.post({
             headers: {'content-type' : 'application/x-www-form-urlencoded'},
             url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
-            form:{sessionId: super.getSessionId},
+            form:{sessionId: this.getSessionId},
             json: true,
             }, (err, res, body) => {
             if (err) { return reject(err); }

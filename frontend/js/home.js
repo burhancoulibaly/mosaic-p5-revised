@@ -11,30 +11,24 @@ let preloadStarted = false;
 let octree = null;
 let mainHas = false;
 let smallHas = false;
+let socket = io();
 // let uri = "http://localhost:3000/";
 let uri = "https://mosiac-p5.herokuapp.com/";
 
-window.onload = function(){
-    createSession()
-    .then((resolveData) =>{
-        console.log(resolveData);
-        setCookie(resolveData);
-        console.log(document.cookie);
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-    });
-};
+socket.on('New Session', function(sessionId){
+    setCookie(sessionId);
+    console.log(document.cookie);
+})
 
-$(window).on("unload", function(e) {
-    deleteSessions()
-    .then((resolveData)=>{
-        console.log(resolveData);
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-    });
-});
+// $(window).on("unload", function(e) {
+//     deleteSessions()
+//     .then((resolveData)=>{
+//         console.log(resolveData);
+//     })
+//     .catch((rejectData)=>{
+//         console.log(rejectData);
+//     });
+// });
 
 $('#main').change(function() { 
     // console.log("changed");
@@ -336,51 +330,51 @@ function draw(){
 
         noLoop();
 
-        deleteUploads()
-        .then((resolveData)=>{
-            console.log(resolveData[0]+resolveData[1]);
-        })
-        .catch((rejectData)=>{
-            console.log(rejectData);
-        })
+        // deleteUploads()
+        // .then((resolveData)=>{
+        //     console.log(resolveData[0]+resolveData[1]);
+        // })
+        // .catch((rejectData)=>{
+        //     console.log(rejectData);
+        // })
     }
 }
 
-function deleteUploads(){
-    return new Promise((resolve,reject)=>{
-        const UrlGet = "deleteimages";
-        $.ajax({
-            url: uri+UrlGet,
-            type: 'GET',
-            success:function(data){
-                resolve(["Image upload deletion ",data]);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });      
-    });
-}
+// function deleteUploads(){
+//     return new Promise((resolve,reject)=>{
+//         const UrlGet = "deleteimages";
+//         $.ajax({
+//             url: uri+UrlGet,
+//             type: 'GET',
+//             success:function(data){
+//                 resolve(["Image upload deletion ",data]);
+//             },
+//             error:function(error){
+//                 reject('Error',error);
+//             }
+//         });      
+//     });
+// }
 
-function deleteSessions(){
-    return new Promise((resolve,reject)=>{
-        const UrlGet = "delete-session";
-        $.ajax({
-            // async: false,
-            url: uri+UrlGet,
-            type: 'GET',
-            // data: JSON.stringify({sessionId: getSessionId()}),
-            // contentType: "application/json; charset=utf-8",
-            processData: false,
-            success:function(data){
-                resolve(["session deletion",data]);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });      
-    });
-}
+// function deleteSessions(){
+//     return new Promise((resolve,reject)=>{
+//         const UrlGet = "delete-session";
+//         $.ajax({
+//             // async: false,
+//             url: uri+UrlGet,
+//             type: 'GET',
+//             // data: JSON.stringify({sessionId: getSessionId()}),
+//             // contentType: "application/json; charset=utf-8",
+//             processData: false,
+//             success:function(data){
+//                 resolve(["session deletion",data]);
+//             },
+//             error:function(error){
+//                 reject('Error',error);
+//             }
+//         });      
+//     });
+// }
 
 function getSessionId(){
     let cookie = document.cookie;
