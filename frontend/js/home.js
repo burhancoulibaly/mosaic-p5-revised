@@ -12,23 +12,13 @@ let octree = null;
 let mainHas = false;
 let smallHas = false;
 let socket = io();
-// let uri = "http://localhost:3000/";
-let uri = "https://mosiac-p5.herokuapp.com/";
+let uri = "http://localhost:3000/";
+// let uri = "https://mosiac-p5.herokuapp.com/";
 
 socket.on('New Session', function(sessionId){
     setCookie(sessionId);
     console.log(document.cookie);
 })
-
-// $(window).on("unload", function(e) {
-//     deleteSessions()
-//     .then((resolveData)=>{
-//         console.log(resolveData);
-//     })
-//     .catch((rejectData)=>{
-//         console.log(rejectData);
-//     });
-// });
 
 $('#main').change(function() { 
     // console.log("changed");
@@ -122,7 +112,7 @@ function smallClr(){
 
 function submitImages(){
     $(".upload-page").hide();
-
+    console.log(getSessionId())
     mainImage = document.getElementById("main").files[0];
     smallImages = document.getElementById("small").files;
     formDataBig = new FormData();
@@ -132,6 +122,8 @@ function submitImages(){
     for(var i = 0; i < smallImages.length; i++){
         formDataSmall.append("images",smallImages[i]);
     }
+    
+    socket.emit('setStorage', getSessionId());
 
     let postMainImage =  function(){
         //uploading main image
@@ -379,7 +371,7 @@ function draw(){
 function getSessionId(){
     let cookie = document.cookie;
     sessionId = cookie.split("=");
-    sessionId = sessionId[2];
+    sessionId = sessionId[1];
     console.log(sessionId);
     return sessionId;
 }

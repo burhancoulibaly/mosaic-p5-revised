@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
-config = JSON.parse(process.env.config);
-// config = require("./config.json");
+// config = JSON.parse(process.env.config);
+config = require("./config.json");
 
 //module variables
 const defaultConfig = config;
