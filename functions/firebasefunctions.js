@@ -17,11 +17,11 @@
 
 // 	response.send(db);
 
-// 	// db.collection('session').doc(text).set({})
-// 	// 	.then(()=>{
-// 	// 		response.send(text);
-// 	// 	})
-// 	// 	.catch((err)=>{
-// 	// 		response.send(err);
-// 	// 	})
+	// db.collection('session').doc(text).set({})
+	// 	.then(()=>{
+	// 		response.send(text);
+	// 	})
+	// 	.catch((err)=>{
+	// 		response.send(err);
+	// 	})
 // });

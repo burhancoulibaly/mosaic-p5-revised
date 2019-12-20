@@ -5,8 +5,15 @@ const {Storage} = require('@google-cloud/storage'),
       CLOUD_BUCKET = firebaseConf.storageBucket,
       StorageGCS = require("./storage");
 
+let text = "";
+let possible = "ABCDEFGHIJKMNPQRSTUVWXYZ123456789";
+
 class Session{
   constructor(){
+    for(let i = 0; i < 8; i++){
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+
     let _storage = new Storage({
       projectId:firebaseConf.projectId,
       credentials:{
@@ -17,12 +24,13 @@ class Session{
       },
     });
     
-    let _sessionId = null;
+    let _sessionId = text;
     let _bucket = _storage.bucket(CLOUD_BUCKET);
-    let _uploadBig = null;
-    let _uploadSmall = null;
+    let _storageGCS = new StorageGCS(_sessionId);
+    let _uploadBig =  multer({ storage: _storageGCS.getStorageBig });
+    let _uploadSmall = multer({ storage: _storageGCS.getStorageSmall });
     let _publicUrl = null;
-    let _storageGCS = null;
+    
     
     return {
       get getSessionId(){
@@ -42,24 +50,32 @@ class Session{
         return _publicUrl;
       },
       createSession(){
-        // if(_sessionId != null){
-        //   return new Promise((resolve,reject)=>{
-        //     resolve(this.getSessionId);
-        //   })
-        // }else{
-          return new Promise((resolve,reject)=>{
-            request('https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', { json: true }, (err, res, body) => {
-              if (err) {
-                 reject(err); 
-              }
-              _sessionId = res.body[2];
-              _storageGCS = new StorageGCS(this.getSessionId);
-              _uploadBig = multer({ storage: _storageGCS.getStorageBig });
-              _uploadSmall = multer({ storage: _storageGCS.getStorageSmall });
-              resolve(_sessionId);
-            })
+        console.log("Creating Session: "+this.getSessionId);
+        return new Promise((resolve,reject)=>{
+          request.post({
+          headers: {'content-type' : 'application/x-www-form-urlencoded'},
+          url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', 
+          form:{sessionId: this.getSessionId},
+          json: true,
+          }, (err, res, body) => {
+          if (err) { return reject(err); }
+          resolve(res.body);
           })
-        // }
+        });
+      },
+      deleteSession(){
+        console.log("Deleting Session "+this.getSessionId);
+        return new Promise((resolve,reject)=>{
+          request.post({
+          headers: {'content-type' : 'application/x-www-form-urlencoded'},
+          url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
+          form:{sessionId: this.getSessionId},
+          json: true,
+          }, (err, res, body) => {
+          if (err) { return reject(err); }
+          resolve(res.body);
+          })
+        });
       },
       getImages(){
         return new Promise(async(resolve,reject)=>{
@@ -98,20 +114,6 @@ class Session{
             reject(err);
           })
         })
-      },
-      deleteSession(){
-        console.log("Deleting Session "+this.getSessionId);
-        return new Promise((resolve,reject)=>{
-          request.post({
-          headers: {'content-type' : 'application/x-www-form-urlencoded'},
-          url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
-          form:{sessionId: this.getSessionId},
-          json: true,
-          }, (err, res, body) => {
-          if (err) { return reject(err); }
-          resolve(res.body);
-          })
-        });
       },
       imageDeletion(){
         return new Promise(async(resolve,reject)=>{

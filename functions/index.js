@@ -13,13 +13,6 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
 });
 
 exports.newSession = functions.https.onRequest((request, response) => {
-	let text = "";
-	let possible = "ABCDEFGHIJKMNPQRSTUVWXYZ123456789";
-	
-	for(let i = 0; i < 8; i++){
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-	}
-
 	db.collection('Session IDs').doc(text).set({id:text})
 		.then((data)=>{
 			response.send(["New Session: ",data,text]);
