@@ -5,15 +5,8 @@ const {Storage} = require('@google-cloud/storage'),
       CLOUD_BUCKET = firebaseConf.storageBucket,
       StorageGCS = require("./storage");
 
-let text = "";
-let possible = "ABCDEFGHIJKMNPQRSTUVWXYZ123456789";
-
 class Session{
-  constructor(){
-    for(let i = 0; i < 8; i++){
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-
+  constructor(sessionId){
     let _storage = new Storage({
       projectId:firebaseConf.projectId,
       credentials:{
@@ -24,12 +17,11 @@ class Session{
       },
     });
     
-    let _sessionId = text;
+    let _sessionId = sessionId;
     let _bucket = _storage.bucket(CLOUD_BUCKET);
     let _storageGCS = new StorageGCS(_sessionId);
     let _uploadBig =  multer({ storage: _storageGCS.getStorageBig });
     let _uploadSmall = multer({ storage: _storageGCS.getStorageSmall });
-    let _publicUrl = null;
     
     
     return {
@@ -46,20 +38,21 @@ class Session{
         return _uploadSmall;
       },
       getPublicUrl(filename){
-        _publicUrl = 'https://storage.googleapis.com/'+this.getBucket.name+'/'+filename;
-        return _publicUrl;
+        return 'https://storage.googleapis.com/'+this.getBucket.name+'/'+filename;;
       },
       createSession(){
         console.log("Creating Session: "+this.getSessionId);
         return new Promise((resolve,reject)=>{
           request.post({
-          headers: {'content-type' : 'application/x-www-form-urlencoded'},
-          url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', 
-          form:{sessionId: this.getSessionId},
-          json: true,
+            headers: {'content-type' : 'application/x-www-form-urlencoded'},
+            url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', 
+            form:{sessionId: this.getSessionId},
+            json: true,
           }, (err, res, body) => {
-          if (err) { return reject(err); }
-          resolve(res.body);
+          if (err) { 
+            reject(err); 
+          }
+            resolve(res.body);
           })
         });
       },
@@ -72,7 +65,9 @@ class Session{
           form:{sessionId: this.getSessionId},
           json: true,
           }, (err, res, body) => {
-          if (err) { return reject(err); }
+          if (err) { 
+            reject(err); 
+          }
           resolve(res.body);
           })
         });
@@ -117,11 +112,21 @@ class Session{
       },
       imageDeletion(){
         return new Promise(async(resolve,reject)=>{
-          this.getBucket.getFiles()
+          const root = this.getSessionId;
+          const images =  root;
+
+          const delimeter = "/";
+
+          const sessionImages = {
+            prefix: images,
+            delimeter: delimeter
+          }
+
+          this.getBucket.getFiles(sessionImages)
           .then(async(results)=>{
           // console.log(results);
           const [imgsToDelete] = results;
-          console.log([imgsToDelete]);
+          console.log([imgsToDelete].length);
 
           if(imgsToDelete.length == 0){
               resolve("Empty Bucket");

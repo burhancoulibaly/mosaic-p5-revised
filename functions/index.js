@@ -13,9 +13,9 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
 });
 
 exports.newSession = functions.https.onRequest((request, response) => {
-	db.collection('Session IDs').doc(text).set({id:text})
+	db.collection('Session IDs').doc(request.body.sessionId).set({id:request.body.sessionId})
 		.then((data)=>{
-			response.send(["New Session: ",data,text]);
+			response.send(["New Session: ",data,request.body.sessionId]);
 			return "New Session: ",data;
 		})
 		.catch((err)=>{
@@ -27,16 +27,16 @@ exports.deleteSession = functions.https.onRequest((request, response) =>{
 	sessionRef = db.collection('Session IDs').doc(request.body.sessionId)
 	
 	deleteField()
-	.then(()=>{
-		return deleteDocument();
-	})
-	.then((resolveData)=>{
-		response.send(resolveData);
-		return "Session Deleted";
-	})
-	.catch((rejectData)=>{
-		response.send(rejectData);
-	})
+		.then(()=>{
+			return deleteDocument();
+		})
+		.then((resolveData)=>{
+			response.send(resolveData);
+			return "Session Deleted";
+		})
+		.catch((rejectData)=>{
+			response.send(rejectData);
+		})
 
 
 	function deleteField(){
