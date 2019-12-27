@@ -18,10 +18,10 @@ class GCSSharp{
             bucket:CLOUD_BUCKET,
             projectId:firebaseConf.projectId,
             credentials:{
-              client_email:global.gConfig.client_email,
-              private_key:global.gConfig.private_key
-              // client_email:process.env.client_email,
-              // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+            //   client_email:global.gConfig.client_email,
+            //   private_key:global.gConfig.private_key
+              client_email:process.env.client_email,
+              private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
             },
             acl: 'publicRead',
             max:true
@@ -39,10 +39,10 @@ class GCSSharp{
             bucket:CLOUD_BUCKET,
             projectId:firebaseConf.projectId,
             credentials:{
-            client_email:global.gConfig.client_email,
-            private_key:global.gConfig.private_key
-            // client_email:process.env.client_email,
-            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
+            // client_email:global.gConfig.client_email,
+            // private_key:global.gConfig.private_key
+            client_email:process.env.client_email,
+            private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
             },
             acl: 'publicRead',
             size:{

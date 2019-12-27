@@ -12,8 +12,8 @@ let octree = null;
 let mainHas = false;
 let smallHas = false;
 let socket = io();
-let uri = "http://localhost:3000/";
-// let uri = "https://mosiac-p5.herokuapp.com/";
+// let uri = "http://localhost:3000/";
+let uri = "https://mosiac-p5.herokuapp.com/";
 
 socket.on('New Session', function(sessionId){
     setCookie(sessionId);
