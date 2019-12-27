@@ -1,9 +1,7 @@
 const {Storage} = require('@google-cloud/storage'),
       gConfig = require("../config/config"),
-      multer = require('multer'),
       firebaseConf = global.gConfig.development.firebaseConfig,
-      CLOUD_BUCKET = firebaseConf.storageBucket,
-      StorageGCS = require("./storage");
+      CLOUD_BUCKET = firebaseConf.storageBucket;
 
 class Session{
   constructor(sessionId){
@@ -19,9 +17,6 @@ class Session{
     
     let _sessionId = sessionId;
     let _bucket = _storage.bucket(CLOUD_BUCKET);
-    let _storageGCS = new StorageGCS(_sessionId);
-    let _uploadBig =  multer({ storage: _storageGCS.getStorageBig });
-    let _uploadSmall = multer({ storage: _storageGCS.getStorageSmall });
     
     
     return {
@@ -31,17 +26,10 @@ class Session{
       get getBucket(){
         return _bucket;
       },
-      get getUploadBig(){
-        return _uploadBig;
-      },
-      get getUploadSmall(){
-        return _uploadSmall;
-      },
       getPublicUrl(filename){
         return 'https://storage.googleapis.com/'+this.getBucket.name+'/'+filename;;
       },
       createSession(){
-        console.log("Creating Session: "+this.getSessionId);
         return new Promise((resolve,reject)=>{
           request.post({
             headers: {'content-type' : 'application/x-www-form-urlencoded'},
@@ -57,7 +45,6 @@ class Session{
         });
       },
       deleteSession(){
-        console.log("Deleting Session "+this.getSessionId);
         return new Promise((resolve,reject)=>{
           request.post({
           headers: {'content-type' : 'application/x-www-form-urlencoded'},
@@ -68,13 +55,13 @@ class Session{
           if (err) { 
             reject(err); 
           }
-          resolve(res.body);
+          resolve(["Deleting Session: "+this.getSessionId,res.body]);
           })
         });
       },
-      getImages(){
+      getImages(folderId){
         return new Promise(async(resolve,reject)=>{
-          const root = this.getSessionId;
+          const root = folderId;
           const mainFolder =  root+"/main_image";
           const resizeFolder =  root+"/resized_images";
           let resolveArr = new Array();
@@ -110,9 +97,9 @@ class Session{
           })
         })
       },
-      imageDeletion(){
+      imageDeletion(folderId){
         return new Promise(async(resolve,reject)=>{
-          const root = this.getSessionId;
+          const root = folderId;
           const images =  root;
 
           const delimeter = "/";
@@ -126,7 +113,7 @@ class Session{
           .then(async(results)=>{
           // console.log(results);
           const [imgsToDelete] = results;
-          console.log([imgsToDelete].length);
+          // console.log([imgsToDelete].length);
 
           if(imgsToDelete.length == 0){
               resolve("Empty Bucket");

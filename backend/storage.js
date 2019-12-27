@@ -1,64 +1,35 @@
 const path = require('path'),
       gConfig = require("../config/config"),
-      gcsSharp = require('../custom_module/multer-sharp'),
+      multer = require('multer'),
       firebaseConf = global.gConfig.development.firebaseConfig,
-      CLOUD_BUCKET = firebaseConf.storageBucket;
+      GCSSharp = require("./gcs-sharpe");
+
 
 
 class Storage{
-    constructor(sessionId){
-        console.log("Folder: "+sessionId);
-        let _storageBig = null;
-        let _storageSmall = null;
+    constructor(folderId){
+        let _folderId = folderId;
 
-        _storageBig = gcsSharp({
-            filename: (req, file, cb) => {
-              cb(null,sessionId+"/main_image/"+file.fieldname + '-' + Date.now() + 
-              path.extname(file.originalname));
-            },
-            bucket:CLOUD_BUCKET,
-            projectId:firebaseConf.projectId,
-            credentials:{
-              client_email:global.gConfig.client_email,
-              private_key:global.gConfig.private_key
-              // client_email:process.env.client_email,
-              // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-            },
-            acl: 'publicRead',
-            max:true
-        });
-  
-        _storageSmall = gcsSharp({
-            filename: (req, file, cb) => {
-            // console.log(file.fieldname, file.originalname);
-            cb(null,sessionId+"/resized_images/"+file.fieldname + '-' + Date.now() + 
-            path.extname(file.originalname));
-            },
-            bucket:CLOUD_BUCKET,
-            projectId:firebaseConf.projectId,
-            credentials:{
-            client_email:global.gConfig.client_email,
-            private_key:global.gConfig.private_key
-            // client_email:process.env.client_email,
-            // private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-            },
-            acl: 'publicRead',
-            size:{
-            width:100,
-            height:100
-            },
-            max:true
-        });
+        let gcsSharp = new GCSSharp(_folderId);
+
+        let _storageBig = gcsSharp.getStorageBig;
+        let _storageSmall = gcsSharp.getStorageSmall;
+
+        let _uploadBig =  multer({ storage:  _storageBig });
+        let _uploadSmall = multer({ storage: _storageSmall });
 
         // console.log(_storageBig);
         // console.log(_storageSmall);
 
         return {
-            get getStorageBig(){
-                return _storageBig;
+            get getFolderId(){
+                return _folderId;
             },
-            get getStorageSmall(){
-                return _storageSmall;
+            get getUploadBig(){
+                return _uploadBig;
+            },
+            get getUploadSmall(){
+                return _uploadSmall;
             },
         }
     }

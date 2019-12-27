@@ -61,8 +61,6 @@
       <button id="sendImgs" onClick="submitImages()" type="submit" class="btn btn-primary -btn-lg create-hidden">Create Mosaic Image</button>
     </div>
     
-    <!-- <script src="https://mosiac-p5.herokuapp.com/socket.io/socket.io.js"></script> -->
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/js/home.js"></script>
   </body>
 </html>
