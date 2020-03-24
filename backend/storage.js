@@ -7,11 +7,10 @@ const path = require('path'),
 
 
 class Storage{
-    constructor(folderId){
-        let _folderId = folderId;
+    constructor(){
+        let gcsSharp = new GCSSharp();
 
-        let gcsSharp = new GCSSharp(_folderId);
-
+        let _storage = gcsSharp.getStorage;
         let _storageBig = gcsSharp.getStorageBig;
         let _storageSmall = gcsSharp.getStorageSmall;
 
@@ -22,8 +21,8 @@ class Storage{
         // console.log(_storageSmall);
 
         return {
-            get getFolderId(){
-                return _folderId;
+            get getStorage(){
+                return _storage
             },
             get getUploadBig(){
                 return _uploadBig;

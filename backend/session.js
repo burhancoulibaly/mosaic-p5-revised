@@ -1,143 +1,182 @@
-const {Storage} = require('@google-cloud/storage'),
-      gConfig = require("../config/config"),
+const ygConfig = require("../config/config"),
       firebaseConf = global.gConfig.development.firebaseConfig,
       CLOUD_BUCKET = firebaseConf.storageBucket;
 
 class Session{
-  constructor(sessionId){
-    let _storage = new Storage({
-      projectId:firebaseConf.projectId,
-      credentials:{
-        // client_email:global.gConfig.client_email,
-        // private_key:global.gConfig.private_key
-        client_email:process.env.client_email,
-        private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-      },
-    });
+  constructor(storage){
+    let _storage = storage;
     
-    let _sessionId = sessionId;
     let _bucket = _storage.bucket(CLOUD_BUCKET);
+
+    let _getImage = (image_name)=>{
+      return new Promise(async (resolve,reject)=>{
+        try{
+          let imageData = _bucket.file(image_name.image).getMetadata()
+          resolve(imageData);
+        }catch(err){
+          reject(err);
+        }
+      })
+    }
     
+    let _deleteImage = (image)=>{
+      return new Promise(async (resolve,reject)=>{
+        try{
+          let imageData = _bucket.file(image[0].name).delete();
+          resolve(imageData);
+        }catch(err){
+          reject(err);
+        }
+      })
+    }
     
     return {
-      get getSessionId(){
-        return _sessionId;
-      },
       get getBucket(){
         return _bucket;
       },
       getPublicUrl(filename){
-        return 'https://storage.googleapis.com/'+this.getBucket.name+'/'+filename;;
+        return 'https://storage.googleapis.com/'+this.getBucket.name+'/'+filename;
       },
-      createSession(){
+      getImages(image_names){
+        return new Promise(async(resolve,reject)=>{
+          console.log(image_names);
+          if(image_names[0] && image_names[1]){
+            try{
+              let mainImage = await _getImage(image_names[0])
+              let images = await Promise.all(image_names[1].map(async (image_name) => { return _getImage(image_name) }));
+
+              console.log(mainImage,images);
+
+              resolve([mainImage, images]);
+            }catch(err){
+              console.log(err);
+              reject(err)
+            }
+          }
+          resolve([])
+        })
+      },
+      createSession(sessionId){
         return new Promise((resolve,reject)=>{
           request.post({
-            headers: {'content-type' : 'application/x-www-form-urlencoded'},
+            headers: {
+              'content-type' : 'application/x-www-form-urlencoded'
+            },
             url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/newSession', 
-            form:{sessionId: this.getSessionId},
+            form: {
+              sessionId: sessionId
+            }, 
             json: true,
           }, (err, res, body) => {
-          if (err) { 
-            reject(err); 
-          }
+            if (err) { 
+              reject(err); 
+            }
             resolve(res.body);
           })
         });
       },
-      deleteSession(){
+      storeImages(sessionId, main_image_url, images_url){
+        console.log(sessionId, main_image_url, images_url)
         return new Promise((resolve,reject)=>{
           request.post({
-          headers: {'content-type' : 'application/x-www-form-urlencoded'},
-          url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
-          form:{sessionId: this.getSessionId},
-          json: true,
+            headers: {
+              'content-type' : 'application/x-www-form-urlencoded'
+            },
+            url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/storeImages',
+            form: {
+              sessionId: sessionId,
+              main_image_url: main_image_url,
+              image_urls: images_url
+            }, 
+            json: true,
           }, (err, res, body) => {
-          if (err) { 
-            reject(err); 
-          }
-          resolve(["Deleting Session: "+this.getSessionId,res.body]);
+            if (err) { 
+              reject(err); 
+            }
+            resolve(res.body);
           })
         });
       },
-      getImages(folderId){
-        return new Promise(async(resolve,reject)=>{
-          const root = folderId;
-          const mainFolder =  root+"/main_image";
-          const resizeFolder =  root+"/resized_images";
-          let resolveArr = new Array();
-      
-          const delimeter = "/";
-      
-          const optionsMain = {
-            prefix: mainFolder,
-            delimeter: delimeter
-          }
-      
-          const optionsResize = {
-            prefix: resizeFolder,
-            delimeter: delimeter
-          }
-
-          this.getBucket.getFiles(optionsMain)
-          .then(async (results)=>{
-            const [imageMain] = results;
-            // console.log(imageMain);
-            await resolveArr.push(imageMain);
-
-            return await this.getBucket.getFiles(optionsResize);
+      getImageURLS(sessionId){
+        return new Promise((resolve,reject)=>{
+          request.post({
+            headers: {
+              'content-type' : 'application/x-www-form-urlencoded'
+            },
+            url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/getImageURLS', 
+            form: {
+              sessionId: sessionId
+            }, 
+            json: true,
+          }, (err, res, body) => {
+            if (err) { 
+              console.log(err)
+              reject(err); 
+            }
+            resolve(res.body);
           })
-          .then(async (results)=>{
-            const [imagesResized] = results;
-            // console.log([imagesResized]);
-            await resolveArr.push(imagesResized);
-            resolve(resolveArr);
-          })
-          .catch((err)=>{
-            reject(err);
-          })
-        })
+        });
       },
-      imageDeletion(folderId){
+      deleteImageLinks(sessionId){
+        return new Promise((resolve,reject)=>{
+          request.post({
+            headers: {
+              'content-type' : 'application/x-www-form-urlencoded'
+            },
+            url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteImages', 
+            json: true,
+            form: {
+              sessionId: sessionId
+            }, 
+          }, (err, res, body) => {
+            if (err) { 
+              reject(err); 
+            }
+            resolve(["Deleting Session: "+sessionId,res.body]);
+          })
+        });
+      },
+      deleteSession(sessionId){
+        return new Promise((resolve,reject)=>{
+          request.post({
+            headers: {
+              'content-type' : 'application/x-www-form-urlencoded'
+            },
+            url: 'https://us-central1-mosaic-p5-database.cloudfunctions.net/deleteSession', 
+            json: true,
+            form: {
+              sessionId: sessionId
+            }, 
+          }, (err, res, body) => {
+            if (err) { 
+              reject(err); 
+            }
+            resolve(["Deleting Session: "+sessionId,res.body]);
+          })
+        });
+      },
+      imageDeletion(image_names){
         return new Promise(async(resolve,reject)=>{
-          const root = folderId;
-          const images =  root;
+          if(image_names[0] && image_names[1]){
+            try{
+              let mainImage = await _getImage(image_names[0])
+              let images = await Promise.all(image_names[1].map(async (image_name) => { return _getImage(image_name) }));
 
-          const delimeter = "/";
+              images.concat(mainImage);
 
-          const sessionImages = {
-            prefix: images,
-            delimeter: delimeter
-          }
+              let deleteInfo = await Promise.all(images.map(async (image) => { return _deleteImage(image) }));
 
-          this.getBucket.getFiles(sessionImages)
-          .then(async(results)=>{
-          // console.log(results);
-          const [imgsToDelete] = results;
-          // console.log([imgsToDelete].length);
-
-          if(imgsToDelete.length == 0){
-              resolve("Empty Bucket");
-          }
-      
-          Promise.all(imgsToDelete.map(async(img)=>{
-              return this.getBucket.file(img.metadata.name).delete();
-          }))
-          .then((resolveData)=>{
-              resolve(resolveData);
-          })
-          .catch((err)=>{
+              resolve(deleteInfo);
+            }catch(err){
               console.log(err);
-              reject(err);
-          })      
-          })
-          .catch((err)=>{
-          console.log(err);
-          reject(err);
-          })
+              reject(err)
+            }
+          }
+
+          resolve([])  
         });
       }
     }
   }
 }
-
 module.exports = Session;

@@ -5,20 +5,39 @@ let points = new Array();
 let mainImgRGB = new Array();
 let closeImgs = new Array();
 let imgsHash = new Object;
+let sessions = new Object();
 let setupStarted = false;
 let drawStarted = false;
 let preloadStarted = false;
 let octree = null;
 let mainHas = false;
 let smallHas = false;
-let socket = io();
-// let uri = "http://localhost:3000/";
-let uri = "https://mosiac-p5.herokuapp.com/";
+let uri = "http://localhost:3000/"; 
+// let uri = "https://mosiac-p5.herokuapp.com/";
 
-socket.on('New Session', function(sessionId){
-    setCookie(sessionId);
-    console.log(document.cookie);
-})
+window.onload = function(e){
+    createSession()
+    .then((resolveData) =>{
+        console.log(resolveData);
+        return null;
+    })
+    .catch((rejectData)=>{
+        console.log(rejectData);
+        return null;
+    });
+};
+
+window.onbeforeunload = function(e){
+    deleteSession()
+    .then((resolveData)=>{
+        console.log(resolveData);
+        return null;
+    })
+    .catch((rejectData)=>{
+        console.log(rejectData);
+        return null;
+    });
+};
 
 $('#main').change(function() { 
     // console.log("changed");
@@ -112,7 +131,6 @@ function smallClr(){
 
 function submitImages(){
     $(".upload-page").hide();
-    console.log(getSessionId())
     mainImage = document.getElementById("main").files[0];
     smallImages = document.getElementById("small").files;
     formDataBig = new FormData();
@@ -122,20 +140,16 @@ function submitImages(){
     for(var i = 0; i < smallImages.length; i++){
         formDataSmall.append("images",smallImages[i]);
     }
-    
-    socket.emit('setStorage', getSessionId());
+
 
     let postMainImage =  function(){
         //uploading main image
         console.log("uploading main image");
         return new Promise((resolve,reject)=>{
-        const UrlPostBig = "mainimage";
+            const UrlPostBig = "mainimage";
             $.ajax({
                 url: uri+UrlPostBig,
                 type: 'POST',
-                headers: {
-                    'path': getSessionId()
-                },
                 data: formDataBig,
                 processData: false,
                 contentType: false,
@@ -157,9 +171,6 @@ function submitImages(){
             $.ajax({
                 url: uri+UrlPost,
                 type: 'POST',
-                headers: {
-                    'path': getSessionId(),
-                },
                 data: formDataSmall,
                 processData: false,
                 contentType: false,
@@ -181,9 +192,6 @@ function submitImages(){
             $.ajax({
                 url: uri+UrlGet,
                 type: 'GET',
-                headers: {
-                    'path': getSessionId(),
-                },
                 success:function(data){
                     console.log(data)
                     resolve(["All images recieved",data]);
@@ -201,17 +209,12 @@ function submitImages(){
 
     postMainImage()
     .then((resolveData)=>{
-        console.log(resolveData[0]);
-        // console.log(resolveData[1]);
+        console.log(resolveData[1]);
 
         return resizeSmallImages();
     })
     .then((resolveData)=>{
-        console.log(resolveData[0]);
-
-        // for(var i = 0;i < resolveData[1].length;i++){
-        //     console.log(resolveData[1][i]);
-        // }
+        console.log(resolveData[1]);
 
         return getAllImages();
     })
@@ -223,18 +226,22 @@ function submitImages(){
 
         startPreload();
         preload();
+
+        return null;
     })
     .catch((rejectData)=>{
         console.log(rejectData);
+        return null;
     });
 }
 
 function preload(){
     if(preloadStarted == true){
-        mainImage = imgArray[0][0].metadata.mediaLink;
+        mainImage = imgArray[0][0].mediaLink;
+        console.log(mainImage)
         img = loadImage(mainImage);
         for (var i = 0; i < imgArray[1].length; i++) {
-            resizedImage = imgArray[1][i].metadata.mediaLink
+            resizedImage = imgArray[1][i][0].mediaLink
             allImages[i] = loadImage(resizedImage);
         }
         setTimeout(()=>{
@@ -331,58 +338,89 @@ function draw(){
 
         noLoop();
 
-        // deleteUploads()
-        // .then((resolveData)=>{
-        //     console.log(resolveData[0]+resolveData[1]);
-        // })
-        // .catch((rejectData)=>{
-        //     console.log(rejectData);
-        // })
+        deleteUploads()
+        .then((resolveData)=>{
+            console.log(resolveData[0]+resolveData[1]);
+            return null;
+        })
+        .catch((rejectData)=>{
+            console.log(rejectData);
+            return null;
+        })
     }
 }
 
-// function deleteUploads(){
-//     return new Promise((resolve,reject)=>{
-//         const UrlGet = "deleteimages";
-//         $.ajax({
-//             url: uri+UrlGet,
-//             type: 'GET',
-//             success:function(data){
-//                 resolve(["Image upload deletion ",data]);
-//             },
-//             error:function(error){
-//                 reject('Error',error);
-//             }
-//         });      
-//     });
-// }
+function deleteUploads(){
+    return new Promise((resolve,reject)=>{
+        const UrlGet = "deleteimages";
+        $.ajax({
+            url: uri+UrlGet,
+            type: 'GET',
+            success:function(data){
+                resolve(["Image upload deletion ",data]);
+            },
+            error:function(error){
+                reject('Error',error);
+            }
+        });      
+    });
+}
 
-// function deleteSessions(){
-//     return new Promise((resolve,reject)=>{
-//         const UrlGet = "delete-session";
-//         $.ajax({
-//             // async: false,
-//             url: uri+UrlGet,
-//             type: 'GET',
-//             // data: JSON.stringify({sessionId: getSessionId()}),
-//             // contentType: "application/json; charset=utf-8",
-//             processData: false,
-//             success:function(data){
-//                 resolve(["session deletion",data]);
-//             },
-//             error:function(error){
-//                 reject('Error',error);
-//             }
-//         });      
-//     });
-// }
+function deleteSession(){
+    return new Promise((resolve,reject)=>{
+        const UrlGet = "deleteSession";
+        $.ajax({
+            async: false,
+            url: uri+UrlGet,
+            type: 'GET',
+            processData: false,
+            success:function(data){
+                resolve(["session deletion",data]);
+            },
+            error:function(error){
+                reject('Error',error);
+            }
+        });      
+    });
+}
+
+function createSession(){
+    return new Promise((resolve,reject)=>{
+    const UrlGet = "createsession";
+        $.ajax({
+            url: uri+UrlGet,
+            type: 'GET',
+            success:function(data){
+                resolve(data);
+            },
+            error:function(error){
+                reject('Error',error);
+            }
+        });
+    });
+}
 
 function getSessionId(){
-    let cookie = document.cookie;
-    sessionId = cookie.split("=");
-    sessionId = sessionId[1];
-    console.log(sessionId);
-    return sessionId;
+    return new Promise(async (resolve,reject)=>{
+        if(!document.cookie){
+            reject("Unable to recieve sessionId, try turning on cookies");
+;       }
+
+        let cookie = document.cookie;
+        cookies = cookieString.split(" ");
+        
+        await cookies.map((cookie)=>{
+            if(cookie.includes("io")){
+                sessionString = cookie;
+            }
+        })
+
+        sessionId = sessionString.split("=");
+        sessionId = cookie.split("=");
+        sessionId = sessionId[1];
+
+        resolve(sessionId);
+    });
 }
 
 function startPreload(){
@@ -407,8 +445,4 @@ function componentToHex(c) {
 
 function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
-
-function setCookie(sessionId){
-    document.cookie = "sessionId ="+sessionId+";";
 }
