@@ -1,5 +1,5 @@
 {
-  "name": "mosaic-p5-revised",
+  "name": "mosaic-p5-revised-demo",
   "version": "1.0.0",
   "description": "This is the revised mosaic image creator, this one will be a lot faster then my previous attempt because im going to be implemeneting an octree for the color comparisons.",
   "scripts": {
