@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This is the revised mosaic image creator, this one will be a lot faster then my previous attempt because im going to be implemeneting an octree for the color comparisons.",
   "scripts": {
-    "start": "node ./backend/server.js",
+    "start": " node ./backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Menekou B. Coulibaly",
@@ -12,20 +12,26 @@
     "bluebird": "*",
     "bootstrap": "*",
     "consolidate": "*",
-    "cookie": "*",
-    "cookie-parser": "*",
+    "cookie": "^0.4.0",
+    "cookie-parser": "^1.4.5",
     "express": "*",
+    "express-session": "^1.17.0",
     "jquery": "*",
-    "lodash": "*",
+    "lodash": "^4.17.15",
     "mkdirp": "*",
-    "multer": "*",
+    "multer": "^1.4.2",
     "multer-sharp": "*",
     "mustache": "*",
     "p5": "*",
-    "popper": "*",
+    "popper": "^1.0.1",
     "promisepipe": "*",
-    "request": "*",
-    "sharp": "*",
+    "request": "^2.88.0",
+    "sharp": "^0.22.1",
     "useragent": "*"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "nodemon": "^2.0.2"
   }
 }
