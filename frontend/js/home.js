@@ -14,11 +14,13 @@ let imgsHash = new Object;
 let octree = null;
 let setupStarted = false;
 let drawStarted = false;
+// let url = "http://localhost:3000/";
+let url = "https://mosaic-p5--demo.herokuapp.com/";
 
 
 getImages = function(){
     return new Promise((resolve,reject) => {
-        const UrlGet = "http://localhost:3000/getimages";
+        const UrlGet = url+"getimages";
         $.ajax({
             url: UrlGet,
             type: 'GET',
@@ -36,7 +38,7 @@ getImages = function(){
 
 resizeImages = function(){
     return new Promise((resolve,reject) => {
-        const UrlPost = "http://localhost:3000/resizeimages";
+        const UrlPost = url+"resizeimages";
         $.ajax({
             url: UrlPost,
             type: 'POST',
@@ -199,6 +201,8 @@ function draw(){
         }
         
         noLoop();
+
+        // $("#loading").css("display","none");
     }
 }
 
