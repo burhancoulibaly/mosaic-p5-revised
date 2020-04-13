@@ -27,9 +27,5 @@
     "request": "*",
     "sharp": "*",
     "useragent": "*"
-  },
-  "devDependencies": {
-    "eslint": "*",
-    "eslint-plugin-promise": "*"
   }
 }
