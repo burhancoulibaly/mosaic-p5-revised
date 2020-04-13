@@ -1,3 +1,9 @@
+// boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
+// octree = new Quad(boundary,9);
+// point = new Point(155,126,143)
+// octree.newPoint(point);
+// console.log(octree.node.getTotalPoints(octree.node))
+let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
 let imgArray;
 let mainImage;
 let allImages = new Array();
@@ -5,272 +11,111 @@ let points = new Array();
 let mainImgRGB = new Array();
 let closeImgs = new Array();
 let imgsHash = new Object;
-let sessions = new Object();
+let octree = null;
 let setupStarted = false;
 let drawStarted = false;
-let preloadStarted = false;
-let octree = null;
-let mainHas = false;
-let smallHas = false;
-let uri = "http://localhost:3000/"; 
-// let uri = "https://mosiac-p5.herokuapp.com/";
-
-window.onload = function(e){
-    createSession()
-    .then((resolveData) =>{
-        console.log(resolveData);
-        return null;
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-        return null;
-    });
-};
-
-window.onbeforeunload = function(e){
-    deleteSession()
-    .then((resolveData)=>{
-        console.log(resolveData);
-        return null;
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-        return null;
-    });
-};
-
-$('#main').change(function() { 
-    // console.log("changed");
-    if((document.getElementById("main").files).length == 0){
-        mainHas = false;
-        
-        $("#mainImgLabel img").remove();
-        $("#mainImgLabel").append('<div id="mainImgText">Click To Insert Main Image</div>');
-        
-        $("#sendImgs").removeClass("create");
-        $("#sendImgs").addClass("create-hidden");
-    }else{
-        mainImage = URL.createObjectURL(document.getElementById("main").files[0]);
-        // console.log(mainImage);
-
-        $("#mainImgText").remove()
-
-        $("#mainImgLabel").prepend('<img class="prevMain" src="" />');
-        $("#mainImgLabel img").attr("src",mainImage);
-    
-        mainHas = true;
-
-        if(mainHas == true && smallHas == true){
-            $("#sendImgs").removeClass("create-hidden");
-            $("#sendImgs").addClass("create");
-        }       
-    }
-}); 
-
-$('#small').change(function() { 
-    // console.log("changed");
-    blobImages = new Array();
-    smallImages = document.getElementById("small").files;
-    
-    if((document.getElementById("small").files).length < 4){
-        smallHas = false;
-
-        $("#smallImgsLabel img").remove();
-        $("#smallImgsText").remove();
-        $("#smallImgsLabel").append('<div id="smallImgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>');
-        
-        $("#sendImgs").removeClass("create");
-        $("#sendImgs").addClass("create-hidden");
-
-    }else{
-        for(var i = 0; i < smallImages.length; i++){
-            smallImage = URL.createObjectURL(smallImages[i]);
-            blobImages.push(smallImage);
-        }
-        // console.log(blobImages); 
-    
-        $("#smallImgsText").remove();
-    
-        for(var i = 0; i < blobImages.length; i++){
-            $("#smallImgsLabel").append('<img class="prevSmall" src='+blobImages[i]+' />');
-        }
-
-        smallHas = true;
-
-        if(mainHas == true && smallHas == true){
-            $("#sendImgs").removeClass("create-hidden");
-            $("#sendImgs").addClass("create");
-        }
-    }
-}); 
-
-function mainClr(){
-    mainHas = false;
-
-    $("#sendImgs").removeClass("create");
-    $("#sendImgs").addClass("create-hidden");
-    
-    $("#mainImg").get(0).reset();
-    $("#mainImgLabel img").remove();
-    $("#mainImgLabel").append('<div id="mainImgText">Click To Insert Main Image</div>');
-
-}
-
-function smallClr(){
-    smallHas = false;
-
-    $("#sendImgs").removeClass("create");
-    $("#sendImgs").addClass("create-hidden");
-
-    $("#smallImg").get(0).reset();
-    $("#smallImgsLabel img").remove();
-    $("#smallImgsText").remove();
-    $("#smallImgsLabel").append('<div id="smallImgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>');
-
-}
-
-function submitImages(){
-    $(".upload-page").hide();
-    mainImage = document.getElementById("main").files[0];
-    smallImages = document.getElementById("small").files;
-    formDataBig = new FormData();
-    formDataSmall = new FormData();
-
-    formDataBig.append("image",mainImage);
-    for(var i = 0; i < smallImages.length; i++){
-        formDataSmall.append("images",smallImages[i]);
-    }
 
 
-    let postMainImage =  function(){
-        //uploading main image
-        console.log("uploading main image");
-        return new Promise((resolve,reject)=>{
-            const UrlPostBig = "mainimage";
-            $.ajax({
-                url: uri+UrlPostBig,
-                type: 'POST',
-                data: formDataBig,
-                processData: false,
-                contentType: false,
-                success:function(data){
-                    resolve(["Main image posted",data]);
-                },
-                error:function(error){
-                    reject('Error',error);
-                }
-            });
+getImages = function(){
+    return new Promise((resolve,reject) => {
+        const UrlGet = "http://localhost:3000/getimages";
+        $.ajax({
+            url: UrlGet,
+            type: 'GET',
+            async:false, 
+            success:function(data){
+                // console.log('success',data);
+                resolve(data);
+            },
+            error:function(error){
+                reject(error);
+            }
         });
-    }
-
-    let resizeSmallImages = function(){
-        //resizing and uploading small images
-        console.log("resizing and uploading small images");
-        return new Promise((resolve,reject)=>{
-            const UrlPost = "resizeimages";
-            $.ajax({
-                url: uri+UrlPost,
-                type: 'POST',
-                data: formDataSmall,
-                processData: false,
-                contentType: false,
-                success:function(data){
-                    resolve(["Small images resized",data]);
-                },
-                error:function(error){
-                    reject('Error',error);
-                }
-            });       
-        });
-    }
-
-    let getAllImages = function(){
-        //getting all images
-        console.log("getting all images");
-        return new Promise((resolve,reject)=>{
-            const UrlGet = "getimages";
-            $.ajax({
-                url: uri+UrlGet,
-                type: 'GET',
-                success:function(data){
-                    console.log(data)
-                    resolve(["All images recieved",data]);
-                },
-                error:function(error){
-                    reject('Error',error);
-                }
-            });
-        });
-    }
-
-    console.time();
-
-    console.log("Uploading and resizing images");
-
-    postMainImage()
-    .then((resolveData)=>{
-        console.log(resolveData[1]);
-
-        return resizeSmallImages();
     })
-    .then((resolveData)=>{
-        console.log(resolveData[1]);
-
-        return getAllImages();
-    })
-    .then((resolveData)=>{
-        console.log(resolveData);
-        imgArray = resolveData[1];
-
-        console.timeEnd();
-
-        startPreload();
-        preload();
-
-        return null;
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-        return null;
-    });
 }
 
-function preload(){
-    if(preloadStarted == true){
-        mainImage = imgArray[0][0].mediaLink;
-        console.log(mainImage)
-        img = loadImage(mainImage);
-        for (var i = 0; i < imgArray[1].length; i++) {
-            resizedImage = imgArray[1][i][0].mediaLink
-            allImages[i] = loadImage(resizedImage);
-        }
-        setTimeout(()=>{
-            startSetup();
-            setup();
-        },2000);
+resizeImages = function(){
+    return new Promise((resolve,reject) => {
+        const UrlPost = "http://localhost:3000/resizeimages";
+        $.ajax({
+            url: UrlPost,
+            type: 'POST',
+            data: {
+                images: imgArray
+            },
+            success: function(data){
+                // console.log('success',data);
+                resolve(data);
+            },
+            error: function(error){
+                // console.log(error);
+                reject(error);
+            }
+        });
+    })
+}
+
+function loadCompleteImage(image){
+    return new Promise((resolve,reject) => {
+        loadImage(image, async(result,error) => {
+            if(error){
+                reject(error)
+            }
+            
+            resolve(result);
+        })
+    })
+}
+
+console.log("loading images");
+console.time();
+async function preload() {
+    try {
+        imgArray = await getImages();
+        console.log(imgArray);
+
+        result = await resizeImages();
+        console.log(result);
+
+        mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
+
+        img = await loadCompleteImage("./images/images/"+ mainImage);
+
+        await Promise.all(imgArray.map(async(img, i) => {
+            loadedImageData = await loadCompleteImage("./images/resized_images/"+img);
+            allImages[i] = loadedImageData;
+        }))
+
+        octree = new Quad(boundary,Math.ceil(allImages.length/10));
+
+        startSetup();
+        setup();
+
+    }catch(err){
+        console.log(err);
     }
 }
+console.timeEnd();
+console.log("Loading images end")
 
 function setup(){
     if(setupStarted == true){
-        let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-        octree = new Quad(boundary,Math.ceil(allImages.length/100));
-
         w = img.width;
         h = img.height;
 
-        pxSize = (Math.round(w/h))*10;
+        pxSize = (Math.round(w/h)*5);
         canvas = createCanvas(w*2,h*2);
         canvas.position(0,0);
 
+        console.log("Ave Img RGB")
+        console.time();
         for (var i = 0; i < allImages.length; i++) {
-            colArray = null;
             var red = 0;
             var green = 0;
             var blue = 0;
-            // console.log(allImages[i]);
+            
             allImages[i].loadPixels();
-        
+            
             for (var j = 0; j < allImages[i].pixels.length; j+=4) {
                 red += allImages[i].pixels[j];
                 green += allImages[i].pixels[j+1];
@@ -286,16 +131,23 @@ function setup(){
             // console.log(r,g,b);
             points.push(new Point(r,g,b))
         }
+        console.timeEnd();
+        console.log("Ave Img RGB end")
 
         
+        console.log("add points to octree")
+        console.time();
         for(var i = 0; i < points.length; i++){
-            // console.log(points[i]);
             octree.newPoint(points[i])
         }
+        console.timeEnd();
+        console.log("add points to octree end")
         
-        console.log(octree.node.getTotalPoints(octree.node));
+        // console.log(octree.node.getTotalPoints(octree.node));
 
         img.loadPixels();
+        console.log("push points 2")
+        console.time();
         for (var i = 0; i < w; i+=pxSize) {
             for (var j = 0; j < h; j+=pxSize) {
                 var index = 4 * (i + (j * w));
@@ -305,127 +157,50 @@ function setup(){
                 g = img.pixels[index + 1];
                 b = img.pixels[index + 2];
                 
-            
                 mainImgRGB.push(new Array(new Point(r,g,b),i,j));
             }
         }
+
         startDraw();
+        console.timeEnd();
+        console.log("push points 2 end")
     }
 }
 
 function draw(){
     if(drawStarted == true){
-        console.log(mainImgRGB.length);
+        noStroke();
+        // console.log(mainImgRGB.length);
+        console.log("close points")
+        console.time();
         for(var i = 0; i < mainImgRGB.length; i++){
             // console.log(mainImgRGB[i][0])
             let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
             // console.log(closePoint);
             closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
         }
-        
+        console.timeEnd();
+        console.log("close points end")
         // console.log(closeImgs);
 
+        console.log("drawing image")
+        console.time();
         for(var i = 0; i < closeImgs.length; i++){
             hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
             image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
         }
+        console.timeEnd();
+        console.log("drawing image end")
         
         if(w*2 > window.innerWidth ){
             image(img,0,closeImgs[closeImgs.length-1][2]+1,w,h);
         }else{
             image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
         }
-
-        noLoop();
-
-        deleteUploads()
-        .then((resolveData)=>{
-            console.log(resolveData[0]+resolveData[1]);
-            return null;
-        })
-        .catch((rejectData)=>{
-            console.log(rejectData);
-            return null;
-        })
-    }
-}
-
-function deleteUploads(){
-    return new Promise((resolve,reject)=>{
-        const UrlGet = "deleteimages";
-        $.ajax({
-            url: uri+UrlGet,
-            type: 'GET',
-            success:function(data){
-                resolve(["Image upload deletion ",data]);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });      
-    });
-}
-
-function deleteSession(){
-    return new Promise((resolve,reject)=>{
-        const UrlGet = "deleteSession";
-        $.ajax({
-            async: false,
-            url: uri+UrlGet,
-            type: 'GET',
-            processData: false,
-            success:function(data){
-                resolve(["session deletion",data]);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });      
-    });
-}
-
-function createSession(){
-    return new Promise((resolve,reject)=>{
-    const UrlGet = "createsession";
-        $.ajax({
-            url: uri+UrlGet,
-            type: 'GET',
-            success:function(data){
-                resolve(data);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });
-    });
-}
-
-function getSessionId(){
-    return new Promise(async (resolve,reject)=>{
-        if(!document.cookie){
-            reject("Unable to recieve sessionId, try turning on cookies");
-;       }
-
-        let cookie = document.cookie;
-        cookies = cookieString.split(" ");
         
-        await cookies.map((cookie)=>{
-            if(cookie.includes("io")){
-                sessionString = cookie;
-            }
-        })
-
-        sessionId = sessionString.split("=");
-        sessionId = cookie.split("=");
-        sessionId = sessionId[1];
-
-        resolve(sessionId);
-    });
-}
-
-function startPreload(){
-    preloadStarted = true;
-    console.log("preloadStarted",preloadStarted)
+        
+        noLoop();
+    }
 }
 
 function startSetup(){
