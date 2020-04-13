@@ -198,7 +198,6 @@ function draw(){
             image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
         }
         
-        
         noLoop();
     }
 }
