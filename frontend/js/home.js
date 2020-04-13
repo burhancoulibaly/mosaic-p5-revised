@@ -15,7 +15,7 @@ let octree = null;
 let setupStarted = false;
 let drawStarted = false;
 // let url = "http://localhost:3000/";
-let url = "https://mosaic-p5--demo.herokuapp.com/";
+let url = "https://mosaic-p5-demo.herokuapp.com/";
 
 
 getImages = function(){
