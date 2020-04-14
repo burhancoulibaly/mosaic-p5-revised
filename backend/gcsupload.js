@@ -14,7 +14,7 @@ const storage = new Storage({
   },
 });
 
-console.log(storage);
+console.log("StorageInfo:",storage);
 
 const bucket = storage.bucket(CLOUD_BUCKET);
 
