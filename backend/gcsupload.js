@@ -14,7 +14,7 @@ const storage = new Storage({
   },
 });
 
-// console.log(storage);
+console.log(storage);
 
 const bucket = storage.bucket(CLOUD_BUCKET);
 
@@ -63,7 +63,7 @@ function uploadResizedImage(imageName){
 }
 
 async function getResizedImages(){
-    return new Promise(async(resolve,reject)=>{
+    return new Promise((resolve,reject)=>{
         const resizedImagesFolder = "resized_images";
 
         const delimeter = "/";
@@ -74,7 +74,7 @@ async function getResizedImages(){
         }
 
         bucket.getFiles(optionsResize)
-        .then(async(results)=>{
+        .then((results)=>{
             const [resizedImageLinks] = results;
 
             resolve(resizedImageLinks);
