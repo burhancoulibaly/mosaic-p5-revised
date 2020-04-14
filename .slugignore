@@ -1,0 +1,6 @@
+*.psd
+*.pdf
+/test
+/spec
+package-lock.json
+node_modules
