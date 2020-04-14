@@ -4,7 +4,6 @@
 // octree.newPoint(point);
 // console.log(octree.node.getTotalPoints(octree.node))
 let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-let imgArray;
 let mainImage;
 let allImages = new Array();
 let points = new Array();
@@ -17,14 +16,22 @@ let drawStarted = false;
 // let url = "http://localhost:3000/";
 let url = "https://mosaic-p5-demo.herokuapp.com/";
 
+$(window).on("unload", function(e) {
+    deleteUploads()
+    .then((resolveData)=>{
+        console.log(resolveData[0]+resolveData[1]);
+    })
+    .catch((rejectData)=>{
+        console.log(rejectData);
+    });
+});
 
 getImages = function(){
     return new Promise((resolve,reject) => {
-        const UrlGet = url+"getimages";
+        const UrlGet = url+"get-images";
         $.ajax({
             url: UrlGet,
             type: 'GET',
-            async:false, 
             success:function(data){
                 // console.log('success',data);
                 resolve(data);
@@ -36,25 +43,41 @@ getImages = function(){
     })
 }
 
-resizeImages = function(){
-    return new Promise((resolve,reject) => {
-        const UrlPost = url+"resizeimages";
+let resizeImages = function(images){
+    //resizing and uploading small images
+    console.log("resizing and uploading small images");
+    return new Promise((resolve,reject)=>{
+        const UrlPost = url+"upload-resized-images";
         $.ajax({
             url: UrlPost,
             type: 'POST',
-            data: {
-                images: imgArray
-            },
-            success: function(data){
-                // console.log('success',data);
+            data: { images: images },
+            success:function(data){
                 resolve(data);
             },
-            error: function(error){
-                // console.log(error);
-                reject(error);
+            error:function(error){
+                reject('Error',error);
+            }
+        });       
+    });
+}
+
+let getResizedImages = function(){
+    //getting all images
+    console.log("getting all images");
+    return new Promise((resolve,reject)=>{
+        const UrlGet = url+"get-resized-images";
+        $.ajax({
+            url: UrlGet,
+            type: 'GET',
+            success:function(data){
+                resolve(data);
+            },
+            error:function(error){
+                reject('Error',error);
             }
         });
-    })
+    });
 }
 
 function loadCompleteImage(image){
@@ -73,18 +96,24 @@ console.log("loading images");
 console.time();
 async function preload() {
     try {
-        imgArray = await getImages();
+        const deleteUploadsResult = await deleteUploads()
+        console.log(deleteUploadsResult);
+
+        const imgArray = await getImages();
         console.log(imgArray);
 
-        result = await resizeImages();
-        console.log(result);
+        const resizeImagesResult = await resizeImages(imgArray);
+        console.log(resizeImagesResult);
+
+        const resizedImages = await getResizedImages();
+        console.log(resizedImages);
 
         mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
-
         img = await loadCompleteImage("./images/images/"+ mainImage);
 
-        await Promise.all(imgArray.map(async(img, i) => {
-            loadedImageData = await loadCompleteImage("./images/resized_images/"+img);
+        await Promise.all(resizedImages.map(async(resizedImage, i) => {
+            console.log(resizedImage.metadata.selfLink);
+            loadedImageData = await loadCompleteImage(resizedImage.metadata.mediaLink);
             allImages[i] = loadedImageData;
         }))
 
@@ -204,6 +233,22 @@ function draw(){
 
         // $("#loading").css("display","none");
     }
+}
+
+function deleteUploads(){
+    return new Promise((resolve,reject)=>{
+        const UrlGet = url+"delete-images";
+        $.ajax({
+            url: UrlGet,
+            type: 'GET',
+            success:function(data){
+                resolve(["Image upload deletion ",data]);
+            },
+            error:function(error){
+                reject('Error',error);
+            }
+        });      
+    });
 }
 
 function startSetup(){

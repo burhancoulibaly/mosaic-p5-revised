@@ -8,7 +8,8 @@ const express = require("express"),
     mkdirp = require('mkdirp'),
     request = require('request'),
     cookieParser = require('cookie-parser'),
-    sharp = require("sharp");
+    sharp = require("sharp"),
+    gcsUpload = require('./gcsupload');
 
     main = path.resolve("./frontend/html/home.html"),
     css = path.resolve("./frontend/css"),
@@ -44,55 +45,53 @@ app.get('/',function(req,res){
 })
 
 
-app.get('/getimages',function(req,res){
+app.get('/get-images',async function(req,res){
   fs.readdir(images+"/images", function(err, retrievedImages){
     if(err){
-      console.error("Could not list your directory.", err);
+      res.send("Could not list your directory.", err);
       process.exit(1);
     }
+    
     res.send(retrievedImages);
   })
 })
 
-app.post('/resizeimages',async function(req,res){
-  let images = req.body.images;
+app.post('/upload-resized-images',async function(req,res,next){
+  let imageNames = req.body.images;
   let resizedImages = new Array();
 
-  try {
-    await Promise.all(images.map(async(image) => {
-      resizedImage = await resizeImage(image)
-      resizedImages.push(resizedImage);
-    }));
+  try{
+    result = await Promise.all(imageNames.map(async(imageName) => {
+                resizedImage = await gcsUpload.uploadResizedImage(imageName);
+                resizedImages.push(resizedImage);
+              }));
   }catch(err){
     res.send(err);
   }
 
   console.log(resizedImages);
-
   res.send(resizedImages);
-})
+});
 
-function resizeImage(image){
-  return new Promise((resolve,reject) => {
-    try {
-      let inStream = fs.createReadStream(images+"/images/"+image);
-      let outStream = fs.createWriteStream(images+"/resized_images/"+image, {flags: "w"});
-
-      // on error of output file being saved
-      outStream.on('error', function(error) {
-        reject("Error: ", error);
-      });
-
-      // on success of output file being saved
-      outStream.on('close', function() {
-        resolve("Successfully saved file");
-      });
-
-      let transform = sharp().resize({width:100,height:100});
-
-      inStream.pipe(transform).pipe(outStream);
-    }catch(err){
-      reject(err);
-    }
+app.get('/get-resized-images',function(req,res,err){
+  gcsUpload.getResizedImages()
+  .then((resolveData)=>{
+    // console.log("images",resolveData);
+    res.send(resolveData);
   })
-}
+  .catch((rejectData)=>{
+    res.send(rejectData);
+  })
+});
+
+app.get('/delete-images',function(req,res,err){
+  gcsUpload.deleteImages()
+  .then((resolveData)=>{
+    console.log(resolveData);
+    res.send(resolveData);
+  })
+  .catch((rejectData)=>{
+    console.log(rejectData);
+    res.send(rejectData);
+  })
+});
