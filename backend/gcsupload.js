@@ -63,25 +63,42 @@ function uploadResizedImage(imageName){
 }
 
 async function getResizedImages(){
-    return new Promise((resolve,reject)=>{
+    return new Promise(async(resolve,reject)=>{
         const resizedImagesFolder = "resized_images";
 
         const delimeter = "/";
+
+        const signedUrlOptions = {
+            version: 'v4',
+            action: 'read',
+            expires: Date.now() + 3 * 60 * 1000 // 3 minutes
+        };
 
         const optionsResize = {
             prefix:resizedImagesFolder,
             delimeter:delimeter
         }
 
-        bucket.getFiles(optionsResize)
-        .then((results)=>{
-            const [resizedImageLinks] = results;
+        try{
+            const [resizedImageLinks] = await bucket.getFiles(optionsResize);
+            let signedUrls = new Array();
+            
+            await Promise.all(resizedImageLinks.map(async(resizedImageLink) => {
+                try{
+                    const [signedUrl] = await bucket.file(resizedImageLink.name).getSignedUrl(signedUrlOptions);
+                    console.log(signedUrl);
+                    signedUrls.push(signedUrl);
+                }catch(err){
+                    console.log(err);
+                    reject(err);
+                }
+            }));
 
-            resolve(resizedImageLinks);
-        })
-        .catch((err)=>{
+            resolve(signedUrls);
+        }catch(err){
+            console.log(err);
             reject(err);
-        })
+        }
     })
 }
 
@@ -114,9 +131,9 @@ async function deleteImages(){
     });
 };
 
-  module.exports = {
+module.exports = {
     uploadResizedImage,
     bucket,
     getResizedImages,
     deleteImages
-  };
+};

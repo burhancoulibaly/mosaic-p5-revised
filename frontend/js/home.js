@@ -112,8 +112,7 @@ async function preload() {
         img = await loadCompleteImage("./images/images/"+ mainImage);
 
         await Promise.all(resizedImages.map(async(resizedImage, i) => {
-            console.log(resizedImage.metadata.selfLink);
-            loadedImageData = await loadCompleteImage(resizedImage.metadata.mediaLink);
+            loadedImageData = await loadCompleteImage(resizedImage);
             allImages[i] = loadedImageData;
         }))
 
