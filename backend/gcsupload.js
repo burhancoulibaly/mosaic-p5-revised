@@ -14,9 +14,27 @@ const storage = new Storage({
   },
 });
 
-console.log("StorageInfo:",storage);
+// console.log("StorageInfo:",storage);
 
 const bucket = storage.bucket(CLOUD_BUCKET);
+// const corsConfiguration = [
+//     {
+//       "origin": ["http://localhost:3000", "https://mosaic-p5-demo.herokuapp.com"],
+//       "responseHeader": ["Content-Type", "Authorization",  "Content-Length", "User-Agent", "x-goog-resumable"],
+//       "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     }
+// ]; // allows request from "https://mosaic-p5-demo.herokuapp.com" and "http://localhost:3000"
+
+// bucket.setCorsConfiguration(corsConfiguration).then(function(data) {
+//     const apiResponse = data[0];
+//     console.log(apiResponse.cors[0].origin);
+//     console.log(apiResponse.cors[0].responseHeader);
+// });
+
+bucket.getMetadata()
+.then((result) => {
+    console.log(result[1].body.cors);
+})
 
 function getPublicUrl (filename) {
   return 'https://storage.googleapis.com/'+bucket.name+'/'+filename;
@@ -88,9 +106,9 @@ async function getResizedImages(){
                     const [signedUrl] = await bucket.file(resizedImageLink.name).getSignedUrl(signedUrlOptions);
                     console.log(signedUrl);
                     signedUrls.push(signedUrl);
-                }catch(err){
-                    console.log(err);
-                    reject(err);
+                }catch(error){
+                    console.log(error);
+                    reject(error);
                 }
             }));
 

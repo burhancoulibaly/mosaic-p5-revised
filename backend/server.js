@@ -9,7 +9,8 @@ const express = require("express"),
     request = require('request'),
     cookieParser = require('cookie-parser'),
     sharp = require("sharp"),
-    gcsUpload = require('./gcsupload');
+    gcsUpload = require('./gcsupload'),
+    fetch = require("node-fetch");
 
     main = path.resolve("./frontend/html/home.html"),
     css = path.resolve("./frontend/css"),
