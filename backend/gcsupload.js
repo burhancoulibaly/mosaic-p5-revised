@@ -64,7 +64,7 @@ function uploadResizedImage(imageName){
         const remoteWriteStream = bucket.file("resized_images/"+imageName).createWriteStream(); 
 
         // on error of output file being saved
-        remoteWriteStream.on('error', function(err) {
+        readStream.on('error', function(err) {
             reject("Error:",err);
         });
         
