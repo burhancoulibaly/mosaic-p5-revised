@@ -46,28 +46,28 @@ app.get('/',function(req,res){
 })
 
 
-app.get('/get-images',async function(req,res){
-  fs.readdir(images+"/images", function(err, retrievedImages){
-    if(err){
-      res.send("Could not list your directory.", err);
-      process.exit(1);
-    }
-    
-    res.send(retrievedImages);
-  })
+app.get('/get-stock-images',async function(req,res){
+  try{
+     const stockImages = await gcsUpload.getStockImages();
+     res.send(stockImages);
+  }catch(err){
+    res.send(err);
+    return;
+  }
 })
 
 app.post('/upload-resized-images',async function(req,res,next){
-  let imageNames = req.body.images;
+  let images = req.body.images;
   let resizedImages = new Array();
 
   try{
-    result = await Promise.all(imageNames.map(async(imageName) => {
-                resizedImage = await gcsUpload.uploadResizedImage(imageName);
-                resizedImages.push(resizedImage);
+    result = await Promise.all(images.map(async(image) => {
+                  resizedImage = await gcsUpload.uploadResizedImage(image);
+                  resizedImages.push(resizedImage);
               }));
   }catch(err){
     res.send(err);
+    return;
   }
 
   console.log(resizedImages);

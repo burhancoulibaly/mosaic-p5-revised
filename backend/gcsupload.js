@@ -40,28 +40,9 @@ function getPublicUrl (filename) {
   return 'https://storage.googleapis.com/'+bucket.name+'/'+filename;
 }
 
-function uploadResizedImages(req,res,next){
-    // console.log(req.files);
-    // console.log(req.file);
-    
-    if (!req.files) {
-        return next();
-    }
-
-    imgUrls = new Array();
-
-    for(var i = 0;i < req.files.length;i++){
-        const gcsName = "resized_images/"+req.files[i].fieldname + '-' + Date.now() + path.extname(req.files[i].originalname);
-        imgUrls[i] = getPublicUrl(gcsName)
-    }
-
-    req.files.cloudStoragePublicUrl = imgUrls;
-    next();
-}
-
 function uploadResizedImage(imageName){
-    return new Promise((resolve,reject) => {
-        const readStream  = fs.createReadStream(images+"/images/"+imageName);
+    return new Promise(async(resolve,reject) => {
+        const readStream  = bucket.file(imageName).createReadStream();
         const remoteWriteStream = bucket.file("resized_images/"+imageName).createWriteStream(); 
 
         // on error of output file being saved
@@ -80,10 +61,9 @@ function uploadResizedImage(imageName){
     });
 }
 
-async function getResizedImages(){
+async function getStockImages(){
     return new Promise(async(resolve,reject)=>{
-        const resizedImagesFolder = "resized_images";
-
+        const stockImagesFolder = "stock_images";
         const delimeter = "/";
 
         const signedUrlOptions = {
@@ -92,18 +72,60 @@ async function getResizedImages(){
             expires: Date.now() + 3 * 60 * 1000 // 3 minutes
         };
 
-        const optionsResize = {
-            prefix:resizedImagesFolder,
-            delimeter:delimeter
+        const optionsStockImages = {
+            prefix: stockImagesFolder,
+            delimeter: delimeter
         }
 
         try{
-            const [resizedImageLinks] = await bucket.getFiles(optionsResize);
+            const [stockImages] = await bucket.getFiles(optionsStockImages);
+            const mainImage = stockImages[Math.floor(Math.random()*stockImages.length)];
+            const [signedMainImageUrl] = await bucket.file(mainImage.name).getSignedUrl(signedUrlOptions);
+            let stockImageNames = new Array();
+
+            await Promise.all(stockImages.map(async(stockImage) => {
+                if(stockImage.name !== "stock_images/"){
+                    try{
+                        const stockImageName = stockImage.name;
+                        stockImageNames.push(stockImageName);
+                    }catch(error){
+                        console.log(error);
+                        reject(error);
+                    }
+                }
+            }));
+
+            resolve([signedMainImageUrl, stockImageNames]);
+        }catch(err){
+            console.log(err);
+            reject(err);
+        }
+    }) 
+}
+
+async function getResizedImages(){
+    return new Promise(async(resolve,reject)=>{
+        const resizedImagesFolder = "resized_images";
+        const delimeter = "/";
+
+        const signedUrlOptions = {
+            version: 'v4',
+            action: 'read',
+            expires: Date.now() + 3 * 60 * 1000 // 3 minutes
+        };
+
+        const optionsResizedImages = {
+            prefix: resizedImagesFolder,
+            delimeter: delimeter
+        }
+
+        try{
+            const [resizedImages] = await bucket.getFiles(optionsResizedImages);
             let signedUrls = new Array();
             
-            await Promise.all(resizedImageLinks.map(async(resizedImageLink) => {
+            await Promise.all(resizedImages.map(async(resizedImage) => {
                 try{
-                    const [signedUrl] = await bucket.file(resizedImageLink.name).getSignedUrl(signedUrlOptions);
+                    const [signedUrl] = await bucket.file(resizedImage.name).getSignedUrl(signedUrlOptions);
                     console.log(signedUrl);
                     signedUrls.push(signedUrl);
                 }catch(error){
@@ -122,7 +144,15 @@ async function getResizedImages(){
 
 async function deleteImages(){
     return new Promise(async(resolve,reject)=>{
-        bucket.getFiles()
+        const resizedImagesFolder = "resized_images";
+        const delimeter = "/";
+
+        const optionsResizedImages = {
+            prefix:resizedImagesFolder,
+            delimeter:delimeter
+        }
+
+        bucket.getFiles(optionsResizedImages)
         .then(async(results)=>{
             console.log(results);
             const [imgsToDelete] = results;
@@ -152,6 +182,7 @@ async function deleteImages(){
 module.exports = {
     uploadResizedImage,
     bucket,
+    getStockImages,
     getResizedImages,
     deleteImages
 };

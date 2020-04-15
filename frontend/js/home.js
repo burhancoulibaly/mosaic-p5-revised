@@ -26,9 +26,9 @@ $(window).on("unload", function(e) {
     });
 });
 
-getImages = function(){
+getStockImages = function(){
     return new Promise((resolve,reject) => {
-        const UrlGet = url+"get-images";
+        const UrlGet = url+"get-stock-images";
         $.ajax({
             url: UrlGet,
             type: 'GET',
@@ -99,9 +99,11 @@ async function preload() {
         const deleteUploadsResult = await deleteUploads()
         console.log(deleteUploadsResult);
 
-        $("#loading").html("<h1>Generating Image...</h1><br><h3>Getting Images</h3>");
-        const imgArray = await getImages();
-        console.log(imgArray);
+        $("#loading").html("<h1>Generating Image...</h1><br><h3>Getting Stock Images</h3>");
+        const result = await getStockImages();
+        const mainImageSignedUrL = result[0];
+        const imgArray = result[1];
+        console.log(result);
 
         $("#loading").html("<h1>Generating Image...</h1><br><h3>Resizing and uploading images to google cloud storage</h3>");
         const resizeImagesResult = await resizeImages(imgArray);
@@ -112,8 +114,7 @@ async function preload() {
         console.log(resizedImages);
 
         $("#loading").html("<h1>Generating Image...</h1><br><h3>Processing Images</h3>");
-        mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
-        img = await loadCompleteImage("./images/images/"+ mainImage);
+        mainImage = await loadCompleteImage(mainImageSignedUrL);
 
         await Promise.all(resizedImages.map(async(resizedImage, i) => {
             loadedImageData = await loadCompleteImage(resizedImage);
@@ -134,8 +135,8 @@ console.log("Loading images end")
 
 function setup(){
     if(setupStarted == true){
-        w = img.width;
-        h = img.height;
+        w = mainImage.width;
+        h = mainImage.height;
 
         pxSize = (Math.round(w/h)*5);
         canvas = createCanvas(w*2,h*2);
@@ -179,7 +180,7 @@ function setup(){
         
         // console.log(octree.node.getTotalPoints(octree.node));
 
-        img.loadPixels();
+        mainImage.loadPixels();
         console.log("push points 2")
         console.time();
         for (var i = 0; i < w; i+=pxSize) {
@@ -187,9 +188,9 @@ function setup(){
                 var index = 4 * (i + (j * w));
                 x = i;
                 y = j;
-                r = img.pixels[index];
-                g = img.pixels[index + 1];
-                b = img.pixels[index + 2];
+                r = mainImage.pixels[index];
+                g = mainImage.pixels[index + 1];
+                b = mainImage.pixels[index + 2];
                 
                 mainImgRGB.push(new Array(new Point(r,g,b),i,j));
             }
@@ -201,7 +202,7 @@ function setup(){
     }
 }
 
-function draw(){
+async function draw(){
     if(drawStarted == true){
         $("#loading").html("<h1>Generating Image...</h1><br><h3>Drawing Mosaic Image</h3>");
         noStroke();
@@ -228,14 +229,17 @@ function draw(){
         console.log("drawing image end")
         
         if(w*2 > window.innerWidth ){
-            image(img,0,closeImgs[closeImgs.length-1][2]+1,w,h);
+            image(mainImage,0,closeImgs[closeImgs.length-1][2]+1,w,h);
         }else{
-            image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
+            image(mainImage,closeImgs[closeImgs.length-1][1]+1,0,w,h);
         }
         
         noLoop();
 
         $("#loading").html("").css("display","none");
+
+        const deleteUploadsResult = await deleteUploads()
+        console.log(deleteUploadsResult);
     }
 }
 
