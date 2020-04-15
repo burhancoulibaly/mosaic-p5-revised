@@ -40,8 +40,30 @@ function getPublicUrl (filename) {
   return 'https://storage.googleapis.com/'+bucket.name+'/'+filename;
 }
 
-function uploadResizedImage(imageName){
+function uploadResizedImages(imageNames){
     return new Promise(async(resolve,reject) => {
+        let resizedImages = new Array();
+
+        try{
+            await Promise.all(imageNames.map(async(image) => {
+                try{
+                    resizedImage = await uploadResizedImage(image);
+                    resizedImages.push(resizedImage);
+                }catch(err){
+                    reject(err);
+                }
+            }));
+
+        }catch(err){
+            reject(err);
+        }
+
+        resolve(resizedImages());
+    });
+}
+
+function uploadResizedImage(){
+    return new Promise((resolve,reject) => {
         const readStream  = bucket.file(imageName).createReadStream();
         const remoteWriteStream = bucket.file("resized_images/"+imageName).createWriteStream(); 
 
@@ -58,7 +80,7 @@ function uploadResizedImage(imageName){
         transform = sharp().resize({width:100,height:100});
 
         readStream.pipe(transform).pipe(remoteWriteStream);
-    });
+    })
 }
 
 async function getStockImages(){
@@ -180,7 +202,7 @@ async function deleteImages(){
 };
 
 module.exports = {
-    uploadResizedImage,
+    uploadResizedImages,
     bucket,
     getStockImages,
     getResizedImages,

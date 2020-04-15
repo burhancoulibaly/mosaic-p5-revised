@@ -58,13 +58,9 @@ app.get('/get-stock-images',async function(req,res){
 
 app.post('/upload-resized-images',async function(req,res,next){
   let images = req.body.images;
-  let resizedImages = new Array();
 
   try{
-    result = await Promise.all(images.map(async(image) => {
-                  resizedImage = await gcsUpload.uploadResizedImage(image);
-                  resizedImages.push(resizedImage);
-              }));
+    result = 
   }catch(err){
     res.send(err);
     return;
