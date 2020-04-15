@@ -46,12 +46,15 @@ function uploadResizedImages(imageNames){
                     resizedImage = await uploadResizedImage(imageName);
                     resizedImages.push(resizedImage);
                 }catch(err){
+                    console.log(err)
                     reject(err);
-                }
+                    return;                }
             }));
 
         }catch(err){
+            console.log(err)
             reject(err);
+            return;
         }
 
         resolve(resizedImages);
