@@ -60,14 +60,13 @@ app.post('/upload-resized-images',async function(req,res,next){
   let images = req.body.images;
 
   try{
-    result = 
+    result = await gcsUpload.uploadResizedImages(images);
+    console.log(result);
+    res.send(result);
   }catch(err){
     res.send(err);
     return;
   }
-
-  console.log(resizedImages);
-  res.send(resizedImages);
 });
 
 app.get('/get-resized-images',function(req,res,err){
