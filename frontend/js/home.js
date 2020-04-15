@@ -99,15 +99,19 @@ async function preload() {
         const deleteUploadsResult = await deleteUploads()
         console.log(deleteUploadsResult);
 
+        $("#loading").html("<h1>Generating Image...</h1><br><h3>Getting Images</h3>");
         const imgArray = await getImages();
         console.log(imgArray);
 
+        $("#loading").html("<h1>Generating Image...</h1><br><h3>Resizing and uploading images to google cloud storage</h3>");
         const resizeImagesResult = await resizeImages(imgArray);
         console.log(resizeImagesResult);
 
+        $("#loading").html("<h1>Generating Image...</h1><br><h3>Getting resized images</h3>");
         const resizedImages = await getResizedImages();
         console.log(resizedImages);
 
+        $("#loading").html("<h1>Generating Image...</h1><br><h3>Processing Images</h3>");
         mainImage = imgArray[Math.floor(Math.random()*imgArray.length)];
         img = await loadCompleteImage("./images/images/"+ mainImage);
 
@@ -199,6 +203,7 @@ function setup(){
 
 function draw(){
     if(drawStarted == true){
+        $("#loading").html("<h1>Generating Image...</h1><br><h3>Drawing Mosaic Image</h3>");
         noStroke();
         // console.log(mainImgRGB.length);
         console.log("close points")
@@ -230,7 +235,7 @@ function draw(){
         
         noLoop();
 
-        // $("#loading").css("display","none");
+        $("#loading").html("").css("display","none");
     }
 }
 
