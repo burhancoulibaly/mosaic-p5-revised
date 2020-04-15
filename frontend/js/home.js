@@ -43,15 +43,15 @@ getStockImages = function(){
     })
 }
 
-let resizeImages = function(images){
+let resizeImages = function(image){
     //resizing and uploading small images
     console.log("resizing and uploading small images");
     return new Promise((resolve,reject)=>{
-        const UrlPost = url+"upload-resized-images";
+        const UrlPost = url+"upload-resized-image";
         $.ajax({
             url: UrlPost,
             type: 'POST',
-            data: { images: images },
+            data: { image: image },
             success:function(data){
                 resolve(data);
             },
@@ -106,7 +106,9 @@ async function preload() {
         console.log(result);
 
         $("#loading").html("<h1>Generating Image...</h1><br><h3>Resizing and uploading images to google cloud storage</h3>");
-        const resizeImagesResult = await resizeImages(imgArray);
+        const resizeImagesResult = await Promise.all(imgArray.map((img) => {
+            return resizeImages(img);
+        }));
         console.log(resizeImagesResult);
 
         $("#loading").html("<h1>Generating Image...</h1><br><h3>Getting resized images</h3>");

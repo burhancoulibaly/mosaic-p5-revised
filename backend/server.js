@@ -56,11 +56,11 @@ app.get('/get-stock-images',async function(req,res){
   }
 })
 
-app.post('/upload-resized-images',async function(req,res,next){
-  let images = req.body.images;
+app.post('/upload-resized-image',async function(req,res,next){
+  let image = req.body.image;
 
   try{
-    result = await gcsUpload.uploadResizedImages(images);
+    result = await gcsUpload.uploadResizedImage(image);
     console.log(result);
     res.send(result);
   }catch(err){

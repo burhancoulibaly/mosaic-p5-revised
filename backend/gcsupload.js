@@ -36,30 +36,30 @@ bucket.getMetadata()
     console.log(result[1].body.cors);
 })
 
-function uploadResizedImages(imageNames){
-    return new Promise(async(resolve,reject) => {
-        let resizedImages = new Array();
+// function uploadResizedImages(imageNames){
+//     return new Promise(async(resolve,reject) => {
+//         let resizedImages = new Array();
 
-        try{
-            await Promise.all(imageNames.map(async(imageName) => {
-                try{
-                    resizedImage = await uploadResizedImage(imageName);
-                    resizedImages.push(resizedImage);
-                }catch(err){
-                    console.log(err)
-                    reject(err);
-                    return;                }
-            }));
+//         try{
+//             await Promise.all(imageNames.map(async(imageName) => {
+//                 try{
+//                     resizedImage = await uploadResizedImage(imageName);
+//                     resizedImages.push(resizedImage);
+//                 }catch(err){
+//                     console.log(err)
+//                     reject(err);
+//                     return;                }
+//             }));
 
-        }catch(err){
-            console.log(err)
-            reject(err);
-            return;
-        }
+//         }catch(err){
+//             console.log(err)
+//             reject(err);
+//             return;
+//         }
 
-        resolve(resizedImages);
-    });
-}
+//         resolve(resizedImages);
+//     });
+// }
 
 function uploadResizedImage(imageName){
     return new Promise((resolve,reject) => {
@@ -201,7 +201,7 @@ async function deleteImages(){
 };
 
 module.exports = {
-    uploadResizedImages,
+    uploadResizedImage,
     bucket,
     getStockImages,
     getResizedImages,
