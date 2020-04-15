@@ -36,18 +36,14 @@ bucket.getMetadata()
     console.log(result[1].body.cors);
 })
 
-function getPublicUrl (filename) {
-  return 'https://storage.googleapis.com/'+bucket.name+'/'+filename;
-}
-
 function uploadResizedImages(imageNames){
     return new Promise(async(resolve,reject) => {
         let resizedImages = new Array();
 
         try{
-            await Promise.all(imageNames.map(async(image) => {
+            await Promise.all(imageNames.map(async(imageName) => {
                 try{
-                    resizedImage = await uploadResizedImage(image);
+                    resizedImage = await uploadResizedImage(imageName);
                     resizedImages.push(resizedImage);
                 }catch(err){
                     reject(err);
@@ -58,11 +54,11 @@ function uploadResizedImages(imageNames){
             reject(err);
         }
 
-        resolve(resizedImages());
+        resolve(resizedImages);
     });
 }
 
-function uploadResizedImage(){
+function uploadResizedImage(imageName){
     return new Promise((resolve,reject) => {
         const readStream  = bucket.file(imageName).createReadStream();
         const remoteWriteStream = bucket.file("resized_images/"+imageName).createWriteStream(); 
