@@ -1,22 +1,17 @@
 const {Storage} = require('@google-cloud/storage'),
       path = require('path'),
       gConfig = require("../config/config"),
-      firebaseConf = global.gConfig.development.firebaseConfig,
-      CLOUD_BUCKET = firebaseConf.storageBucket;
-
-const storage = new Storage({
-  projectId:firebaseConf.projectId,
-  credentials:{
-    // client_email:global.gConfig.client_email,
-    // private_key:global.gConfig.private_key,
-    client_email:process.env.client_email,
-    private_key:new Buffer.from(process.env.private_key_base64, 'base64').toString("ascii").replace(/\\n/g, '\n')
-  },
+      admin = require("firebase-admin"),
+      serviceAccount = global.gConfig;
+      
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "mosaic-p5-database.appspot.com"
 });
 
-// console.log("StorageInfo:",storage);
+const stockImagesBucket = admin.storage().bucket("mosaic-p5-stock-images");
+const resizedImagesBucket = admin.storage().bucket("mosaic-p5-resized-images");
 
-const bucket = storage.bucket(CLOUD_BUCKET);
 // const corsConfiguration = [
 //     {
 //       "origin": ["http://localhost:3000", "https://mosaic-p5-demo.herokuapp.com"],
@@ -25,46 +20,32 @@ const bucket = storage.bucket(CLOUD_BUCKET);
 //     }
 // ]; // allows request from "https://mosaic-p5-demo.herokuapp.com" and "http://localhost:3000"
 
-// bucket.setCorsConfiguration(corsConfiguration).then(function(data) {
+// stockImagesBucket.setCorsConfiguration(corsConfiguration).then(function(data) {
 //     const apiResponse = data[0];
 //     console.log(apiResponse.cors[0].origin);
 //     console.log(apiResponse.cors[0].responseHeader);
 // });
 
-bucket.getMetadata()
+// resizedImagesBucket.setCorsConfiguration(corsConfiguration).then(function(data) {
+//     const apiResponse = data[0];
+//     console.log(apiResponse.cors[0].origin);
+//     console.log(apiResponse.cors[0].responseHeader);
+// });
+
+stockImagesBucket.getMetadata()
 .then((result) => {
     console.log(result[1].body.cors);
 })
 
-// function uploadResizedImages(imageNames){
-//     return new Promise(async(resolve,reject) => {
-//         let resizedImages = new Array();
-
-//         try{
-//             await Promise.all(imageNames.map(async(imageName) => {
-//                 try{
-//                     resizedImage = await uploadResizedImage(imageName);
-//                     resizedImages.push(resizedImage);
-//                 }catch(err){
-//                     console.log(err)
-//                     reject(err);
-//                     return;                }
-//             }));
-
-//         }catch(err){
-//             console.log(err)
-//             reject(err);
-//             return;
-//         }
-
-//         resolve(resizedImages);
-//     });
-// }
+resizedImagesBucket.getMetadata()
+.then((result) => {
+    console.log(result[1].body.cors);
+})
 
 function uploadResizedImage(imageName){
     return new Promise((resolve,reject) => {
-        const readStream  = bucket.file(imageName).createReadStream();
-        const remoteWriteStream = bucket.file("resized_images/"+imageName).createWriteStream(); 
+        const readStream  = stockImagesBucket.file(imageName).createReadStream();
+        const remoteWriteStream = resizedImagesBucket.file(imageName).createWriteStream(); 
 
         // on error of output file being saved
         readStream.on('error', function(err) {
@@ -84,35 +65,25 @@ function uploadResizedImage(imageName){
 
 async function getStockImages(){
     return new Promise(async(resolve,reject)=>{
-        const stockImagesFolder = "stock_images";
-        const delimeter = "/";
-
         const signedUrlOptions = {
             version: 'v4',
             action: 'read',
             expires: Date.now() + 3 * 60 * 1000 // 3 minutes
         };
 
-        const optionsStockImages = {
-            prefix: stockImagesFolder,
-            delimeter: delimeter
-        }
-
         try{
-            const [stockImages] = await bucket.getFiles(optionsStockImages);
+            const [stockImages] = await stockImagesBucket.getFiles();
             const mainImage = stockImages[Math.floor(Math.random()*stockImages.length)];
-            const [signedMainImageUrl] = await bucket.file(mainImage.name).getSignedUrl(signedUrlOptions);
+            const [signedMainImageUrl] = await mainImage.getSignedUrl(signedUrlOptions);
             let stockImageNames = new Array();
 
             await Promise.all(stockImages.map(async(stockImage) => {
-                if(stockImage.name !== "stock_images/"){
-                    try{
-                        const stockImageName = stockImage.name;
-                        stockImageNames.push(stockImageName);
-                    }catch(error){
-                        console.log(error);
-                        reject(error);
-                    }
+                try{
+                    const stockImageName = stockImage.name;
+                    stockImageNames.push(stockImageName);
+                }catch(error){
+                    console.log(error);
+                    reject(error);
                 }
             }));
 
@@ -126,28 +97,20 @@ async function getStockImages(){
 
 async function getResizedImages(){
     return new Promise(async(resolve,reject)=>{
-        const resizedImagesFolder = "resized_images";
-        const delimeter = "/";
-
         const signedUrlOptions = {
             version: 'v4',
             action: 'read',
             expires: Date.now() + 3 * 60 * 1000 // 3 minutes
         };
 
-        const optionsResizedImages = {
-            prefix: resizedImagesFolder,
-            delimeter: delimeter
-        }
-
         try{
-            const [resizedImages] = await bucket.getFiles(optionsResizedImages);
+            const [resizedImages] = await resizedImagesBucket.getFiles();
             let signedUrls = new Array();
             
             await Promise.all(resizedImages.map(async(resizedImage) => {
                 try{
-                    const [signedUrl] = await bucket.file(resizedImage.name).getSignedUrl(signedUrlOptions);
-                    console.log(signedUrl);
+                    const [signedUrl] = await resizedImage.getSignedUrl(signedUrlOptions);
+                    // console.log(signedUrl);
                     signedUrls.push(signedUrl);
                 }catch(error){
                     console.log(error);
@@ -165,15 +128,7 @@ async function getResizedImages(){
 
 async function deleteImages(){
     return new Promise(async(resolve,reject)=>{
-        const resizedImagesFolder = "resized_images";
-        const delimeter = "/";
-
-        const optionsResizedImages = {
-            prefix:resizedImagesFolder,
-            delimeter:delimeter
-        }
-
-        bucket.getFiles(optionsResizedImages)
+        resizedImagesBucket.getFiles()
         .then(async(results)=>{
             console.log(results);
             const [imgsToDelete] = results;
@@ -183,7 +138,7 @@ async function deleteImages(){
             }
 
             Promise.all(imgsToDelete.map(async(img)=>{
-                return bucket.file(img.metadata.name).delete();
+                return img.delete();
             }))
             .then((resolveData)=>{
                 resolve(resolveData);
@@ -202,7 +157,6 @@ async function deleteImages(){
 
 module.exports = {
     uploadResizedImage,
-    bucket,
     getStockImages,
     getResizedImages,
     deleteImages

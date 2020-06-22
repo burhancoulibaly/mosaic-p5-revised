@@ -3,7 +3,7 @@ const express = require("express"),
     path = require("path"),
     server = require('http').createServer(app),
     Promise = require('bluebird');
-    fs = Promise.promisifyAll(require('fs')),
+    fs = require('fs'),
     bodyParser = require("body-parser"),
     mkdirp = require('mkdirp'),
     request = require('request'),
@@ -18,7 +18,7 @@ const express = require("express"),
     bootstrap = path.resolve("./node_modules/bootstrap/dist"),
     jquery = path.resolve("./node_modules/jquery/dist"),
     p5js = path.resolve("./node_modules/p5/lib"),
-    images = path.resolve("./stock_images");
+    images = path.resolve("./images");
 
 app.use("/main", express.static(main));
 app.use("/css", express.static(css));
@@ -39,7 +39,7 @@ app.use(function(req, res, next) {
 });
 
 server.listen(process.env.PORT || 3000);
-// console.log("Server running on port: 3000");
+console.log("Server running on port: 3000");
 
 app.get('/',function(req,res){
   res.sendFile(main);
@@ -57,10 +57,13 @@ app.get('/get-stock-images',async function(req,res){
 })
 
 app.post('/upload-resized-image',async function(req,res,next){
-  let image = req.body.image;
+  let images = req.body.images;
 
   try{
-    result = await gcsUpload.uploadResizedImage(image);
+    let result = await Promise.all(images.map(async (image) => {
+      return await gcsUpload.uploadResizedImage(image);
+    }));
+    
     console.log(result);
     res.send(result);
   }catch(err){

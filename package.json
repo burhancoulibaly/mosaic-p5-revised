@@ -17,6 +17,8 @@
     "express": "*",
     "express-session": "^1.17.0",
     "firebase": "^7.14.0",
+    "firebase-admin": "^8.12.1",
+    "firebase-tools": "^8.4.3",
     "jquery": "*",
     "lodash": "^4.17.15",
     "mkdirp": "*",
