@@ -26,11 +26,6 @@ h1{
     font-size: 5vh;
 }
 
-.ins-head-text-div{
-    /* border-style: solid;
-    border-color: green; */
-}
-
 .insert-head-text h1{
     font-size: 3vh;
 }
@@ -52,7 +47,7 @@ h1{
     left: -15%;
 }
 
-.big-image-insert{
+.main-image-insert{
     padding-top: .2em;
     border-style: solid;
     border-color: rgb(80, 80, 80);
@@ -65,7 +60,7 @@ h1{
     color: #cdcdd0;
 }
 
-.small-image-insert{
+.images-insert{
     padding-top: .2em;
     float: right;
     border-style: solid;
@@ -147,7 +142,7 @@ h1{
     height:100%;
     font-size: 7vh;
     padding: 15%;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 #smallImgsText{
@@ -166,12 +161,13 @@ h1{
 }
 
 .prevMain{
+    padding: .1em;
     object-fit: cover;
     width: 100%;
-    height: 100%;
+    height: auto;
 }
 
-.prevSmall{
+.prevImgs{
     padding: .1em;
     object-fit: cover;
     width: 10vw;

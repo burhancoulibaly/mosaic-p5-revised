@@ -1,21 +1,11 @@
-
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <title>Mosaic Image Generator</title>
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
-    <script type="text/javascript" src="/jquery/jquery.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-    <script type="text/javascript" src="/js/octree.js"></script>
-    <script type="text/javascript" src="/p5js/p5.js"></script>
-    <!-- <script type="text/javascript" src="/p5js/addons/p5.dom.js"></script> -->
-    <!-- <script type="text/javascript" src="/p5js/addons/p5.sound.js"></script> -->
-    <link rel="stylesheet" href="/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="/css/home.css">
   </head>
   <body>
-    <div class="upload-page">
+    <div id="upload-page" class="upload-page">
       <div class="header">
         <h1>Mosaic Image Creator</h1>
       </div>
@@ -32,34 +22,33 @@
           <hr style="clear:both;">
         </div>
         
-        <div class="big-image-insert">
+        <div class="main-image-insert">
           <div class="holder">
-            <form id="mainImg" name="mainImg" class="upload" method="post" enctype="multipart/form-data" action="/upload">
+            <form id="mainImg" name="mainImg" class="upload" method="post" enctype="multipart/form-data">
               <label id="mainImgLabel" class="click">
                 <div id="mainImgText">Click To Insert Main Image</div>
-                <input id="main" class="add-file" type="file" name="imgMain">
+                <input id="main" class="add-file" type="file" name="main">
               </label>
             </form>
           </div>
         </div>
 
-        <div class="small-image-insert">
+        <div class="images-insert">
           <div class="holder">
-            <form id="smallImg" name="smallImgs" class="upload" method="post" enctype="multipart/form-data">
-              <label id="smallImgsLabel" class="click">
-                <div id="smallImgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>
-                <input id="small" class="add-file" type="file" value=file name="imgSmall" multiple>
+            <form id="imgs" name="imgs" class="upload" method="post" enctype="multipart/form-data">
+              <label id="imgLabels" class="click">
+                <div id="imgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>
+                <input id="images" class="add-file" type="file" value=file name="images" multiple>
               </label>
             </form>
           </div>
         </div>
   
-        <button id="mainClr" onClick="mainClr()" class="btn btn-primary btn-lg clear">Clear</button>
-        <button id="smallClr" onClick="smallClr()" class="btn btn-primary btn-lg clear">Clear</button>
+        <button id="mainClr" class="btn btn-primary btn-lg clear">Clear</button>
+        <button id="imgsClr" class="btn btn-primary btn-lg clear">Clear</button>
       
       </div>
-      <button id="sendImgs" onClick="submitImages()" type="submit" class="btn btn-primary -btn-lg create-hidden">Create Mosaic Image</button>
+      <button id="sendImgs" type="submit" class="btn btn-primary -btn-lg create-hidden">Create Mosaic Image</button>
     </div>
-    <script type="text/javascript" src="/js/home.js"></script>
   </body>
 </html>

@@ -400,3 +400,10 @@ class Quad{
     }
 
 }
+
+module.exports = {
+    Octree,
+    Rectangle,
+    Point,
+    Quad
+}

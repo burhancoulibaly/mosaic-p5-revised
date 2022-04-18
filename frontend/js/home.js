@@ -1,448 +1,465 @@
+import { initializeApp } from "firebase/app";
+import { getAuth, signInAnonymously } from "firebase/auth";
+const { getStorage, ref, getBlob } = require('firebase/storage');
+import p5 from "p5";
+import {Octree, Rectangle, Point, Quad} from "./octree.js";
+import '../css/home.css';
+import "../../node_modules/bootstrap/dist/css/bootstrap.css";
+
+let authInfo;
+let p5Container;
 let imgArray;
+let mainMetaData;
+let imagesMetaData;
+let mainDataURL;
+let imageDataURLs;
 let mainImage;
 let allImages = new Array();
 let points = new Array();
 let mainImgRGB = new Array();
 let closeImgs = new Array();
 let imgsHash = new Object;
-let sessions = new Object();
-let setupStarted = false;
-let drawStarted = false;
-let preloadStarted = false;
 let octree = null;
 let mainHas = false;
-let smallHas = false;
+let imagesHas = false;
 let uri = "http://localhost:3000/"; 
 // let uri = "https://mosiac-p5.herokuapp.com/";
 
-window.onload = function(e){
-    createSession()
-    .then((resolveData) =>{
-        console.log(resolveData);
-        return null;
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-        return null;
-    });
+const firebaseConfig = {
+    apiKey: process.env.APIKEY,
+    authDomain: process.env.AUTHDOMAIN,
+    databaseURL: process.env.DATABASEURL,
+    projectId: process.env.PROJECTID,
+    storageBucket: process.env.STORAGEBUCKET,
+    messagingSenderId: process.env.MESSAGINGSENDERID,
+    appId: process.env.APPID
+}
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const bucket = getStorage(app);
+
+window.onload = async function(e){
+    document.getElementById("main").addEventListener('change', mainImgChanged);
+    document.getElementById("mainClr").addEventListener('click', mainClr);
+    document.getElementById("images").addEventListener('change', imagesChanged);
+    document.getElementById("imgsClr").addEventListener('click', imagesClr);
+    document.getElementById("sendImgs").addEventListener('click', submitImages);
+
+    try {
+        authInfo = await signInAnonymously(auth)
+
+        console.log({
+            status: `Success`,
+            message: `User authenticated, id: ${authInfo.user.uid}`
+        });
+    } catch (error) {
+        console.log({
+            status: error.code,
+            message: error.message + " (May need to refresh)"
+        });
+    }
+
+    console.log(await deleteImages());
+
+    p5Container = document.createElement("div");
+    p5Container.setAttribute("id", "p5container");
 };
 
-window.onbeforeunload = function(e){
-    deleteSession()
-    .then((resolveData)=>{
-        console.log(resolveData);
-        return null;
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-        return null;
-    });
+window.onbeforeunload = async function(e){
+    await deleteImages();
 };
 
-$('#main').change(function() { 
-    // console.log("changed");
+function mainImgChanged() {
     if((document.getElementById("main").files).length == 0){
         mainHas = false;
         
-        $("#mainImgLabel img").remove();
-        $("#mainImgLabel").append('<div id="mainImgText">Click To Insert Main Image</div>');
-        
-        $("#sendImgs").removeClass("create");
-        $("#sendImgs").addClass("create-hidden");
+        const imgLabelRef = document.getElementById("mainImgLabel");
+        imgLabelRef.removeChild(imgLabelRef.getElementsByTagName(img).item(0));
+
+        if(!document.getElementById("mainImgText")){
+            const mainImgText = document.createElement("div");
+            mainImgText.setAttribute("id", "mainImgText");
+            mainImgText.innerHTML = "Click To Insert Main Image"
+            imgLabelRef.append(mainImgText);
+        }
+
+        const sendImgs = document.getElementById("sendImgs")
+        sendImgs.classList.remove("create");
+        sendImgs.classList.add("create-hidden");
     }else{
-        mainImage = URL.createObjectURL(document.getElementById("main").files[0]);
-        // console.log(mainImage);
+        const mainImageBlob = URL.createObjectURL(document.getElementById("main").files[0]);
 
-        $("#mainImgText").remove()
+        document.getElementById("mainImgText").remove();
 
-        $("#mainImgLabel").prepend('<img class="prevMain" src="" />');
-        $("#mainImgLabel img").attr("src",mainImage);
+        const imgLabelRef = document.getElementById("mainImgLabel");
+
+        const imgEl = document.createElement("img");
+        imgEl.classList.add("prevMain");
+        imgEl.setAttribute("src", mainImageBlob);
+        imgLabelRef.prepend(imgEl);
     
         mainHas = true;
 
-        if(mainHas == true && smallHas == true){
-            $("#sendImgs").removeClass("create-hidden");
-            $("#sendImgs").addClass("create");
+        if(mainHas == true && imagesHas == true){
+            const sendImgs = document.getElementById("sendImgs");
+
+            sendImgs.classList.remove("create-hidden");
+            sendImgs.classList.add("create");
         }       
     }
-}); 
-
-$('#small').change(function() { 
-    // console.log("changed");
-    blobImages = new Array();
-    smallImages = document.getElementById("small").files;
-    
-    if((document.getElementById("small").files).length < 4){
-        smallHas = false;
-
-        $("#smallImgsLabel img").remove();
-        $("#smallImgsText").remove();
-        $("#smallImgsLabel").append('<div id="smallImgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>');
-        
-        $("#sendImgs").removeClass("create");
-        $("#sendImgs").addClass("create-hidden");
-
-    }else{
-        for(var i = 0; i < smallImages.length; i++){
-            smallImage = URL.createObjectURL(smallImages[i]);
-            blobImages.push(smallImage);
-        }
-        // console.log(blobImages); 
-    
-        $("#smallImgsText").remove();
-    
-        for(var i = 0; i < blobImages.length; i++){
-            $("#smallImgsLabel").append('<img class="prevSmall" src='+blobImages[i]+' />');
-        }
-
-        smallHas = true;
-
-        if(mainHas == true && smallHas == true){
-            $("#sendImgs").removeClass("create-hidden");
-            $("#sendImgs").addClass("create");
-        }
-    }
-}); 
+}; 
 
 function mainClr(){
     mainHas = false;
-
-    $("#sendImgs").removeClass("create");
-    $("#sendImgs").addClass("create-hidden");
     
-    $("#mainImg").get(0).reset();
-    $("#mainImgLabel img").remove();
-    $("#mainImgLabel").append('<div id="mainImgText">Click To Insert Main Image</div>');
+    const sendImgs = document.getElementById("sendImgs");
+    const imgLabelRef = document.getElementById("mainImgLabel");
+    
+    sendImgs.classList.remove("create");
+    sendImgs.classList.add("create-hidden");
+    
+    document.getElementById("mainImg").reset();
+    
+    imgLabelRef.removeChild(imgLabelRef.getElementsByTagName("img").item(0));
 
+    if(!document.getElementById("mainImgText")){
+        const mainImgText = document.createElement("div");
+        mainImgText.setAttribute("id", "mainImgText");
+        mainImgText.innerHTML = "Click To Insert Main Image"
+        imgLabelRef.append(mainImgText);
+    }
 }
 
-function smallClr(){
-    smallHas = false;
+function imagesChanged(){ 
+    const blobImages = new Array();
+    const images = document.getElementById("images").files;
 
-    $("#sendImgs").removeClass("create");
-    $("#sendImgs").addClass("create-hidden");
+    if((document.getElementById("images").files).length < 4){
+        imagesHas = false;
 
-    $("#smallImg").get(0).reset();
-    $("#smallImgsLabel img").remove();
-    $("#smallImgsText").remove();
-    $("#smallImgsLabel").append('<div id="smallImgsText">Click to Insert Images to Create Mosaic (min. 4 images)</div>');
+        const imgLabelsRef = document.getElementById("imgLabels");
 
+        Object.entries(imgLabelsRef.getElementsByTagName("img")).map(([_, img]) => {
+            console.log(img)
+            imgLabelsRef.removeChild(img);
+        })
+        
+        if(!document.getElementById("imgsText")){
+            const imgsText = document.createElement("div");
+            imgsText.setAttribute("id", "imgsText");
+            imgsText.innerHTML = "Click to Insert Images to Create Mosaic (min. 4 images)"
+            imgLabelsRef.append(imgsText);
+        }
+
+        const sendImgs = document.getElementById("sendImgs")
+        sendImgs.classList.remove("create");
+        sendImgs.classList.add("create-hidden");
+
+        document.getElementById("imgs").reset();
+
+        alert("Minimun of 4 images required")
+    }else{
+        const imgLabelsRef = document.getElementById("imgLabels");
+
+        for(let i = 0; i < images.length; i++){
+            blobImages.push(URL.createObjectURL(images[i]));
+        }
+    
+        document.getElementById("imgsText").remove();
+    
+        for(let i = 0; i < blobImages.length; i++){
+            const imgEl = document.createElement("img");
+            imgEl.classList.add("prevImgs");
+            imgEl.setAttribute("src", blobImages[i]);
+            imgLabelsRef.append(imgEl);
+        }
+
+        imagesHas = true;
+
+        if(mainHas == true && imagesHas == true){
+            const sendImgs = document.getElementById("sendImgs");
+
+            sendImgs.classList.remove("create-hidden");
+            sendImgs.classList.add("create");
+        }
+    }
+}; 
+
+function imagesClr(){
+    imagesHas = false;
+    
+    const sendImgs = document.getElementById("sendImgs");
+    const imgLabelsRef = document.getElementById("imgLabels");
+    
+    sendImgs.classList.remove("create");
+    sendImgs.classList.add("create-hidden");
+    
+    document.getElementById("imgs").reset();
+
+    Object.entries(imgLabelsRef.getElementsByTagName("img")).map(([_, img]) => {
+        console.log(img)
+        imgLabelsRef.removeChild(img);
+    })
+
+    if(!document.getElementById("imgsText")){
+        const imgsText = document.createElement("div");
+        imgsText.setAttribute("id", "imgsText");
+        imgsText.innerHTML = "Click to Insert Images to Create Mosaic (min. 4 images)"
+        imgLabelsRef.append(imgsText);
+    }
 }
 
-function submitImages(){
-    $(".upload-page").hide();
-    mainImage = document.getElementById("main").files[0];
-    smallImages = document.getElementById("small").files;
-    formDataBig = new FormData();
-    formDataSmall = new FormData();
+async function submitImages(){
+    document.getElementById("upload-page").hidden = true;
+    const body = document.getElementsByTagName("body").item(0);
+    body.append(p5Container);
+    console.log(p5Container)
 
-    formDataBig.append("image",mainImage);
-    for(var i = 0; i < smallImages.length; i++){
-        formDataSmall.append("images",smallImages[i]);
+    const formDataMain = new FormData();
+    const main = document.getElementById("main").files[0];
+    
+    const formDataImages = new FormData();
+    const images = document.getElementById("images").files;
+    console.log(images);
+
+    formDataMain.append("image", main);
+
+    for(let i = 0; i < images.length; i++){
+        formDataImages.append("images", images[i]);
     }
 
+    const responseMain = await postMain(formDataMain);
+    const responseImages = await postImages(formDataImages);
 
-    let postMainImage =  function(){
-        //uploading main image
-        console.log("uploading main image");
-        return new Promise((resolve,reject)=>{
-            const UrlPostBig = "mainimage";
-            $.ajax({
-                url: uri+UrlPostBig,
-                type: 'POST',
-                data: formDataBig,
-                processData: false,
-                contentType: false,
-                success:function(data){
-                    resolve(["Main image posted",data]);
-                },
-                error:function(error){
-                    reject('Error',error);
-                }
+    mainMetaData = responseMain.response;
+    mainDataURL = await getDataURL([responseMain.response]);
+
+    imagesMetaData = responseImages.response;
+    imageDataURLs = await getDataURL(responseImages.response);
+    
+    new p5(sketch, p5Container);
+}
+
+function postMain(formDataMain){
+    //uploading main image
+    return new Promise((resolve,reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onload = (event) => {
+            resolve({
+                status: xhr.status, 
+                response: xhr.response
             });
-        });
-    }
+        }
 
-    let resizeSmallImages = function(){
-        //resizing and uploading small images
-        console.log("resizing and uploading small images");
-        return new Promise((resolve,reject)=>{
-            const UrlPost = "resizeimages";
-            $.ajax({
-                url: uri+UrlPost,
-                type: 'POST',
-                data: formDataSmall,
-                processData: false,
-                contentType: false,
-                success:function(data){
-                    resolve(["Small images resized",data]);
-                },
-                error:function(error){
-                    reject('Error',error);
-                }
-            });       
-        });
-    }
+        xhr.onerror = (event) => {
+            reject({
+                status: xhr.status, 
+                response: xhr.response
+            })
+        }
 
-    let getAllImages = function(){
-        //getting all images
-        console.log("getting all images");
-        return new Promise((resolve,reject)=>{
-            const UrlGet = "getimages";
-            $.ajax({
-                url: uri+UrlGet,
-                type: 'GET',
-                success:function(data){
-                    console.log(data)
-                    resolve(["All images recieved",data]);
-                },
-                error:function(error){
-                    reject('Error',error);
-                }
-            });
-        });
-    }
-
-    console.time();
-
-    console.log("Uploading and resizing images");
-
-    postMainImage()
-    .then((resolveData)=>{
-        console.log(resolveData[1]);
-
-        return resizeSmallImages();
-    })
-    .then((resolveData)=>{
-        console.log(resolveData[1]);
-
-        return getAllImages();
-    })
-    .then((resolveData)=>{
-        console.log(resolveData);
-        imgArray = resolveData[1];
-
-        console.timeEnd();
-
-        startPreload();
-        preload();
-
-        return null;
-    })
-    .catch((rejectData)=>{
-        console.log(rejectData);
-        return null;
+        xhr.open("POST", uri + "uploadmain");
+        xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
+        xhr.withCredentials = true;
+        xhr.responseType = "json";
+        xhr.send(formDataMain);
     });
 }
 
-function preload(){
-    if(preloadStarted == true){
-        mainImage = imgArray[0][0].mediaLink;
-        console.log(mainImage)
-        img = loadImage(mainImage);
-        for (var i = 0; i < imgArray[1].length; i++) {
-            resizedImage = imgArray[1][i][0].mediaLink
-            allImages[i] = loadImage(resizedImage);
+function postImages(formDataImages){
+    //uploading images
+    return new Promise((resolve,reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onload = (data) => {
+            resolve({
+                status: xhr.status, 
+                response: xhr.response
+            });
         }
-        setTimeout(()=>{
-            startSetup();
-            setup();
-        },2000);
-    }
+
+        xhr.onerror = (error) => {
+            reject({
+                status: xhr.status, 
+                response: xhr.response
+            })
+        }
+
+        xhr.open("POST", uri + "uploadimages");
+        xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
+        xhr.withCredentials = true;
+        xhr.responseType = "json";
+        xhr.send(formDataImages);
+    });
 }
 
-function setup(){
-    if(setupStarted == true){
+const sketch = (p5) => {
+    p5.preload = function() {
+        mainImage = p5.loadImage(mainDataURL);
+
+        allImages = Array.from(imageDataURLs.map((imageDataURL) => {
+            return p5.loadImage(imageDataURL);
+        }));
+    }
+
+    p5.setup = function() {
         let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
         octree = new Quad(boundary,Math.ceil(allImages.length/100));
 
-        w = img.width;
-        h = img.height;
+        const w = mainImage.width;
+        const h = mainImage.height;
 
-        pxSize = (Math.round(w/h))*10;
-        canvas = createCanvas(w*2,h*2);
+        const pxSize = (Math.round(w/h))*10;
+        const canvas = p5.createCanvas(w*2,h*2);
         canvas.position(0,0);
 
-        for (var i = 0; i < allImages.length; i++) {
-            colArray = null;
-            var red = 0;
-            var green = 0;
-            var blue = 0;
-            // console.log(allImages[i]);
+        for(let i = 0; i < allImages.length; i++) {
+            let colArray = null;
+            let red = 0;
+            let green = 0;
+            let blue = 0;
+
             allImages[i].loadPixels();
         
-            for (var j = 0; j < allImages[i].pixels.length; j+=4) {
+            for(let j = 0; j < allImages[i].pixels.length; j+=4) {
                 red += allImages[i].pixels[j];
                 green += allImages[i].pixels[j+1];
                 blue += allImages[i].pixels[j+2];
             }
 
-            r = Math.round(red/(allImages[i].pixels.length/4));
-            g = Math.round(green/(allImages[i].pixels.length/4));
-            b = Math.round(blue/(allImages[i].pixels.length/4));
+            const r = Math.round(red/(allImages[i].pixels.length/4));
+            const g = Math.round(green/(allImages[i].pixels.length/4));
+            const b = Math.round(blue/(allImages[i].pixels.length/4));
 
             imgsHash[rgbToHex(r,g,b)] = allImages[i];
 
-            // console.log(r,g,b);
             points.push(new Point(r,g,b))
         }
 
         
-        for(var i = 0; i < points.length; i++){
-            // console.log(points[i]);
+        for(let i = 0; i < points.length; i++){
             octree.newPoint(points[i])
         }
-        
-        console.log(octree.node.getTotalPoints(octree.node));
 
-        img.loadPixels();
-        for (var i = 0; i < w; i+=pxSize) {
-            for (var j = 0; j < h; j+=pxSize) {
-                var index = 4 * (i + (j * w));
-                x = i;
-                y = j;
-                r = img.pixels[index];
-                g = img.pixels[index + 1];
-                b = img.pixels[index + 2];
+        mainImage.loadPixels();
+
+        for (let i = 0; i < w; i+=pxSize) {
+            for (let j = 0; j < h; j+=pxSize) {
+                let index = 4 * (i + (j * w));
+                let x = i;
+                let y = j;
+                let r = mainImage.pixels[index];
+                let g = mainImage.pixels[index + 1];
+                let b = mainImage.pixels[index + 2];
                 
             
                 mainImgRGB.push(new Array(new Point(r,g,b),i,j));
             }
         }
-        startDraw();
     }
-}
 
-function draw(){
-    if(drawStarted == true){
-        console.log(mainImgRGB.length);
-        for(var i = 0; i < mainImgRGB.length; i++){
-            // console.log(mainImgRGB[i][0])
+    p5.draw = function(){
+        const w = mainImage.width;
+        const h = mainImage.height;
+        const pxSize = (Math.round(w/h))*10;
+        console.log(mainImage)
+        for(let i = 0; i < mainImgRGB.length; i++){
             let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
-            // console.log(closePoint);
+            
             closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
         }
-        
-        // console.log(closeImgs);
 
-        for(var i = 0; i < closeImgs.length; i++){
-            hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
-            image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
+        for(let i = 0; i < closeImgs.length; i++){
+            const hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
+
+            p5.image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
         }
         
         if(w*2 > window.innerWidth ){
-            image(img,0,closeImgs[closeImgs.length-1][2]+1,w,h);
+            p5.image(mainImage,0,closeImgs[closeImgs.length-1][2]+1,w,h);
         }else{
-            image(img,closeImgs[closeImgs.length-1][1]+1,0,w,h);
+            p5.image(mainImage,closeImgs[closeImgs.length-1][1]+1,0,w,h);
         }
 
-        noLoop();
+        p5.noLoop();
 
-        deleteUploads()
-        .then((resolveData)=>{
-            console.log(resolveData[0]+resolveData[1]);
-            return null;
-        })
-        .catch((rejectData)=>{
-            console.log(rejectData);
-            return null;
-        })
-    }
-}
-
-function deleteUploads(){
-    return new Promise((resolve,reject)=>{
-        const UrlGet = "deleteimages";
-        $.ajax({
-            url: uri+UrlGet,
-            type: 'GET',
-            success:function(data){
-                resolve(["Image upload deletion ",data]);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });      
-    });
-}
-
-function deleteSession(){
-    return new Promise((resolve,reject)=>{
-        const UrlGet = "deleteSession";
-        $.ajax({
-            async: false,
-            url: uri+UrlGet,
-            type: 'GET',
-            processData: false,
-            success:function(data){
-                resolve(["session deletion",data]);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });      
-    });
-}
-
-function createSession(){
-    return new Promise((resolve,reject)=>{
-    const UrlGet = "createsession";
-        $.ajax({
-            url: uri+UrlGet,
-            type: 'GET',
-            success:function(data){
-                resolve(data);
-            },
-            error:function(error){
-                reject('Error',error);
-            }
-        });
-    });
-}
-
-function getSessionId(){
-    return new Promise(async (resolve,reject)=>{
-        if(!document.cookie){
-            reject("Unable to recieve sessionId, try turning on cookies");
-;       }
-
-        let cookie = document.cookie;
-        cookies = cookieString.split(" ");
         
-        await cookies.map((cookie)=>{
-            if(cookie.includes("io")){
-                sessionString = cookie;
-            }
-        })
-
-        sessionId = sessionString.split("=");
-        sessionId = cookie.split("=");
-        sessionId = sessionId[1];
-
-        resolve(sessionId);
-    });
-}
-
-function startPreload(){
-    preloadStarted = true;
-    console.log("preloadStarted",preloadStarted)
-}
-
-function startSetup(){
-    setupStarted = true;
-    console.log("setupStarted",setupStarted);
-}
-
-function startDraw(){
-    drawStarted = true;
-    console.log("drawStarted",drawStarted);
-}
+        (async () => {
+            console.log(await deleteImages());
+        }).call(this);
+    }
+};
 
 function componentToHex(c) {
-    var hex = c.toString(16);
+    let hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
 }
 
 function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+async function getDataURL(imageMetaData){
+    if(!imageMetaData){
+        return reject("Image info required")
+    }
+    
+    const dataurls = await Promise.all(
+        imageMetaData.map(async (metadata) => {
+            return new Promise(async (resolve, reject) => {
+                const imageRef = ref(bucket, metadata.filename);
+            
+                try {
+                    const reader = new FileReader();
+                    const blob = await getBlob(imageRef);
+
+                    reader.onload = function() {
+                        return resolve(reader.result);
+                    }
+
+                    reader.onerror = function() {
+                        console.log(reader.result);
+                        return reject(null);
+                    }
+
+                    reader.readAsDataURL(blob);
+                } catch (error) {
+                    console.log(error);
+                    return reject(null);
+                }
+            })
+        })
+    );
+
+    dataurls.filter((dataurl) => dataurl!== null);
+
+    return dataurls;
+}
+
+function deleteImages(){
+    return new Promise((resolve,reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onload = (event) => {
+            resolve({
+                status: xhr.status, 
+                response: xhr.response
+            });
+        }
+
+        xhr.onerror = (event) => {
+            reject({
+                status: xhr.status, 
+                response: xhr.response
+            })
+        }
+
+        xhr.open("GET", uri + "deleteimages");
+        xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
+        xhr.withCredentials = true;
+        xhr.responseType = "json";
+        xhr.send();
+    });
 }

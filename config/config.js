@@ -1,21 +1,21 @@
-const _ = require('lodash');
+const dotenv = require('dotenv');
 
-// config = JSON.parse(process.env.config);
-config = require("./config.json");
+const envFile = process.env.NODE_ENV ? `./.env.${process.env.NODE_ENV}` : '.env.development';
+dotenv.config({ path: envFile });
 
-//module variables
-const defaultConfig = config;
-environment = process.env.NODE_ENV|| 'development';
-environmentConfig = config[environment];
-finalConfig = _.merge(defaultConfig, environmentConfig);
+const firebaseConfig = {
+    apiKey: process.env.APIKEY,
+    authDomain: process.env.AUTHDOMAIN,
+    databaseURL: process.env.DATABASEURL,
+    projectId: process.env.PROJECTID,
+    storageBucket: process.env.STORAGEBUCKET,
+    messagingSenderId: process.env.MESSAGINGSENDERID,
+    appId: process.env.APPID
+}
 
-// as a best practice
-// all global variables should be referenced via global. syntax
-// and their names should always begin with 
+const serviceAccount = JSON.parse(process.env.SERVICEACCOUNT)
 
-if(finalConfig != null){
-    global.gConfig = finalConfig;
-    // console.log(global.gConfig);
-}else{
-    console.log("Unable to create config");
+module.exports = {
+    firebaseConfig,
+    serviceAccount
 }

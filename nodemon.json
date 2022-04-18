@@ -1,0 +1,9 @@
+{
+    "watch": ["./"],
+    "ext": ".ts,.js",
+    "ignore": ["node_modules"],
+    "exec": "NODE_ENV=development node ./backend/server.js",
+    "events": {
+        "config:update": "NODE_ENV=development node ./backend/server.js"
+    } 
+}
