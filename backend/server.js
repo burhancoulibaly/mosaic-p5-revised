@@ -24,7 +24,6 @@ const corsOptions = {
 };
 
 const compiler = webpack(webpackConfig);
-const imageUrls = {}
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -44,8 +43,6 @@ app.post('/uploadmain', multerUpload.uploadMain().single('image'), function(req,
     res.send();
   }
 
-  imageUrls[req.payload.uid] = req.file;
-
   res.send(req.file);
 });
 
@@ -53,8 +50,6 @@ app.post('/uploadimages', multerUpload.uploadImages().array('images'), function(
   if(!req.files){
     res.send();
   }
-
-  imageUrls[req.payload.uid] = req.files;
 
   res.send(req.files);
 });
