@@ -3,7 +3,6 @@ const path = require('path');
 const app = express();
 const server = require('http').createServer(app);
 const bodyParser = require("body-parser");
-const cors = require("cors");
 const { verifyUser } = require('./firebase/auth.js');
 const multerUpload = require('./multerupload.js');
 const { cleanStorage } = require('./firebase/cleanStorage.js');

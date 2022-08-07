@@ -13,7 +13,7 @@ module.exports = merge(common, {
     devtool: 'inline-source-map',
     plugins: [
         new Dotenv({
-            path: path.resolve(__dirname, process.env.NODE_ENV ? `./.env.${process.env.NODE_ENV}` : './.env.development'), // Path to .env file (this is the default)
+            path: path.resolve(__dirname, './.env.development'), // Path to .env file (this is the default)
             safe: true, // load .env.example (defaults to "false" which does not use dotenv-safe)
         }),
     ],
