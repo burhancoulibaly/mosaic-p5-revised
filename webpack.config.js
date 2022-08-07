@@ -55,7 +55,7 @@ module.exports = {
             APIKEY: process.env.APIKEY,
             AUTHDOMAIN: process.env.AUTHDOMAIN,
             DATABASEURL: process.env.DATABASEURL,
-            pPROJECTID: process.env.PROJECTID,
+            PROJECTID: process.env.PROJECTID,
             STORAGEBUCKETt: process.env.STORAGEBUCKET,
             MESSAGINGSENDERID: process.env.MESSAGINGSENDERID,
             APPID: process.env.APPID
