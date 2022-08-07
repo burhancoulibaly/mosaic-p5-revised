@@ -36,27 +36,31 @@ function FirebaseStorage (opts) {
     this.removeFiles = (async function(req, res, next){
         try {
             if(this.opts.subDir === "main") {
-                const mainMetaData = req.body.mainMetaData;
+                if(req.body.mainMetaData){
+                    const mainMetaData = req.body.mainMetaData;
 
-                if(mainMetaData){
-                    await bucket.file(mainMetaData.filename).delete();
+                    if(mainMetaData){
+                        await bucket.file(mainMetaData.filename).delete();
+                    }
                 }
             }else if (this.opts.subDir === "images") {
-                const imagesMetaData = req.body.imagesMetaData;
+                if(req.body.imagesMetaData){
+                    const imagesMetaData = req.body.imagesMetaData;
                 
-                await Promise.all(imagesMetaData.map(async (metaData) => {
-                    if(metaData){
-                        try {
-                            await bucket.file(metaData.filename).delete();
-                            return;
-                        } catch (error) {
-                            console.log({
-                                name: error.name,
-                                message: error.message
-                            })
-                        }         
-                    }    
-                }));
+                    await Promise.all(imagesMetaData.map(async (metaData) => {
+                        if(metaData){
+                            try {
+                                await bucket.file(metaData.filename).delete();
+                                return;
+                            } catch (error) {
+                                console.log({
+                                    name: error.name,
+                                    message: error.message
+                                })
+                            }         
+                        }    
+                    }));
+                }
             }
 
             next();

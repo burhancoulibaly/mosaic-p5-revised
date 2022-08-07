@@ -22,8 +22,6 @@ let imgsHash = new Object;
 let octree = null;
 let mainHas = false;
 let imagesHas = false;
-// let uri = "http://localhost:3000/"; 
-let uri = "https://mosaic-p5.herokuapp.com/";
 
 const firebaseConfig = {
     apiKey: process.env.APIKEY,
@@ -99,7 +97,6 @@ function mainImgChanged() {
         if(document.getElementById("mainImgText")){
             document.getElementById("mainImgText").remove();
         }else{
-            console.log(document.getElementsByClassName("prevMain"))
             document.getElementsByClassName("prevMain")[0].remove();
         }
         
@@ -152,7 +149,6 @@ function imagesChanged(){
         const imgLabelsRef = document.getElementById("imgLabels");
 
         Object.entries(imgLabelsRef.getElementsByTagName("img")).map(([_, img]) => {
-            console.log(img)
             imgLabelsRef.removeChild(img);
         })
         
@@ -181,7 +177,6 @@ function imagesChanged(){
             document.getElementById("imgsText").remove();
         }else{
             Object.entries(imgLabelsRef.getElementsByClassName("prevImgs")).map(([_, img]) => {
-                console.log(img)
                 imgLabelsRef.removeChild(img);
             })
         }
@@ -216,7 +211,6 @@ function imagesClr(){
     document.getElementById("imgs").reset();
 
     Object.entries(imgLabelsRef.getElementsByTagName("img")).map(([_, img]) => {
-        console.log(img)
         imgLabelsRef.removeChild(img);
     })
 
@@ -233,14 +227,13 @@ async function submitImages(){
     document.getElementById("loading").hidden = false;
     const body = document.getElementsByTagName("body").item(0);
     body.append(p5Container);
-    console.log(p5Container)
 
     const formDataMain = new FormData();
     const main = document.getElementById("main").files[0];
     
     const formDataImages = new FormData();
     const images = document.getElementById("images").files;
-    console.log(images);
+    console.log("Submitting images");
 
     formDataMain.append("image", main);
 
@@ -283,7 +276,7 @@ function postMain(formDataMain){
             })
         }
 
-        xhr.open("POST", uri + "uploadmain");
+        xhr.open("POST", "/uploadmain");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
         xhr.responseType = "json";
@@ -310,7 +303,7 @@ function postImages(formDataImages){
             })
         }
 
-        xhr.open("POST", uri + "uploadimages");
+        xhr.open("POST", "/uploadimages");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
         xhr.responseType = "json";
@@ -319,10 +312,10 @@ function postImages(formDataImages){
 }
 
 const sketch = (p5) => {
+    console.log("Generating image")
     p5.preload = function() {
         try {
             mainImage = p5.loadImage(mainDataURL);
-            console.log(mainImage)
         } catch (error) {
             console.log(error);
         }
@@ -435,7 +428,7 @@ const sketch = (p5) => {
         }
 
         p5.noLoop();
-
+        
         document.getElementById("loading").hidden = true;
 
         (async () => {
@@ -508,7 +501,7 @@ function deleteImages(){
             })
         }
 
-        xhr.open("POST", uri + "deleteimages");
+        xhr.open("POST", "/deleteimages");
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
