@@ -4,7 +4,7 @@
   "description": "This is the revised mosaic image creator, this one will be a lot faster then my previous attempt because im going to be implemeneting an octree for the color comparisons.",
   "private": true,
   "scripts": {
-    "start:dev": "webpack serve --open --config webpack.dev.js",
+    "start:dev": "webpack --config webpack.dev.js && npm run start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./backend/server.js",
     "heroku-postbuild": "webpack --config webpack.prod.js",
