@@ -1,4 +1,6 @@
 const path = require('path');
+const { merge } = require('webpack-merge');
+const common = require('./webpack.common.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const dotenv = require('dotenv');
@@ -7,7 +9,7 @@ const webpack = require('webpack');
 
 dotenv.config({ path: envFile });
 
-module.exports = {
+module.exports = merge(common, {
     mode: 'development',
     entry: {
         home: [
@@ -23,8 +25,7 @@ module.exports = {
     },
     devtool: 'inline-source-map',
     devServer: {
-        static: './dist',
-        port: 4000,
+        static: './dist'
     },
     module: {
         rules: [
@@ -44,21 +45,12 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-          title: 'Development',
-          template: './frontend/html/home.html'
+            title: 'Development',
+            template: './frontend/html/home.html'
         }),
         new Dotenv({
             path: path.resolve(__dirname, process.env.NODE_ENV ? `./.env.${process.env.NODE_ENV}` : './.env.development'), // Path to .env file (this is the default)
             safe: true, // load .env.example (defaults to "false" which does not use dotenv-safe)
         }),
-        new webpack.DefinePlugin({
-            APIKEY: process.env.APIKEY,
-            AUTHDOMAIN: process.env.AUTHDOMAIN,
-            DATABASEURL: process.env.DATABASEURL,
-            PROJECTID: process.env.PROJECTID,
-            STORAGEBUCKETt: process.env.STORAGEBUCKET,
-            MESSAGINGSENDERID: process.env.MESSAGINGSENDERID,
-            APPID: process.env.APPID
-        })
     ],
-}
+})
