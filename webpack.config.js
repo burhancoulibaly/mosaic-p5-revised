@@ -50,6 +50,15 @@ module.exports = {
         new Dotenv({
             path: path.resolve(__dirname, process.env.NODE_ENV ? `./.env.${process.env.NODE_ENV}` : './.env.development'), // Path to .env file (this is the default)
             safe: true, // load .env.example (defaults to "false" which does not use dotenv-safe)
+        }),
+        new webpack.DefinePlugin({
+            APIKEY: process.env.APIKEY,
+            AUTHDOMAIN: process.env.AUTHDOMAIN,
+            DATABASEURL: process.env.DATABASEURL,
+            pPROJECTID: process.env.PROJECTID,
+            STORAGEBUCKETt: process.env.STORAGEBUCKET,
+            MESSAGINGSENDERID: process.env.MESSAGINGSENDERID,
+            APPID: process.env.APPID
         })
     ],
 }
