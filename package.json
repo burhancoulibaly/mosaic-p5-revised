@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "webpack serve --open --config webpack.dev.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./backend/server.j",
+    "start": "node ./backend/server.js",
     "heroku-postbuild": "webpack --config webpack.prod.js",
     "server": "nodemon"
   },
