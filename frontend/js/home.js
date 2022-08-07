@@ -233,7 +233,6 @@ async function submitImages(){
     
     const formDataImages = new FormData();
     const images = document.getElementById("images").files;
-    console.log("Submitting images");
 
     formDataMain.append("image", main);
 
@@ -241,9 +240,11 @@ async function submitImages(){
         formDataImages.append("images", images[i]);
     }
 
+    console.log("Submitting images");
     const responseMain = await postMain(formDataMain);
     const responseImages = await postImages(formDataImages);
 
+    console.log("Submission complete")
     mainMetaData = responseMain.response;
     mainDataURL = await getDataURL([mainMetaData]);
 
@@ -251,6 +252,7 @@ async function submitImages(){
     imageDataURLs = await getDataURL(imagesMetaData);
     
     try {
+        console.log("Generating image")
         new p5(sketch, p5Container);
     } catch (error) {
         console.log(error)
