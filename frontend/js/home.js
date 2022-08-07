@@ -22,8 +22,8 @@ let imgsHash = new Object;
 let octree = null;
 let mainHas = false;
 let imagesHas = false;
-let uri = "http://localhost:3000/"; 
-// let uri = "https://mosiac-p5.herokuapp.com/";
+// let uri = "http://localhost:3000/"; 
+let uri = "https://mosiac-p5.herokuapp.com/";
 
 const firebaseConfig = {
     apiKey: process.env.APIKEY,
