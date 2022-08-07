@@ -9,7 +9,7 @@ function StorageHandler(){
         filename: (req, file, cb) => {
             cb(
                 null,
-                `${req.payload.uid}/main/${file.fieldname}-${crypto.randomBytes(16).toString('hex')}}`
+                `${req.payload.uid}/main/${file.fieldname}-${crypto.randomBytes(16).toString('hex')}`
             );
         },
         app: firebaseApp.app,
@@ -23,7 +23,7 @@ function StorageHandler(){
         filename: (req, file, cb) => {
             cb(
                 null,
-                `${req.payload.uid}/images/${file.fieldname}-${crypto.randomBytes(16).toString('hex')}}`
+                `${req.payload.uid}/images/${file.fieldname}-${crypto.randomBytes(16).toString('hex')}`
             );
         },
         app: firebaseApp.app,

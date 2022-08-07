@@ -2,9 +2,6 @@ const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 const Dotenv = require('dotenv-webpack');
-const dotenv = require('dotenv');
-const envFile = process.env.NODE_ENV ? `./.env.${process.env.NODE_ENV}` : './.env.development';
-const webpack = require('webpack');
 
 dotenv.config({ path: envFile });
 

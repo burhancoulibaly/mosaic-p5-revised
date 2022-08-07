@@ -34,8 +34,6 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig);
-console.log(firebaseConfig.projectId);
-console.log(process.env.PROJECTID)
 const auth = getAuth(app);
 const bucket = getStorage(app);
 
@@ -65,7 +63,6 @@ window.onload = async function(e){
 };
 
 window.onbeforeunload = async function(e){
-    console.log("HELLO")
     await deleteImages();
     await auth.signOut();
     console.log("signedOut")
@@ -100,7 +97,6 @@ function mainImgChanged() {
         if(document.getElementById("mainImgText")){
             document.getElementById("mainImgText").remove();
         }else{
-            console.log(document.getElementsByClassName("prevMain"))
             document.getElementsByClassName("prevMain")[0].remove();
         }
         
@@ -153,7 +149,6 @@ function imagesChanged(){
         const imgLabelsRef = document.getElementById("imgLabels");
 
         Object.entries(imgLabelsRef.getElementsByTagName("img")).map(([_, img]) => {
-            console.log(img)
             imgLabelsRef.removeChild(img);
         })
         
@@ -182,7 +177,6 @@ function imagesChanged(){
             document.getElementById("imgsText").remove();
         }else{
             Object.entries(imgLabelsRef.getElementsByClassName("prevImgs")).map(([_, img]) => {
-                console.log(img)
                 imgLabelsRef.removeChild(img);
             })
         }
@@ -217,7 +211,6 @@ function imagesClr(){
     document.getElementById("imgs").reset();
 
     Object.entries(imgLabelsRef.getElementsByTagName("img")).map(([_, img]) => {
-        console.log(img)
         imgLabelsRef.removeChild(img);
     })
 
@@ -234,14 +227,13 @@ async function submitImages(){
     document.getElementById("loading").hidden = false;
     const body = document.getElementsByTagName("body").item(0);
     body.append(p5Container);
-    console.log(p5Container)
 
     const formDataMain = new FormData();
     const main = document.getElementById("main").files[0];
     
     const formDataImages = new FormData();
     const images = document.getElementById("images").files;
-    console.log(images);
+    console.log("Submitting images");
 
     formDataMain.append("image", main);
 
@@ -320,10 +312,10 @@ function postImages(formDataImages){
 }
 
 const sketch = (p5) => {
+    console.log("Generating image")
     p5.preload = function() {
         try {
             mainImage = p5.loadImage(mainDataURL);
-            console.log(mainImage)
         } catch (error) {
             console.log(error);
         }
