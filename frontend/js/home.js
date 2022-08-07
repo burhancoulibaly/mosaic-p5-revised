@@ -314,7 +314,6 @@ function postImages(formDataImages){
 }
 
 const sketch = (p5) => {
-    console.log("Generating image")
     p5.preload = function() {
         try {
             mainImage = p5.loadImage(mainDataURL);
