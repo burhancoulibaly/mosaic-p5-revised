@@ -22,8 +22,6 @@ let imgsHash = new Object;
 let octree = null;
 let mainHas = false;
 let imagesHas = false;
-let uri = "http://localhost:3000/"; 
-// let uri = "https://mosiac-p5.herokuapp.com/";
 
 const firebaseConfig = {
     apiKey: process.env.APIKEY,
@@ -284,7 +282,7 @@ function postMain(formDataMain){
             })
         }
 
-        xhr.open("POST", uri + "uploadmain");
+        xhr.open("POST", "/uploadmain");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
         xhr.responseType = "json";
@@ -311,7 +309,7 @@ function postImages(formDataImages){
             })
         }
 
-        xhr.open("POST", uri + "uploadimages");
+        xhr.open("POST", "/uploadimages");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
         xhr.responseType = "json";
@@ -509,7 +507,7 @@ function deleteImages(){
             })
         }
 
-        xhr.open("POST", uri + "deleteimages");
+        xhr.open("POST", "/deleteimages");
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
