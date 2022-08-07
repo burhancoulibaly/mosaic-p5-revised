@@ -20,7 +20,7 @@ async function verifyUser(req,res,next){
             status: error.code,
             message: error.message
         });
-
+        
         res.status(401).send({ status: "Error", message: "User unauthorized"});
     }
 }

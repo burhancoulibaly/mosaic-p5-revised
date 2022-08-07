@@ -65,6 +65,7 @@ window.onload = async function(e){
 };
 
 window.onbeforeunload = async function(e){
+    console.log("HELLO")
     await deleteImages();
     await auth.signOut();
     console.log("signedOut")
