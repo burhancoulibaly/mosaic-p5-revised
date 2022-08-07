@@ -1,73 +1,109 @@
-h1{
+h1, h2{
     font-family: Arial, Helvetica, sans-serif;
+}
+
+html, body{
+    height: 100%;
+}
+
+#upload-page{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 1200px;
 }
 
 .header{
     /* border-style: solid; */
     border-color:black;
-    min-height: 7vh;
-    height: 7vh;
+    height: 75px;
+    width: 100%;
     display:block;
     text-align: center;
     background-color:#b8b8c4;    
 }
 
+#upload-page .app{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .insert{
-    /* border-style: solid;
-    border-color: red; */
-    height: 70vh;
+    width: 60vw;
+    max-width: 1900px;
+    height: 825px;
     position: relative;
-    top: 3vh;
-    padding-left: 22em;
-    padding-right: 22em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .header h1{
-    font-size: 5vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin:0;
+    height: 100%;
 }
 
-.insert-head-text h1{
-    font-size: 3vh;
+.ins-head-text-div {
+    height: 55px;
+    margin-bottom: 1rem;
+    width: 100%;
 }
 
 .insert-head-text{
-    width: 15%;
-    text-align: center;
-    /* border-style: solid;
-    border-color: black; */
-    position: relative;
-    float: left;
-    right: -15%;
-}
-
-.insert-head-text:nth-of-type(2n){
-    /* border-style: solid;
-    border-color: black; */
-    float: right;
-    left: -15%;
-}
-
-.main-image-insert{
-    padding-top: .2em;
-    border-style: solid;
-    border-color: rgb(80, 80, 80);
-    border-radius: 25px;
+    height: 100%;
+    width: 100%;
+    margin-bottom: 1rem;
     display: inline-block;
-    width: 45%;
-    height: 75%;
-    font-size: 5vh;
     text-align: center;
-    color: #cdcdd0;
+    position: relative;
 }
 
-.images-insert{
-    padding-top: .2em;
+.insert-head-text:nth-of-type(2){
     float: right;
+}
+
+.insert-head-text h2 {
+    height: 100%;
+    margin: 0;
+    line-height: 55px;
+}
+
+.image-insert-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 95%;
+}
+
+.image-insert-container > div {
+    width: 45%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.image-insert-container > div .main-image-insert,
+.image-insert-container > div .images-insert {
     border-style: solid;
     border-color: rgb(80, 80, 80);
-    width: 45%;
-    height: 75%;
     border-radius: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
     font-size: 5vh;
     text-align: center;
     color: #cdcdd0;
@@ -75,9 +111,8 @@ h1{
 }
 
 .holder{
-    margin: auto;
-    width:98%;
-    height: 98%;
+    width:95%;
+    height: 95%;
     border-style: dashed;
     border-color: #cdcdd0;
     border-radius: 25px;
@@ -85,27 +120,30 @@ h1{
     overflow: hidden;
 }
 
-.clear{
-    top: 3vh;
-    width: 12%;
-    height: 7%;
-    position: relative;
-    left: 16%;
-    font-size: 2vh;
-    border-radius: 25px;
+.clr-buttons{
+    margin-top: 2.5rem;
+    height: 50px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 44%;
 }
 
-.clear:nth-of-type(2n){
-    left:60%;
+.clear{
+    width: 30%;
+    height: 100%;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    position: relative;
 }
 
 .create-hidden{
     display: block;
     text-align: center;
     width:60vw;
-    height: 3vw;
-    left: 20vw;
-    top: 7vh;
+    height: 65px;
     position: relative;
     font-size: 3vh;
     border-radius: 25px;
@@ -117,9 +155,7 @@ h1{
     display: block;
     text-align: center;
     width:60vw;
-    height: 3vw;
-    left: 20vw;
-    top: 7vh;
+    height: 65px;
     position: relative;
     font-size: 3vh;
     border-radius: 25px;
@@ -136,17 +172,18 @@ h1{
 .click{
     position: relative;
     text-align: center;
-    /* border-style: solid;
-    border-color: purple; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     width:100%;
     height:100%;
-    font-size: 7vh;
-    padding: 15%;
+    font-size: 2vw;
     overflow-y: scroll;
 }
 
 #smallImgsText{
-    font-size:5vh;
+    font-size:1.5vw;
 }
 
 .add-file{
@@ -156,8 +193,6 @@ h1{
     top: 0;
     left: 0;
     visibility: hidden;
-    /* border-style: solid;
-    border-color: purple; */
 }
 
 .prevMain{
@@ -172,4 +207,76 @@ h1{
     object-fit: cover;
     width: 10vw;
     height: auto;
+}
+
+@media screen and (max-width: 1765px){
+    .insert {
+        width: 60vw;
+        max-width: 1900px;
+        height: 700px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .image-insert-container{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 80%;
+    }
+
+    .clr-buttons{
+        margin-top: 2.5rem;
+        height: 40px;
+        width: 100%;
+        gap: 44%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .create-hidden{
+        display: block;
+        text-align: center;
+        width:60vw;
+        height: 55px;
+        position: relative;
+        font-size: 3vh;
+        border-radius: 25px;
+        opacity: 0.3;
+        pointer-events: none;
+    }
+    
+    .create{
+        display: block;
+        text-align: center;
+        width:60vw;
+        height: 55px;
+        position: relative;
+        font-size: 3vh;
+        border-radius: 25px;
+    }
+}
+
+@media screen and (max-width: 1201px){
+    .insert{
+        width: 80vw;
+        height: 900px;
+        min-height: 900px;
+    }
+
+    .image-insert-container{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 95%;
+    }
+
+    .image-insert-container > div:nth-child(1){
+        margin-bottom: 2rem;
+    }
 }

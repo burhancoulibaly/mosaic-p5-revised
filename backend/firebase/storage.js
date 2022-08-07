@@ -1,4 +1,4 @@
-const { getStorage } = require('firebase-admin/storage');
+const { getStorage, storageRef, deleteObject } = require('firebase-admin/storage');
 const sharp = require('sharp');
 const crypto = require('crypto');
 
@@ -15,7 +15,7 @@ function FirebaseStorage (opts) {
     
     this.opts = opts ? opts : {};
 
-    this.getFilename = this.opts.filename ? this.opts.filename : getFilename;
+    this.getFilename = this.opts.filename ? this.opts.filename : this.getFilename;
 
     if(!this.opts.subDir){
         throw new Error("Sub-directory is required")
@@ -33,19 +33,41 @@ function FirebaseStorage (opts) {
                     ? getStorage(this.opts.app).bucket(this.opts.bucketId)
                     : getStorage().bucket(this.opts.bucketId);
 
-    this.removeFiles = (function(req, res, next){
-        bucket.deleteFiles({
-            prefix: `${req.payload.uid}/${this.opts.subDir}`
-        }, function(err) {
-            if (err) {
-                res.statusCode(502).send({
-                    status: err.code,
-                    message: err.message
-                });
+    this.removeFiles = (async function(req, res, next){
+        try {
+            if(this.opts.subDir === "main") {
+                const mainMetaData = req.body.mainMetaData;
+
+                if(mainMetaData){
+                    await bucket.file(mainMetaData.filename).delete();
+                }
+            }else if (this.opts.subDir === "images") {
+                const imagesMetaData = req.body.imagesMetaData;
+                
+                await Promise.all(imagesMetaData.map(async (metaData) => {
+                    if(metaData){
+                        try {
+                            await bucket.file(metaData.filename).delete();
+                            return;
+                        } catch (error) {
+                            console.log({
+                                name: error.name,
+                                message: error.message
+                            })
+                        }         
+                    }    
+                }));
             }
 
             next();
-        });
+        } catch (error) {
+            console.log({
+                name: error.name,
+                message: error.message
+            });
+            
+            next();
+        }
     }).bind(this)
 
     FirebaseStorage.prototype._handleFile = function(req, file, cb) {

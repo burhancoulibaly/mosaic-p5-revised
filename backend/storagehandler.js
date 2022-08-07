@@ -1,6 +1,7 @@
 const { firebaseConfig } = require("../config/config.js");
 const firebaseStorage = require("./firebase/storage")
 const firebaseApp = require("./firebase/initialize");
+const crypto = require('crypto');
 const path = require("path");
 
 function StorageHandler(){
@@ -8,7 +9,7 @@ function StorageHandler(){
         filename: (req, file, cb) => {
             cb(
                 null,
-                `${req.payload.uid}/main/${file.fieldname}-${Date.now() + path.extname(file.originalname)}`
+                `${req.payload.uid}/main/${file.fieldname}-${crypto.randomBytes(16).toString('hex')}-${file.originalname.replaceAll(" ", "-")}`
             );
         },
         app: firebaseApp.app,
@@ -22,7 +23,7 @@ function StorageHandler(){
         filename: (req, file, cb) => {
             cb(
                 null,
-                `${req.payload.uid}/images/${file.fieldname}-${Date.now() + path.extname(file.originalname)}`
+                `${req.payload.uid}/images/${file.fieldname}-${crypto.randomBytes(16).toString('hex')}-${file.originalname.replaceAll(" ", "-")}`
             );
         },
         app: firebaseApp.app,

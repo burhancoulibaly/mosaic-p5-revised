@@ -60,14 +60,20 @@ window.onload = async function(e){
         });
     }
 
-    console.log(await deleteImages());
-
     p5Container = document.createElement("div");
     p5Container.setAttribute("id", "p5container");
 };
 
 window.onbeforeunload = async function(e){
     await deleteImages();
+    await auth.signOut();
+    console.log("signedOut")
+
+    document.getElementById("main").removeEventListener('change', mainImgChanged);
+    document.getElementById("mainClr").removeEventListener('click', mainClr);
+    document.getElementById("images").removeEventListener('change', imagesChanged);
+    document.getElementById("imgsClr").removeEventListener('click', imagesClr);
+    document.getElementById("sendImgs").removeEventListener('click', submitImages);
 };
 
 function mainImgChanged() {
@@ -90,8 +96,13 @@ function mainImgChanged() {
     }else{
         const mainImageBlob = URL.createObjectURL(document.getElementById("main").files[0]);
 
-        document.getElementById("mainImgText").remove();
-
+        if(document.getElementById("mainImgText")){
+            document.getElementById("mainImgText").remove();
+        }else{
+            console.log(document.getElementsByClassName("prevMain"))
+            document.getElementsByClassName("prevMain")[0].remove();
+        }
+        
         const imgLabelRef = document.getElementById("mainImgLabel");
 
         const imgEl = document.createElement("img");
@@ -165,8 +176,15 @@ function imagesChanged(){
         for(let i = 0; i < images.length; i++){
             blobImages.push(URL.createObjectURL(images[i]));
         }
-    
-        document.getElementById("imgsText").remove();
+
+        if(document.getElementById("imgsText")){
+            document.getElementById("imgsText").remove();
+        }else{
+            Object.entries(imgLabelsRef.getElementsByClassName("prevImgs")).map(([_, img]) => {
+                console.log(img)
+                imgLabelsRef.removeChild(img);
+            })
+        }
     
         for(let i = 0; i < blobImages.length; i++){
             const imgEl = document.createElement("img");
@@ -233,12 +251,16 @@ async function submitImages(){
     const responseImages = await postImages(formDataImages);
 
     mainMetaData = responseMain.response;
-    mainDataURL = await getDataURL([responseMain.response]);
+    mainDataURL = await getDataURL([mainMetaData]);
 
     imagesMetaData = responseImages.response;
-    imageDataURLs = await getDataURL(responseImages.response);
+    imageDataURLs = await getDataURL(imagesMetaData);
     
-    new p5(sketch, p5Container);
+    try {
+        new p5(sketch, p5Container);
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 function postMain(formDataMain){
@@ -297,10 +319,20 @@ function postImages(formDataImages){
 
 const sketch = (p5) => {
     p5.preload = function() {
-        mainImage = p5.loadImage(mainDataURL);
+        try {
+            mainImage = p5.loadImage(mainDataURL);
+            console.log(mainImage)
+        } catch (error) {
+            console.log(error);
+        }
+        
 
         allImages = Array.from(imageDataURLs.map((imageDataURL) => {
-            return p5.loadImage(imageDataURL);
+            try {
+                return p5.loadImage(imageDataURL);
+            } catch (error) {
+                console.log(error);
+            }
         }));
     }
 
@@ -308,34 +340,48 @@ const sketch = (p5) => {
         let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
         octree = new Quad(boundary,Math.ceil(allImages.length/100));
 
+        if(mainImage.width > 5000 || mainImage.height > 5000){
+            if(mainImage.width > mainImage.height){
+                mainImage.resize(5000, 0);
+            } else {
+                mainImage.resize(0, 5000);
+            }
+        }
+
         const w = mainImage.width;
         const h = mainImage.height;
 
         const pxSize = (Math.round(w/h))*10;
+
         const canvas = p5.createCanvas(w*2,h*2);
+
         canvas.position(0,0);
 
         for(let i = 0; i < allImages.length; i++) {
-            let colArray = null;
-            let red = 0;
-            let green = 0;
-            let blue = 0;
-
-            allImages[i].loadPixels();
-        
-            for(let j = 0; j < allImages[i].pixels.length; j+=4) {
-                red += allImages[i].pixels[j];
-                green += allImages[i].pixels[j+1];
-                blue += allImages[i].pixels[j+2];
+            try {
+                let colArray = null;
+                let red = 0;
+                let green = 0;
+                let blue = 0;
+    
+                allImages[i].loadPixels();
+            
+                for(let j = 0; j < allImages[i].pixels.length; j+=4) {
+                    red += allImages[i].pixels[j];
+                    green += allImages[i].pixels[j+1];
+                    blue += allImages[i].pixels[j+2];
+                }
+    
+                const r = Math.round(red/(allImages[i].pixels.length/4));
+                const g = Math.round(green/(allImages[i].pixels.length/4));
+                const b = Math.round(blue/(allImages[i].pixels.length/4));
+    
+                imgsHash[rgbToHex(r,g,b)] = allImages[i];
+    
+                points.push(new Point(r,g,b)) 
+            } catch (error) {
+                console.log(error)
             }
-
-            const r = Math.round(red/(allImages[i].pixels.length/4));
-            const g = Math.round(green/(allImages[i].pixels.length/4));
-            const b = Math.round(blue/(allImages[i].pixels.length/4));
-
-            imgsHash[rgbToHex(r,g,b)] = allImages[i];
-
-            points.push(new Point(r,g,b))
         }
 
         
@@ -343,7 +389,11 @@ const sketch = (p5) => {
             octree.newPoint(points[i])
         }
 
-        mainImage.loadPixels();
+        try {
+            mainImage.loadPixels();
+        } catch (error) {
+            console.log(error)
+        }
 
         for (let i = 0; i < w; i+=pxSize) {
             for (let j = 0; j < h; j+=pxSize) {
@@ -364,7 +414,7 @@ const sketch = (p5) => {
         const w = mainImage.width;
         const h = mainImage.height;
         const pxSize = (Math.round(w/h))*10;
-        console.log(mainImage)
+
         for(let i = 0; i < mainImgRGB.length; i++){
             let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
             
@@ -378,13 +428,12 @@ const sketch = (p5) => {
         }
         
         if(w*2 > window.innerWidth ){
-            p5.image(mainImage,0,closeImgs[closeImgs.length-1][2]+1,w,h);
+            p5.image(mainImage,0,closeImgs[closeImgs.length-1][2]+pxSize,w,h);
         }else{
-            p5.image(mainImage,closeImgs[closeImgs.length-1][1]+1,0,w,h);
+            p5.image(mainImage,closeImgs[closeImgs.length-1][1]+pxSize,0,w,h);
         }
 
         p5.noLoop();
-
         
         (async () => {
             console.log(await deleteImages());
@@ -433,9 +482,9 @@ async function getDataURL(imageMetaData){
         })
     );
 
-    dataurls.filter((dataurl) => dataurl!== null);
+    const filteredDataUrls = dataurls.filter((dataurl) => dataurl !== null);
 
-    return dataurls;
+    return filteredDataUrls;
 }
 
 function deleteImages(){
@@ -456,10 +505,11 @@ function deleteImages(){
             })
         }
 
-        xhr.open("GET", uri + "deleteimages");
+        xhr.open("POST", uri + "deleteimages");
+        xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
         xhr.responseType = "json";
-        xhr.send();
+        xhr.send(JSON.stringify({ mainMetaData, imagesMetaData }));
     });
 }

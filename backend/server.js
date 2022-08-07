@@ -8,6 +8,7 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackConfig = require('../webpack.config.js');
 const { verifyUser } = require('./firebase/auth.js');
 const multerUpload = require('./multerupload.js');
+const { cleanStorage } = require('./firebase/cleanStorage.js');
 
 let whitelist = ['http://localhost:3000'];
 
@@ -33,7 +34,10 @@ app.use(
     publicPath: webpackConfig.output.publicPath,
   })
 )
+
 app.use(verifyUser); 
+
+setInterval(cleanStorage, 24 * 60 * 60 * 1000);
 
 server.listen(process.env.PORT || 3000);
 console.log("Server running on port: 3000");
@@ -54,7 +58,7 @@ app.post('/uploadimages', multerUpload.uploadImages().array('images'), function(
   res.send(req.files);
 });
 
-app.get(
+app.post(
   '/deleteimages',  
   multerUpload.uploadMain().storage.removeFiles, 
   multerUpload.uploadImages().storage.removeFiles, 
