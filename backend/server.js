@@ -3,9 +3,6 @@ const app = express();
 const server = require('http').createServer(app);
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const webpackConfig = require('../webpack.config.js');
 const { verifyUser } = require('./firebase/auth.js');
 const multerUpload = require('./multerupload.js');
 const { cleanStorage } = require('./firebase/cleanStorage.js');
@@ -25,16 +22,9 @@ const corsOptions = {
   credentials: true
 };
 
-const compiler = webpack(webpackConfig);
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
-app.use(
-  webpackDevMiddleware(compiler, {
-    publicPath: webpackConfig.output.publicPath,
-  })
-)
 
 app.use(verifyUser); 
 
