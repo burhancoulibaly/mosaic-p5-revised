@@ -34,7 +34,7 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig);
-console,log(firebaseConfig.projectId)
+console.log(firebaseConfig.projectId)
 const auth = getAuth(app);
 const bucket = getStorage(app);
 
