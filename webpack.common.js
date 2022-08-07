@@ -2,17 +2,21 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: {
-    app: './src/index.js',
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      title: 'Production',
-    }),
-  ],
-  output: {
-    filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    clean: true,
-  }
+    entry: {
+        home: [
+            './frontend/js/home.js',
+            './frontend/js/octree.js'
+        ]
+    },
+    output: {
+        path: path.resolve(__dirname + '/dist'),
+        filename: '[name].bundle.js',
+        clean: true,
+        publicPath: '/',
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: './frontend/html/home.html'
+        }),
+    ]
 };
