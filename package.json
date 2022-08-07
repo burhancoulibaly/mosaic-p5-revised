@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --watch",
     "start": "node ./backend/server.js",
-    "heroku-postbuild": "webpack serve",
+    "heroku-postbuild": "webpack",
     "server": "nodemon"
   },
   "author": "Menekou B. Coulibaly",
