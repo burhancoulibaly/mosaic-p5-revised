@@ -230,6 +230,7 @@ function imagesClr(){
 
 async function submitImages(){
     document.getElementById("upload-page").hidden = true;
+    document.getElementById("loading").hidden = false;
     const body = document.getElementsByTagName("body").item(0);
     body.append(p5Container);
     console.log(p5Container)
@@ -435,6 +436,8 @@ const sketch = (p5) => {
 
         p5.noLoop();
         
+        document.getElementById("loading").hidden = true;
+
         (async () => {
             console.log(await deleteImages());
         }).call(this);
