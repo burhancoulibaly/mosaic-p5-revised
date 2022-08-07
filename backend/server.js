@@ -13,6 +13,7 @@ let whitelist = ['https://mosaic-p5.herokuapp.com', 'mosaic-p5.herokuapp.com'];
 const corsOptions = {
   //Checks if origin is in whitelist if not an error is returned
   origin: function (origin, callback) {
+    console.log(origin)
     if (whitelist.indexOf(origin) !== -1 || (!process.env.NODE_ENV || process.env.NODE_ENV === "development")) {
         callback(null, true)
     } else {
