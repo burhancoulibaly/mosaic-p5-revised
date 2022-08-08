@@ -1,1 +1,7 @@
 node_modules/
+
+#Ignore environment variables
+.env
+.env.development
+.env.production
+.env.test

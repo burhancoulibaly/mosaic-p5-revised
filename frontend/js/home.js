@@ -169,7 +169,30 @@ function imagesChanged(){
 
         document.getElementById("imgs").reset();
 
-        alert("Minimun of 4 images required")
+        alert("Minimum of 4 images required")
+    }else if((document.getElementById("images").files).length > 100){
+        imagesHas = false;
+
+        const imgLabelsRef = document.getElementById("imgLabels");
+
+        Object.entries(imgLabelsRef.getElementsByTagName("img")).map(([_, img]) => {
+            imgLabelsRef.removeChild(img);
+        })
+        
+        if(!document.getElementById("imgsText")){
+            const imgsText = document.createElement("div");
+            imgsText.setAttribute("id", "imgsText");
+            imgsText.innerHTML = "Click to Insert Images to Create Mosaic (min. 4 images)"
+            imgLabelsRef.append(imgsText);
+        }
+
+        const sendImgs = document.getElementById("sendImgs")
+        sendImgs.classList.remove("create");
+        sendImgs.classList.add("create-hidden");
+
+        document.getElementById("imgs").reset();
+
+        alert("Maximum of 100 images allowed")
     }else{
         const imgLabelsRef = document.getElementById("imgLabels");
 
