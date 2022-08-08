@@ -38,6 +38,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const bucket = getStorage(app);
 
+const uri = "https://uploads.mixop.app";
+
 window.onload = async function(e){
     document.getElementById("main").addEventListener('change', mainImgChanged);
     document.getElementById("mainClr").addEventListener('click', mainClr);
@@ -305,7 +307,7 @@ function postMain(formDataMain){
             })
         }
 
-        xhr.open("POST", "/uploadmain");
+        xhr.open("POST", uri + "/uploadmain");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
         xhr.responseType = "json";
@@ -332,7 +334,7 @@ function postImages(formDataImages){
             })
         }
 
-        xhr.open("POST", "/uploadimages");
+        xhr.open("POST", uri + "/uploadimages");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
         xhr.responseType = "json";
@@ -530,7 +532,7 @@ function deleteImages(){
             })
         }
 
-        xhr.open("POST", "/deleteimages");
+        xhr.open("POST", uri + "/deleteimages");
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader("Authorization", authInfo.user.accessToken);
         xhr.withCredentials = true;
