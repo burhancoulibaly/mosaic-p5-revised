@@ -22,6 +22,7 @@ let imgsHash = new Object;
 let octree = null;
 let mainHas = false;
 let imagesHas = false;
+let imagesDeleted = false;
 
 const firebaseConfig = {
     apiKey: process.env.APIKEY,
@@ -63,7 +64,10 @@ window.onload = async function(e){
 };
 
 window.onbeforeunload = async function(e){
-    await deleteImages();
+    if(!imagesDeleted){
+        await deleteImages();
+    }
+    
     await auth.signOut();
     console.log("signedOut")
 
@@ -434,6 +438,7 @@ const sketch = (p5) => {
 
         (async () => {
             console.log(await deleteImages());
+            imagesDeleted = true;
         }).call(this);
     }
 };

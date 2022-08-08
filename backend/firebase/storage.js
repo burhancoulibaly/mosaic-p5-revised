@@ -86,22 +86,73 @@ function FirebaseStorage (opts) {
                 const streamOpts = {
                     predefinedAcl: this.opts.acl || 'private'
                 };
+
+                switch (file.mimetype.split("/")[1]) {
+                    case "jpeg":
+                        file.stream
+                            .pipe(
+                                sharp()
+                                .resize({ 
+                                    width: this.opts.resize ? parseInt(this.opts.resize.width) : null, 
+                                    height: this.opts.resize ? parseInt(this.opts.resize.height) : null,
+                                    fit: this.opts.resize ? this.opts.resize.fit : null
+                                })
+                                .jpeg({
+                                    quality: 80,
+                                    progressive: true,
+                                    force: true
+                                })
+                            )
+                            .pipe(gcsFile.createWriteStream(streamOpts))
+                            .on('error', (err) => cb(err))
+                            .on('finish', (file) => cb(null, {
+                                path: `https://${this.opts.bucketId}.storage.googleapis.com/${filename}`,
+                                filename: filename
+                            }));
+                        break;
+                    case "png":
+                        file.stream
+                            .pipe(
+                                sharp()
+                                .resize({ 
+                                    width: this.opts.resize ? parseInt(this.opts.resize.width) : null, 
+                                    height: this.opts.resize ? parseInt(this.opts.resize.height) : null,
+                                    fit: this.opts.resize ? this.opts.resize.fit : null
+                                })
+                                .png({
+                                    compressionLevel: 9,
+                                    progressive: true,
+                                    force: true
+                                })
+                            )
+                            .pipe(gcsFile.createWriteStream(streamOpts))
+                            .on('error', (err) => cb(err))
+                            .on('finish', (file) => cb(null, {
+                                path: `https://${this.opts.bucketId}.storage.googleapis.com/${filename}`,
+                                filename: filename
+                            }));
+                        break;
+                    default:
+                        file.stream
+                            .pipe(
+                                sharp()
+                                .resize({ 
+                                    width: this.opts.resize ? parseInt(this.opts.resize.width) : null, 
+                                    height: this.opts.resize ? parseInt(this.opts.resize.height) : null,
+                                    fit: this.opts.resize ? this.opts.resize.fit : null
+                                })
+                            )
+                            .pipe(gcsFile.createWriteStream(streamOpts))
+                            .on('error', (err) => cb(err))
+                            .on('finish', (file) => cb(null, {
+                                path: `https://${this.opts.bucketId}.storage.googleapis.com/${filename}`,
+                                filename: filename
+                            }));
+
+                        break;
+                }
                 
-                file.stream
-                    .pipe(
-                        sharp()
-                        .resize({ 
-                            width: this.opts.resize ? parseInt(this.opts.resize.width) : null, 
-                            height: this.opts.resize ? parseInt(this.opts.resize.height) : null,
-                            fit: this.opts.resize ? this.opts.resize.fit : null
-                        })
-                    )
-                    .pipe(gcsFile.createWriteStream(streamOpts))
-                    .on('error', (err) => cb(err))
-                    .on('finish', (file) => cb(null, {
-                        path: `https://${this.opts.bucketId}.storage.googleapis.com/${filename}`,
-                        filename: filename
-                    }));
+                
             });
         }).call(this, req, file, cb);
     }
