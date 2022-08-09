@@ -8,7 +8,7 @@ import "../../node_modules/bootstrap/dist/css/bootstrap.css";
 
 let authInfo;
 let p5Container;
-let imgArray;
+let imageFiles;
 let mainMetaData;
 let imagesMetaData;
 let mainDataURL;
@@ -38,7 +38,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const bucket = getStorage(app);
 
-const uri = "https://uploads.mixop.app";
+const uri = process.env.NODE_ENV == "development"
+            ? "http://localhost:4000"
+            : "https://uploads.mixop.app";
 
 window.onload = async function(e){
     document.getElementById("main").addEventListener('change', mainImgChanged);
@@ -81,22 +83,31 @@ window.onbeforeunload = async function(e){
 };
 
 function mainImgChanged() {
-    if((document.getElementById("main").files).length == 0){
+    let image = (document.getElementById("main").files).length ? document.getElementById("main").files[0] : null;
+
+    if(image && image.size > 31457280){
+        image = null;
+        alert("Image size too large");
+    }
+    
+    if(!image){
         mainHas = false;
-        
         const imgLabelRef = document.getElementById("mainImgLabel");
-        imgLabelRef.removeChild(imgLabelRef.getElementsByTagName(img).item(0));
 
-        if(!document.getElementById("mainImgText")){
-            const mainImgText = document.createElement("div");
-            mainImgText.setAttribute("id", "mainImgText");
-            mainImgText.innerHTML = "Click To Insert Main Image"
-            imgLabelRef.append(mainImgText);
+        if(imgLabelRef.getElementsByTagName("img").item(0)){
+            imgLabelRef.removeChild(imgLabelRef.getElementsByTagName("img").item(0));
+
+            if(!document.getElementById("mainImgText")){
+                const mainImgText = document.createElement("div");
+                mainImgText.setAttribute("id", "mainImgText");
+                mainImgText.innerHTML = "Click To Insert Main Image"
+                imgLabelRef.append(mainImgText);
+            }
+
+            const sendImgs = document.getElementById("sendImgs")
+            sendImgs.classList.remove("create");
+            sendImgs.classList.add("create-hidden");
         }
-
-        const sendImgs = document.getElementById("sendImgs")
-        sendImgs.classList.remove("create");
-        sendImgs.classList.add("create-hidden");
     }else{
         const mainImageBlob = URL.createObjectURL(document.getElementById("main").files[0]);
 
@@ -147,9 +158,29 @@ function mainClr(){
 
 function imagesChanged(){ 
     const blobImages = new Array();
-    const images = document.getElementById("images").files;
+    let imgViolations = 0;
+    const newLine = "\r\n";
+    let msg = "The following images exceed our image size limits (30MB):";
 
-    if((document.getElementById("images").files).length < 4){
+    imageFiles = new Array();
+
+    for(let i = 0; i < (document.getElementById("images").files).length; i++){
+        const image = document.getElementById("images").files[i];
+        
+        if(image.size > 31457280){
+            msg += newLine;
+            msg += " - " + image.name;
+            imgViolations++;
+        }else{
+            imageFiles.push(image);
+        }
+    }
+
+    if(imgViolations > 0){
+        alert(msg);
+    }
+
+    if(imageFiles.length < 4){
         imagesHas = false;
 
         const imgLabelsRef = document.getElementById("imgLabels");
@@ -172,7 +203,7 @@ function imagesChanged(){
         document.getElementById("imgs").reset();
 
         alert("Minimum of 4 images required")
-    }else if((document.getElementById("images").files).length > 100){
+    }else if(imageFiles.length > 100){
         imagesHas = false;
 
         const imgLabelsRef = document.getElementById("imgLabels");
@@ -198,8 +229,8 @@ function imagesChanged(){
     }else{
         const imgLabelsRef = document.getElementById("imgLabels");
 
-        for(let i = 0; i < images.length; i++){
-            blobImages.push(URL.createObjectURL(images[i]));
+        for(let i = 0; i < imageFiles.length; i++){
+            blobImages.push(URL.createObjectURL(imageFiles[i]));
         }
 
         if(document.getElementById("imgsText")){
@@ -260,24 +291,45 @@ async function submitImages(){
     const formDataMain = new FormData();
     const main = document.getElementById("main").files[0];
     
-    const formDataImages = new FormData();
-    const images = document.getElementById("images").files;
+    let formDataImages = new FormData();
+    const images = imageFiles;
 
     formDataMain.append("image", main);
 
-    for(let i = 0; i < images.length; i++){
-        formDataImages.append("images", images[i]);
-    }
-
     console.log("Submitting images");
     const responseMain = await postMain(formDataMain);
-    const responseImages = await postImages(formDataImages);
+
+    let payloadSize = 0;
+    let responseImages = new Array();
+
+    for(let i = 0; i < Object.entries(images).length; i++){
+        if(payloadSize + Object.entries(images)[i][1].size >  134217728){
+            try {
+                const { response } = await postImages(formDataImages);
+                responseImages.push(...response);
+                formDataImages = new FormData();
+                payloadSize = 0;
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        formDataImages.append("images", Object.entries(images)[i][1]);
+        payloadSize += Object.entries(images)[i][1].size;
+
+        if(i == Object.entries(images).length-1){
+            const { response } = await postImages(formDataImages);
+            responseImages.push(...response);
+            formDataImages = new FormData();
+            payloadSize = 0;
+        }
+    }
 
     console.log("Submission complete")
     mainMetaData = responseMain.response;
     mainDataURL = await getDataURL([mainMetaData]);
 
-    imagesMetaData = responseImages.response;
+    imagesMetaData = responseImages;
     imageDataURLs = await getDataURL(imagesMetaData);
     
     try {
@@ -317,6 +369,7 @@ function postMain(formDataMain){
 
 function postImages(formDataImages){
     //uploading images
+    console.log("uploading")
     return new Promise((resolve,reject) => {
         const xhr = new XMLHttpRequest();
 
@@ -479,7 +532,7 @@ function rgbToHex(r, g, b) {
 
 async function getDataURL(imageMetaData){
     if(!imageMetaData){
-        return reject("Image info required")
+        return new Error("Image info required");
     }
     
     const dataurls = await Promise.all(
