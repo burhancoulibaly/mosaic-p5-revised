@@ -499,8 +499,6 @@ const sketch = (p5) => {
             closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
         }
 
-        // console.log(closeImgs);
-
         for(let i = 0; i < closeImgs.length; i++){
             const hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
 
