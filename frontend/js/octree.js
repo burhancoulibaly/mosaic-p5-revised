@@ -1,8 +1,8 @@
 let count = 0
 let totPoints = 0
-let lowestDist = 255
+let lowestDist = 442
 let lowestDistPoint = null
-let emptyQuad = false
+let containedQuadEmpty = false
 
 class Octree{
     constructor(quad){
@@ -18,7 +18,7 @@ class Octree{
     }
     
     getChildren(rootQuad){
-        return [rootQuad.q1,rootQuad.q2,rootQuad.q3,rootQuad.q4,rootQuad.q5,rootQuad.q6,rootQuad.q7,rootQuad.q8]
+        return [rootQuad.q1,rootQuad.q2,rootQuad.q3,rootQuad.q4,rootQuad.q5,rootQuad.q6,rootQuad.q7,rootQuad.q8];
     }
 
     getTotalPoints(rootNode){
@@ -41,211 +41,119 @@ class Octree{
         return count
     }
 
+    closestDistance(point, points){
+        let closestPoint;
+
+        points.forEach(function(point2){
+            if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
+                Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
+
+                closestPoint = point2
+            }
+        }) 
+
+        return closestPoint;
+    }
+
+    findNextClosestCandidate(octree, point, i){
+        let closestCandidate;
+
+        if(i-1 < 0){
+            let right = i+1;
+
+            while(right < 8){
+                if(octree[right].rootQuad.points.length > 0){
+                    closestCandidate = this.closestDistance(point, octree[right].rootQuad.points);
+                    break;
+                }
+                right++
+            }
+
+        }else if(i+1 >= 8){
+            let left = i-1;
+
+            while(left >= 0){
+                if(octree[left].rootQuad.points.length > 0){
+                    closestCandidate = this.closestDistance(point, octree[left].rootQuad.points);
+                    break;
+                }
+                
+                left--
+            }
+        }else{
+            let right = i+1;
+            let left = i-1;
+            let pointsRight;
+            let pointsLeft;
+
+            while(right < 8){
+                if(octree[right].rootQuad.points.length > 0){
+                    pointsRight = octree[right].rootQuad.points;
+                    break;
+                }
+                
+                right++
+            }
+
+            while(left >= 0){
+                if(octree[left].rootQuad.points.length > 0){
+                    pointsLeft = octree[left].rootQuad.points;
+                    break;
+                }
+                
+                left--
+            }
+            
+            closestCandidate = this.closestDistance(point, [...(pointsRight ? pointsRight : []),...(pointsLeft ? pointsLeft : [])]);
+        }
+        
+        return closestCandidate;
+    }
+
     closestImageRGB(rootNode,point){
         if(rootNode.rootQuad.isDivided == false){
-            // console.log("corresponding quad found")
-            let that = this
-            rootNode.rootQuad.points.forEach(function(point2){
-                // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                    Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                    // console.log(point2)
-                    lowestDistPoint = point2
-                }
-            })      
-        }
+            lowestDistPoint = this.closestDistance(point, rootNode.rootQuad.points);      
+        }else{
+            let octree = this.getChildren(rootNode)
         
-                        
-        let octree = this.getChildren(rootNode)
-        
-        for(var i = 0;i < octree.length; i++){
-            if(emptyQuad == true){
-                // console.log("previous quad was empty")
-                if(octree[i].rootQuad.points.length != 0){
-                    if(octree[i].rootQuad.isDivided != true){
-                        if(octree[i].rootQuad.points.length == 0){
-                            // console.log("quad was empty finding closest point amoungst neighboring quads")
-                            let itrs = 0
-                            if(i-1 > 0 && i+1 <= 8){
-                                while(i-1 > 0 && i+1 <= 8){
-                                    // console.log("searching from middle")
-                                    if(octree[i-itrs].rootQuad.points.length != 0 || octree[i+itrs].rootQuad.points.length != 0){
-                                        emptyQuad = false
-                                        mergedPoints = octree[i-1].rootQuad.points + octree[i+1].rootQuad.points
-                                        let that = this;
-                                        mergedPoints.forEach(function(point2){
-                                        // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                                            if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                                Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) 
-                                                console.log(point2)
-                                                lowestDistPoint = point2
-                                            }
-                                        })                                      
-                                    }                                
-                                }
-                            }else if(i-1 < 0){
-                                while(i+1 <= 8){
-                                    // console.log("searching from end")
-                                    if(octree[i+itrs].rootQuad.points.length != 0){
-                                        emptyQuad = false
-                                        let that = this
-                                        octree[i+itrs].rootQuad.points.forEach(function(point2){
-                                            // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                                            if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                                Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                                                console.log(point2)
-                                                lowestDistPoint = point2
-                                            }
-                                        })
-                                    }
-                                }
+            for(var i = 0;i < octree.length; i++){
+                if(octree[i].rootQuad.boundary.contains(point) == true){
+                    // console.log("point is contained in quad");
+                        if(octree[i].rootQuad.isDivided != true){
+                            
+                            // console.log("leaf quad of tree found")
+                            if(octree[i].rootQuad.points.length === 0){
+                                // console.log("leaf quad was empty finding closest point amoungst neighboring quads");
+                                containedQuadEmpty = true
+
+                                lowestDistPoint = this.findNextClosestCandidate(octree, point, i);
+
+                                break;
                             }else{
-                                while(i-1 > 0){
-                                    // console.log("searching from beginning")
-                                    if(octree[i-itrs].rootQuad.points.length != 0){
-                                        emptyQuad = false
-                                        let that = this
-                                        octree[i-itrs].rootQuad.points.forEach(function(point2){
-                                            // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                                            if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                                Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                                                // console.log(point2)
-                                                lowestDistPoint = point2
-                                            }
-                                        })
-                                    }
-                                }
-                            }
+                                // console.log("corresponding quad found");
+                                lowestDistPoint = this.closestDistance(point, octree[i].rootQuad.points);
+
+                                break;
+                            }   
                         }else{
-                            // console.log("corresponding quad found(After Empty octree[i])")
-                            emptyQuad = false
-                            let that = this
-                            octree[i].rootQuad.points.forEach(function(point2){
-                                // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))                           
-                                if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                    Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                                    // console.log(point2)
-                                    lowestDistPoint = point2
-                                }
-                            })
-                        }
-                    }else{
-                        // console.log("changing nested quad")
-                        this.closestImageRGB(octree[i].rootQuad.node, point) 
-                    }                    
-                }else{
-                    emptyQuad = true
-                    // console.log("This parent octree[i] is empty")
-                    emptyQuad = true
-                    // console.log("moving through nested quads")
-                    if(i+1 > 8){
-                        while(i > 0){
-                            // console.log("moving backwards through nested quads")
-                            this.closestImageRGB(octree[i-1],point)
-                        }
-                    }else{
-                        // console.log("moving foward through nested quads")
-                        continue
-                    }
-                } 
-            }
-    
-            if(octree[i].rootQuad.boundary.contains(point) == true){
-                // console.log("point is contained in quad")
-                if(octree[i].rootQuad.points.length != 0){
-                    // console.log("quad is not empty")
-                    if(octree[i].rootQuad.isDivided != true){
-                        // console.log("leaf quad of tree found")
-                        // console.log(octree[i].rootQuad.points.length == 0)
-                        if(octree[i].rootQuad.points.length == 0){
-                            // console.log("leaf quad was empty finding closest point amoungst neighboring quads")
-                            let itrs = 0
-                            if(i-1 > 0 && i+1 <= 8){
-                                while(i-1 > 0 && i+1 <= 8){
-                                    // console.log("searching from middle")
-                                    if(octree[i-itrs].rootQuad.points.length != 0 || octree[i+itrs].rootQuad.points.length != 0){
-                                        mergedPoints = octree[i-1].rootQuad.points + octree[i+1].rootQuad.points
-                                        let that = this;
-                                        mergedPoints.forEach(function(point2){
-                                            // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                                            if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                                Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                                                // console.log(point2)
-                                                lowestDistPoint = point2
-                                            }
-                                        })                                      
-                                    }                                
-                                }
-                            }else if(i-1 < 0){
-                                while(i+1 <= 8){
-                                    // console.log("searching from end")
-                                    if(octree[i+itrs].rootQuad.points.length != 0){
-                                        emptyQuad = false
-                                        let that = this
-                                        octree[i+itrs].rootQuad.points.forEach(function(point2){
-                                            // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                                            if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                                Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                                                // console.log(point2)
-                                                lowestDistPoint = point2
-                                            }
-                                        })
-                                    }
-                                }
-                            }else{
-                                while(i-1 > 0){
-                                    // console.log("searching from beginning")
-                                    if(octree[i-itrs].rootQuad.points.length != 0){
-                                        let that = this
-                                        octree[i-itrs].rootQuad.points.forEach(function(point2){
-                                            // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                                            if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                                Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                                                // console.log(point2)
-                                                lowestDistPoint = point2
-                                            }
-                                        })
-                                    }
-                                }
+                            // console.log("changing nested quad");
+                            lowestDistPoint = this.closestImageRGB(octree[i].rootQuad.node, point);
+
+                            if(containedQuadEmpty && !lowestDistPoint){
+                                lowestDistPoint = this.findNextClosestCandidate(octree, point, i);
                             }
-                        }else{
-                            // console.log("corresponding quad found ")
-                            let that = this
-                            octree[i].rootQuad.points.forEach(function(point2){
-                                // console.log(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))))
-                                if(Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2))) < lowestDist){
-                                    Math.sqrt((Math.pow((point.x-point2.x),2))+(Math.pow((point.y-point2.y),2))+(Math.pow((point.y-point2.y),2)))
-                                    // console.log(point2)
-                                    lowestDistPoint = point2
-                                }
-                            })
-                        }     
-                    }else{
-                        // console.log("changing nested quad")
-                        this.closestImageRGB(octree[i].rootQuad.node, point) 
-                    }                    
+
+                            break;
+                        }                    
                 }else{
-                    // console.log("This parent octree[i] is empty")
-                    emptyQuad = true
-                    // console.log("moving through parent quads")
-                    if(i+1 > 8){
-                        while(i > 0){
-                            // console.log("moving backwards through parent quads")
-                            this.closestImageRGB(octree[i-1],point)
-                        }  
-                    }else{
-                        // console.log("moving foward through parent quads")
-                        continue
-                    }
+                    // console.log("point not contained in quad");
+                    continue
                 }
-            }else{
-                // console.log("point not contained in quad")
-                continue
             }
         }
-    lowestDist = 255
-    // console.log(lowestDistPoint)
-    return lowestDistPoint;
+
+        lowestDist = 442
+        return lowestDistPoint;
     }
 }
 
@@ -283,6 +191,7 @@ class Quad{
         this.capacity = capacity;
         this.isDivided = false;
         this.node = new Octree(this);
+        this.isEmpty = true;
     }
 
     newPoint(point){
@@ -294,6 +203,7 @@ class Quad{
         if(this.points.length < this.capacity){
             // console.log("point added: "+point.x+","+point.y+","+point.z);
             this.points.push(point);
+            this.isEmpty = false;
             return true;
         }else{
             if(this.isDivided != true){
@@ -358,35 +268,43 @@ class Quad{
         that.points.forEach(function(point){
             // console.log("point redistribution")
             if(that.node.q1.rootQuad.boundary.contains((point)) == true){
-                that.node.q1.rootQuad.points.push((point))
+                that.node.q1.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad1")
             }
             else if(that.node.q2.rootQuad.boundary.contains((point)) == true){
-                that.node.q2.rootQuad.points.push((point))
+                that.node.q2.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad2")   
             }
             else if(that.node.q3.rootQuad.boundary.contains((point)) == true){
-                that.node.q3.rootQuad.points.push((point))
+                that.node.q3.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad3")
             }
             else if(that.node.q4.rootQuad.boundary.contains((point)) == true){
-                that.node.q4.rootQuad.points.push((point))
+                that.node.q4.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad4")
             }
             else if(that.node.q5.rootQuad.boundary.contains((point)) == true){
-                that.node.q5.rootQuad.points.push((point))
+                that.node.q5.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad5")
             }
             else if(that.node.q6.rootQuad.boundary.contains((point)) == true){
-                that.node.q6.rootQuad.points.push((point))
+                that.node.q6.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad6")
             }
             else if(that.node.q7.rootQuad.boundary.contains((point)) == true){
-                that.node.q7.rootQuad.points.push((point))
+                that.node.q7.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad7")
             }  
             else if(that.node.q8.rootQuad.boundary.contains((point)) == true){
-                that.node.q8.rootQuad.points.push((point))
+                that.node.q8.rootQuad.points.push((point));
+                that.node.q1.rootQuad.isEmpty = false;
                 // console.log("point redistributed to quad8")
             }
             else{

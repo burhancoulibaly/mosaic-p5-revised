@@ -42,6 +42,10 @@ const uri = process.env.NODE_ENV == "development"
             ? "http://localhost:4000"
             : "https://uploads.mixop.app";
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
 window.onload = async function(e){
     document.getElementById("main").addEventListener('change', mainImgChanged);
     document.getElementById("mainClr").addEventListener('click', mainClr);
@@ -180,7 +184,7 @@ function imagesChanged(){
         alert(msg);
     }
 
-    if(imageFiles.length < 4){
+    if(imageFiles.length < 1){
         imagesHas = false;
 
         const imgLabelsRef = document.getElementById("imgLabels");
@@ -192,7 +196,7 @@ function imagesChanged(){
         if(!document.getElementById("imgsText")){
             const imgsText = document.createElement("div");
             imgsText.setAttribute("id", "imgsText");
-            imgsText.innerHTML = "Click to Insert Images to Create Mosaic (min. 4 images)"
+            imgsText.innerHTML = "Click to Insert Images to Create Mosaic"
             imgLabelsRef.append(imgsText);
         }
 
@@ -201,8 +205,6 @@ function imagesChanged(){
         sendImgs.classList.add("create-hidden");
 
         document.getElementById("imgs").reset();
-
-        alert("Minimum of 4 images required")
     }else if(imageFiles.length > 100){
         imagesHas = false;
 
@@ -215,7 +217,7 @@ function imagesChanged(){
         if(!document.getElementById("imgsText")){
             const imgsText = document.createElement("div");
             imgsText.setAttribute("id", "imgsText");
-            imgsText.innerHTML = "Click to Insert Images to Create Mosaic (min. 4 images)"
+            imgsText.innerHTML = "Click to Insert Images to Create Mosaic"
             imgLabelsRef.append(imgsText);
         }
 
@@ -415,7 +417,7 @@ const sketch = (p5) => {
 
     p5.setup = function() {
         let boundary = new Rectangle(127.5,127.5,127.5,127.5,127.5);
-        octree = new Quad(boundary,Math.ceil(allImages.length/100));
+        octree = new Quad(boundary,Math.ceil(allImages.length/50));
 
         if(mainImage.width > 5000 || mainImage.height > 5000){
             if(mainImage.width > mainImage.height){
@@ -493,15 +495,14 @@ const sketch = (p5) => {
         const pxSize = (Math.round(w/h))*10;
 
         for(let i = 0; i < mainImgRGB.length; i++){
-            let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0])
-            
+            let closePoint = octree.node.closestImageRGB(octree.node,mainImgRGB[i][0]);
             closeImgs.push([closePoint,mainImgRGB[i][1],mainImgRGB[i][2]]);
         }
 
         for(let i = 0; i < closeImgs.length; i++){
             const hexCol = rgbToHex(closeImgs[i][0].x,closeImgs[i][0].y,closeImgs[i][0].z);
 
-            p5.image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize);
+            p5.image(imgsHash[hexCol],closeImgs[i][1],closeImgs[i][2],pxSize,pxSize); 
         }
         
         if(w*2 > window.innerWidth ){
