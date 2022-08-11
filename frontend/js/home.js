@@ -42,8 +42,11 @@ const uri = process.env.NODE_ENV == "development"
             ? "http://localhost:4000"
             : "https://uploads.mixop.app";
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
+function onloadCallback(){
+    grecaptcha.render("sendImgs", {
+        sitekey: process.env.RECAPTCHA,
+        callback: validateReCAPTCHA
+    });
 }
 
 window.onload = async function(e){
@@ -51,7 +54,6 @@ window.onload = async function(e){
     document.getElementById("mainClr").addEventListener('click', mainClr);
     document.getElementById("images").addEventListener('change', imagesChanged);
     document.getElementById("imgsClr").addEventListener('click', imagesClr);
-    document.getElementById("sendImgs").addEventListener('click', submitImages);
 
     try {
         authInfo = await signInAnonymously(auth)
@@ -69,6 +71,8 @@ window.onload = async function(e){
 
     p5Container = document.createElement("div");
     p5Container.setAttribute("id", "p5container");
+
+    onloadCallback();
 };
 
 window.onbeforeunload = async function(e){
@@ -83,7 +87,7 @@ window.onbeforeunload = async function(e){
     document.getElementById("mainClr").removeEventListener('click', mainClr);
     document.getElementById("images").removeEventListener('change', imagesChanged);
     document.getElementById("imgsClr").removeEventListener('click', imagesClr);
-    document.getElementById("sendImgs").removeEventListener('click', submitImages);
+    // document.getElementById("sendImgs").removeEventListener('click', submitImages);
 };
 
 function mainImgChanged() {
@@ -284,6 +288,18 @@ function imagesClr(){
     }
 }
 
+async function validateReCAPTCHA(token){
+    try {
+        const { response } = await validate(token);
+        
+        if(response.message.success){
+            submitImages();
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 async function submitImages(){
     document.getElementById("upload-page").hidden = true;
     document.getElementById("loading").hidden = false;
@@ -340,6 +356,31 @@ async function submitImages(){
     } catch (error) {
         console.log(error)
     }
+}
+
+function validate(token){
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.onload = (event) => {
+            resolve({
+                status: xhr.status, 
+                response: xhr.response
+            });
+        }
+
+        xhr.onerror = (event) => {
+            reject({
+                status: xhr.status, 
+                response: xhr.response
+            })
+        }
+
+        xhr.open("POST", "/validateCaptcha");
+        xhr.setRequestHeader("Content-Type", "application/json")
+        xhr.responseType = "json";
+        xhr.send(JSON.stringify({token}));
+    })
 }
 
 function postMain(formDataMain){

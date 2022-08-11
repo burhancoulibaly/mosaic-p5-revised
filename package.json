@@ -13,6 +13,7 @@
   "author": "Menekou B. Coulibaly",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.27.2",
     "bootstrap": "^5.1.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",

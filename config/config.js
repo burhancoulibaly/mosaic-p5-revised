@@ -18,7 +18,10 @@ const firebaseConfig = {
 
 const serviceAccount = JSON.parse(process.env.SERVICEACCOUNT)
 
+const reCAPTCHASec = process.env.RECAPTCHASEC;
+
 module.exports = {
     firebaseConfig,
-    serviceAccount
+    serviceAccount,
+    reCAPTCHASec
 }
