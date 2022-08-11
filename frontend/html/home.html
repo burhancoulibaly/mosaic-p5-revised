@@ -60,11 +60,19 @@
           </div>
         </div>
   
-        <button id="sendImgs" type="submit" class="btn btn-primary -btn-lg create-hidden">Create Mosaic Image</button>
+        <button
+          class="btn btn-primary -btn-lg create-hidden"  
+          id="sendImgs" 
+          type="submit" 
+        >
+          Create Mosaic Image
+        </button>
+        <div id="recaptcha-container"></div>
       </div>
     </div>
     <div id="loading" hidden>
       <h1>Loading Image...</h1>
     </div>
+    <script async src="https://www.google.com/recaptcha/api.js"></script>
   </body>
 </html>
